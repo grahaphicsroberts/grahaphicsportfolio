@@ -509,7 +509,7 @@ export default function SpeakingPage() {
               Looking for a speaker?
             </p>
             <a
-              href="mailto:graham@grahaphics.com"
+              href="mailto:grahaphics@gmail.com"
               className="inline-block px-8 py-3 bg-white text-black font-bold tracking-tight hover:bg-neutral-200 transition-colors rounded-full"
             >
               Request Availability
