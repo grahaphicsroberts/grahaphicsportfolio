@@ -53,13 +53,13 @@ const HIGHLIGHTS = [
     title: "All the Medalists",
     subtitle: "Data Cinema",
     description:
-      "A generative video engine for the Olympics. Instead of one video, we wrote code to generate thousands of unique clips, visualizing the margin of victory for every single event in Olympic history.",
+      "A cinematic data visualization for the Olympics. Focusing on key sports like track, swimming, and long jump, we created a novel view of human progress, merging all Olympics results back to the beginning of the Games.",
     video: "/medalists-motion.mp4",
     link: "https://www.youtube.com/watch?v=_L_vq5JYQlE",
     seriesThumbnails: ["/medalists-part2.jpg", "/medalists-part3.jpg"],
     awards: ["News & Doc Emmy Nomination", "Edward R. Murrow Award"],
     btsStory:
-      "This was an experiment in 'Data Cinema.' We didn't edit these videos; we coded them. The system took the raw timing data from 100 years of Olympic races and procedurally generated a race visualization for each one, rendering thousands of videos overnight to create a comprehensive archive of human speed.",
+      "This was an experiment in 'Data Cinema.' We turned the fields of play into charts themselves. Narrative data storytelling then revealed the incredible continued human progress in some sports, like the 100-meter dash, and where progress had stalled out as in the long jump, where records stood for decades without being smashed.",
     images: ["/medalists-1.jpg", "/medalists-2.jpg"],
   },
 ];
