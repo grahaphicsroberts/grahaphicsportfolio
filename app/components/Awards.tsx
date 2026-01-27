@@ -31,12 +31,14 @@ export default function Awards() {
         </div>
         {/* 3 Columns on Large Screens, 2 on Medium, 1 on Mobile */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* NEW: MoMA Acquisition */}
           <AwardCard
-            title="Pulitzer Prize"
-            project="Snowfall"
-            detail="Feature Writing"
+            title="Museum of Modern Art"
+            project="Why Notre Dame Was a Tinderbox"
+            detail="Permanent Collection"
           />
-          {/* UPDATED: Edward R. Murrow Award */}
+
           <AwardCard
             title="Edward R. Murrow"
             project="Making a Hit"
@@ -48,15 +50,18 @@ export default function Awards() {
             detail="Winner: New Approaches"
           />
           <AwardCard
+            title="Pulitzer Prize"
+            project="Snowfall"
+            detail="Feature Writing"
+          />
+          <AwardCard
             title="World Press Photo"
             project="Under a Cracked Sky"
             detail="Immersive Storytelling"
           />
-          <AwardCard
-            title="Cooper Hewitt"
-            project="National Design Award"
-            detail="Communication Design"
-          />
+          
+          {/* Cooper Hewitt Removed */}
+          
           <AwardCard
             title="Anthem Award"
             project="Space to Belong"
