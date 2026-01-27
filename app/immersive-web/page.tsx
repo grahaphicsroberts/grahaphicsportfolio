@@ -7,7 +7,7 @@ import {
   useTransform,
   AnimatePresence,
 } from "framer-motion";
-import { ArrowLeft, Trophy, Menu, X, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, Trophy, Menu, X, ArrowUpRight, Landmark } from "lucide-react";
 import Link from "next/link";
 
 // --- DATA: ARCHIVE CAROUSEL ---
@@ -334,6 +334,10 @@ export default function ImmersiveWebPage() {
                 Notre Dame
               </h2>
               <div className="flex flex-wrap gap-4 mb-6">
+                {/* NEW MOMA BADGE */}
+                <div className="flex items-center gap-2 px-3 py-1 bg-blue-900/20 border border-blue-700/50 rounded-full text-blue-400 text-xs font-mono uppercase tracking-wide">
+                  <Landmark className="w-3 h-3" /> MoMA Permanent Collection
+                </div>
                 <div className="flex items-center gap-2 px-3 py-1 bg-neutral-800 border border-neutral-700 rounded-full text-neutral-400 text-xs font-mono uppercase tracking-wide">
                   Malofiej Gold
                 </div>
@@ -379,10 +383,10 @@ export default function ImmersiveWebPage() {
                 </h3>
                 <p className="text-neutral-400 leading-relaxed mb-6">
                   To explain how the fire spread, we utilized laser-scan data of
-                  the cathedral to build a forensic 3D model. This allowed us to
-                  position the camera in places no photographer could reach,
-                  tracing the path of the flames through the "forest" of the
-                  roof.
+                  the cathedral to build a forensic 3D model. In 2025, this work
+                  was acquired by the Museum of Modern Art for its permanent
+                  collection, recognizing its significance in the history of
+                  digital information design.
                 </p>
 
                 {/* LAUNCH BUTTON */}

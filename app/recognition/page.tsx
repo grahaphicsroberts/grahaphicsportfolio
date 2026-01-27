@@ -16,6 +16,13 @@ import { motion, AnimatePresence } from "framer-motion";
 // --- DATA ARCHIVE (EXHAUSTIVE) ---
 const MAJOR_HONORS = [
   {
+    award: "Museum of Modern Art",
+    project: "Why Notre Dame Was a Tinderbox",
+    year: "2025",
+    detail: "Permanent Collection",
+    link: "https://www.moma.org/collection/works/503098",
+  },
+  {
     award: "Pulitzer Prize",
     project: "Snowfall",
     year: "2013",
@@ -44,13 +51,6 @@ const MAJOR_HONORS = [
     link: "https://www.worldpressphoto.org/collection/storytelling/2018/29075/2018-Under-a-Cracked-Sky",
   },
   {
-    award: "Cooper Hewitt",
-    project: "National Design Award",
-    year: "2009",
-    detail: "Communication Design (NYT Team)",
-    link: "https://www.cooperhewitt.org/2019/09/17/communication-design-the-new-york-times-graphics-department/",
-  },
-  {
     award: "Anthem Award",
     project: "Space to Belong (Google)",
     year: "2022",
@@ -63,6 +63,12 @@ const ARCHIVE = [
   {
     year: "2020 — Present",
     awards: [
+      {
+        name: "Museum of Modern Art",
+        project: "Why Notre Dame Was a Tinderbox",
+        detail: "Permanent Collection Acquisition",
+        link: "https://www.moma.org/collection/works/503098",
+      },
       {
         name: "Anthem Award",
         project: "Space to Belong (Google)",

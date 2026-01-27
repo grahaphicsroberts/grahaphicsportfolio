@@ -3,7 +3,6 @@
 import React, { useRef, useState } from "react";
 import {
   useScroll,
-  useTransform,
   motion,
   AnimatePresence,
 } from "framer-motion";
@@ -285,7 +284,7 @@ export default function AboutMagazine() {
         </div>
       </section>
 
-      {/* --- EXPERIENCE: NYT --- */}
+      {/* --- EXPERIENCE: NYT (WITH MOMA UPDATE) --- */}
       <section className="py-32 px-6 bg-neutral-950 border-b border-neutral-900">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12">
           <div className="md:col-span-4">
@@ -309,6 +308,13 @@ export default function AboutMagazine() {
               editorial for <strong>NYT VR</strong>, introducing millions to
               virtual reality, and led product efforts to bring Augmented
               Reality (AR) to the core news app.
+            </p>
+            {/* NEW MOMA PARAGRAPH */}
+            <p className="text-neutral-400 border-l-2 border-blue-500 pl-4">
+              Most recently, my work <em>Why Notre Dame Was a Tinderbox</em> was
+              acquired by the <strong>Museum of Modern Art (MoMA)</strong> for
+              its permanent collection, cementing the role of forensic visual
+              journalism in design history.
             </p>
           </div>
         </div>
