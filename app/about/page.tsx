@@ -274,7 +274,7 @@ export default function AboutMagazine() {
         <img
           src="/nyt-about.jpg"
           alt="NYT Newsroom"
-          className="w-full h-full object-cover opacity-50 group-hover:grayscale-0 transition-all duration-[2s]"
+          className="w-full h-full object-cover opacity-100 group-hover:grayscale-0 transition-all duration-[2s]"
         />
         <div className="absolute bottom-12 right-6 md:right-24 z-20 max-w-xl text-right">
           <span className="font-mono text-xs text-white/60 uppercase tracking-widest mb-2 block">
