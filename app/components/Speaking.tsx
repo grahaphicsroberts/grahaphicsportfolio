@@ -7,6 +7,12 @@ import Link from "next/link";
 // --- DATA: RECENT SPEAKING ENGAGEMENTS ---
 const SPEAKING_ENGAGEMENTS = [
   {
+    year: "2026",
+    event: "INMA Global Media Awards",
+    location: "Global",
+    role: "Grand Jury",
+  },
+  {
     year: "2025",
     event: "Bridge Summit",
     location: "Abu Dhabi, UAE",
@@ -23,12 +29,6 @@ const SPEAKING_ENGAGEMENTS = [
     event: "Novartis Panel",
     location: "New York, NY",
     role: "Panelist",
-  },
-  {
-    year: "2024",
-    event: "Havas Data Different(ly)",
-    location: "New York, NY",
-    role: "Speaker",
   },
 ];
 
