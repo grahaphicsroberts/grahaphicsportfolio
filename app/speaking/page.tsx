@@ -46,6 +46,13 @@ const TEACHING = [
 const ERA_1 = [
   // Recent & Upcoming
   {
+    year: "2026",
+    event: "INMA Global Media Awards",
+    location: "Global",
+    role: "Grand Jury",
+    link: "https://www.inma.org/modules/awards2026/past-judges.html",
+  },
+  {
     year: "2025",
     event: "Bridge Summit",
     location: "Abu Dhabi, UAE",
