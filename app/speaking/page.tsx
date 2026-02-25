@@ -39,7 +39,7 @@ const TEACHING = [
     org: "Skillshare",
     role: "Course Creator",
     detail: "Animated Information Graphics & Maya 3D",
-    //link: "https://www.skillshare.com/en/classes/Animated-Information-Graphics-An-Introduction-to-Maya-3D/1872728965",
+    link: "https://www.skillshare.com/en/r/profile/Graham-Roberts/7680632",
   },
 ];
 
