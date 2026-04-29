@@ -96,7 +96,7 @@ const WORK_ITEMS = [
 ];
 
 // --- INDIVIDUAL WORK ITEM COMPONENT (Handles Scroll Focus) ---
-const WorkItem = ({ item }) => {
+const WorkItem = ({ item }: { item: any }) => {
   const ref = useRef(null);
   // Detect when element is in the center 10% of the viewport
   const isInView = useInView(ref, {
@@ -380,6 +380,37 @@ export default function HavasPage() {
             {WORK_ITEMS.map((item) => (
               <WorkItem key={item.id} item={item} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- LIVE INTERACTIVE PROTOTYPE SECTION --- */}
+      <section className="py-24 px-6 md:px-24 bg-neutral-900 border-t border-neutral-800">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="mb-12">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+              Code-Based Prototyping
+            </h2>
+            <p className="text-xl text-neutral-400 max-w-2xl">
+              True art direction requires moving beyond static comps. By prototyping directly with code, we can pressure-test visual systems, motion behaviors, and interactions using real data before full engineering begins.
+            </p>
+          </div>
+
+          {/* The iframe Wrapper */}
+          <div className="w-full aspect-[16/9] md:aspect-[21/9] bg-black rounded-[2rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl relative group">
+            {/* The src points exactly to the weightofair folder inside your public/prototypes directory */}
+            <iframe
+              src="/prototypes/weightofair/index.html"
+              className="w-full h-full border-none"
+              title="Interactive Prototype"
+              sandbox="allow-scripts allow-same-origin"
+            />
+            
+            {/* Live indicator badge */}
+            <div className="absolute top-6 left-6 bg-blue-600/90 backdrop-blur text-white px-3 py-1 rounded-full text-xs font-mono uppercase tracking-widest flex items-center gap-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              Live Interactive Demo
+            </div>
           </div>
         </div>
       </section>
