@@ -5,25 +5,25 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 const WORKS = [
-  // 1. Current Role (This will be PINNED)
+  // 1. Most Recent Leadership Role (This will be PINNED)
   {
     title: "Havas Global Design",
-    category: "Network Level Design Leadership",
-    year: "2023 — Present",
+    category: "Enterprise Innovation & Practice Building",
+    year: "2023 — 2026",
     image: "/havas-hero.jpg",
     link: "/havas",
   },
   // --- EVERYTHING BELOW THIS WILL BE SHUFFLED ---
   {
     title: "Google Search Trends",
-    category: "Digital & Experiential Design",
+    category: "Digital Innovation & Brand Strategy",
     year: "2019 — 2023",
     image: "/google-hero.jpg",
     link: "/google-trends",
   },
   {
     title: "NYT Immersive AR",
-    category: "Product Strategy & Design",
+    category: "Spatial Computing & Product Strategy",
     year: "2014 — 2019",
     image: "/AR-hero.jpg",
     link: "/nyt-ar",
@@ -31,7 +31,7 @@ const WORKS = [
   },
   {
     title: "The New York Times VR",
-    category: "Editorial Leadership and Product Design",
+    category: "Emerging Tech & Product Leadership",
     year: "2016 — 2019",
     image: "/NYTVR_studioimage.png",
     link: "/nyt-vr",
@@ -39,7 +39,7 @@ const WORKS = [
   },
   {
     title: "Immersive Web Design",
-    category: "Visual Journalism & Innovation",
+    category: "Information Design & Digital Storytelling",
     year: "2012 — 2019",
     image: "/immersive-hero.jpg",
     link: "/immersive-web",
