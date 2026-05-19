@@ -301,14 +301,14 @@ export default function HavasPage() {
               Havas
             </span>
             <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md">
-              2023 — Present
+              2023 — 2026
             </span>
           </div>
           <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-[0.9]">
             The Art of <br /> Health Data
           </h1>
           <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl leading-relaxed">
-            Building a global information design practice. Exploring the
+            Built a global information design practice. Exploring the
             intersection of biology, technology, and human understanding.
           </p>
         </motion.div>
@@ -343,9 +343,9 @@ export default function HavasPage() {
                 is to make it human, accessible, and actionable.
               </p>
               <p className="mb-6">
-                I lead a specialized design practice within Havas that helps the
+                I led a specialized design practice within Havas that helped the
                 world&apos;s leading healthcare companies visualize the
-                invisible. From pitch decks to patient tools, we use high-end
+                invisible. From pitch decks to patient tools, we used high-end
                 visual effects, 3D animation, and interactive design to show
                 clients the &quot;art of the possible.&quot;
               </p>
