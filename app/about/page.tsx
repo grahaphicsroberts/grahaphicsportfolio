@@ -136,8 +136,7 @@ export default function AboutMagazine() {
             </h1>
             <div className="h-1 w-24 bg-neutral-800 mb-8" />
             <p className="text-xl md:text-2xl text-neutral-400 font-light leading-relaxed max-w-md">
-              EVP of Global Information Design. Operating at the intersection of
-              journalism, technology, and storytelling.
+              Senior Design Leader operating at the frontier of AI, information design, and digital storytelling.
             </p>
           </motion.div>
         </div>
@@ -175,12 +174,11 @@ export default function AboutMagazine() {
             <p className="text-neutral-400">
               My expertise spans{" "}
               <strong>
-                visual journalism, motion graphics, 3D visualization, spatial
-                computing, and product design
+                visual journalism, human-computer interaction, spatial computing,
+                and product design
               </strong>
-              . In every role, my goal has been to challenge new creators in the
-              field and elevate the standard for how complex information is
-              communicated to global audiences.
+              . In every role, my goal has been to guide organizations through 
+              technological shifts—from the rise of mobile formats to the integration of generative AI—elevating the standard for how complex information is communicated to global audiences.
             </p>
           </div>
         </div>
@@ -196,10 +194,10 @@ export default function AboutMagazine() {
         />
         <div className="absolute bottom-12 left-6 md:left-24 z-20 max-w-xl">
           <span className="font-mono text-xs text-blue-400 uppercase tracking-widest mb-2 block">
-            Current Chapter
+            Building a Discipline
           </span>
           <h2 className="text-4xl font-bold text-white">
-            Redefining Health Data
+            Enterprise Innovation
           </h2>
         </div>
       </section>
@@ -210,7 +208,7 @@ export default function AboutMagazine() {
           {/* Left Rail */}
           <div className="md:col-span-4 space-y-2">
             <h3 className="text-sm font-mono text-neutral-500 uppercase tracking-widest sticky top-32">
-              Strategy & Innovation
+              Strategy & Leadership
             </h3>
           </div>
 
@@ -222,18 +220,16 @@ export default function AboutMagazine() {
                 Havas Global Network
               </h3>
               <p className="text-neutral-400">
-                Currently, I serve as{" "}
-                <strong>EVP of Global Information Design</strong> at Havas. We
-                are building a new discipline focused on the complex,
-                high-stakes world of health. Working with the world's most
-                influential pharmaceutical and biotech companies, we explore how
-                AI and emerging technologies can converge with human creativity
-                to clarify critical health data for physicians and patients
-                alike.
+                Most recently, I served as{" "}
+                <strong>EVP of Global Information Design</strong>, where I built 
+                a new design practice from the ground up. Operating in the 
+                high-stakes world of health and biotech, I led teams exploring 
+                how AI and emerging technologies can converge with human creativity 
+                to clarify critical health data for physicians and patients alike.
               </p>
             </div>
 
-            {/* Google Block (UPDATED: Side-by-side Layout) */}
+            {/* Google Block */}
             <div className="prose prose-invert prose-lg">
               <h3 className="text-2xl font-bold text-white mb-4">
                 Google Brand Studio
@@ -249,7 +245,7 @@ export default function AboutMagazine() {
                   world's largest information engine.
                 </p>
 
-                {/* Google Image Insert - Inset Style */}
+                {/* Google Image Insert */}
                 <figure className="w-full md:w-64 shrink-0 m-0">
                   <div className="relative overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 hover:grayscale-0 transition-all duration-700">
                     <img
@@ -274,7 +270,7 @@ export default function AboutMagazine() {
         <img
           src="/nyt-about.jpg"
           alt="NYT Newsroom"
-          className="w-full h-full object-cover opacity-100 group-hover:grayscale-0 transition-all duration-[2s]"
+          className="w-full h-full object-cover opacity-50 group-hover:grayscale-0 transition-all duration-[2s]"
         />
         <div className="absolute bottom-12 right-6 md:right-24 z-20 max-w-xl text-right">
           <span className="font-mono text-xs text-white/60 uppercase tracking-widest mb-2 block">
@@ -284,7 +280,7 @@ export default function AboutMagazine() {
         </div>
       </section>
 
-      {/* --- EXPERIENCE: NYT (WITH MOMA UPDATE) --- */}
+      {/* --- EXPERIENCE: NYT --- */}
       <section className="py-32 px-6 bg-neutral-950 border-b border-neutral-900">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12">
           <div className="md:col-span-4">
@@ -309,7 +305,6 @@ export default function AboutMagazine() {
               virtual reality, and led product efforts to bring Augmented
               Reality (AR) to the core news app.
             </p>
-            {/* NEW MOMA PARAGRAPH */}
             <p className="text-neutral-400 border-l-2 border-blue-500 pl-4">
               Most recently, my work <em>Why Notre Dame Was a Tinderbox</em> was
               acquired by the <strong>Museum of Modern Art (MoMA)</strong> for
@@ -320,9 +315,8 @@ export default function AboutMagazine() {
         </div>
       </section>
 
-      {/* --- VISUAL BREAK: BERKELEY (WITH BIO TEXT) --- */}
+      {/* --- VISUAL BREAK: BERKELEY --- */}
       <section className="relative w-full h-[80vh] overflow-hidden group flex items-center justify-center">
-        {/* Background Image */}
         <img
           src="/berkeley-about.jpg"
           alt="Berkeley Hills"
@@ -330,7 +324,6 @@ export default function AboutMagazine() {
         />
         <div className="absolute inset-0 bg-black/40 z-10" />
 
-        {/* Overlay Text (Replaces California) */}
         <div className="relative z-20 max-w-2xl px-6 text-center">
           <p className="text-3xl md:text-5xl font-serif text-white leading-tight drop-shadow-xl">
             "I live amongst the turkey and deer in the Berkeley Hills of
@@ -347,7 +340,6 @@ export default function AboutMagazine() {
             Get in Touch
           </h2>
 
-          {/* Links Grid */}
           <div className="grid grid-cols-3 gap-4">
             <a
               href="mailto:grahaphics@gmail.com"
