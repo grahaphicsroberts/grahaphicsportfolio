@@ -1,38 +1,21 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function Hero() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    // This forcibly tells mobile browsers to mute and play the video,
-    // bypassing React's occasional hydration lag.
-    if (videoRef.current) {
-      videoRef.current.defaultMuted = true;
-      videoRef.current.muted = true;
-      videoRef.current.play().catch((error) => {
-        console.warn("Mobile browser prevented autoplay:", error);
-      });
-    }
-  }, []);
-
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-neutral-950 flex flex-col justify-center pt-24 pb-12">
       {/* --- VIDEO BACKGROUND --- */}
       <div className="absolute inset-0 z-0">
+        {/* Restored to your exact original working video code */}
         <video
-          ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
-          // Add a static JPG of your video here. It shows instantly on mobile 
-          // and acts as the fallback for Low Power Mode users.
-          poster="/video-fallback-poster.jpg" 
           className="w-full h-full object-cover opacity-60"
         >
           <source src="/Kronos_lbrt-8966.mp4" type="video/mp4" />
