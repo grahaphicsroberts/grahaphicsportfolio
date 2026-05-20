@@ -6,26 +6,29 @@ import { ArrowDown, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function Hero() {
+  // The custom smooth scroll function
+  const scrollToWork = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const workSection = document.getElementById("work");
+    if (workSection) {
+      workSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-neutral-950 flex flex-col justify-center pt-24 pb-12">
-      {/* --- VIDEO BACKGROUND (The Nuclear React Bypass) --- */}
-      <div className="absolute inset-0 z-0">
-        <div
-          className="w-full h-full"
-          dangerouslySetInnerHTML={{
-            __html: `
-              <video 
-                autoplay 
-                loop 
-                muted 
-                playsinline 
-                class="w-full h-full object-cover opacity-60"
-              >
-                <source src="/Kronos_lbrt-8966.mp4" type="video/mp4" />
-              </video>
-            `,
-          }}
-        />
+      {/* --- VIDEO BACKGROUND --- */}
+      <div className="absolute inset-0 z-0 bg-neutral-900">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="/video-poster.jpg"
+          className="w-full h-full object-cover opacity-60"
+        >
+          <source src="/Kronos_lbrt-8966.mp4" type="video/mp4" />
+        </video>
         {/* Gradient Overlay for Text Readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/80 via-neutral-950/20 to-transparent pointer-events-none" />
       </div>
@@ -51,12 +54,13 @@ export default function Hero() {
           {/* RIGHT COLUMN: MANIFESTO & CTA */}
           <div className="max-w-xl pb-2 lg:pb-4">
             <p className="text-lg md:text-xl xl:text-2xl text-neutral-300 font-light leading-relaxed mb-8">
-              Graham Roberts provides multidisciplinary design leadership—exploring how AI and emerging technologies can advance human-computer interaction.
+              Graham Roberts is a multidisciplinary design leader exploring how AI and emerging technologies can advance human-computer interaction.
             </p>
 
-            {/* MINIMALIST CTA */}
+            {/* MINIMALIST CTA WITH SMOOTH SCROLL */}
             <Link
-              href="/#work"
+              href="#work"
+              onClick={scrollToWork}
               className="group inline-flex items-center gap-3 border-b border-white pb-1 text-white hover:text-neutral-300 hover:border-neutral-300 transition-colors uppercase tracking-widest text-xs md:text-sm font-mono"
             >
               <span>View Selected Works</span>
@@ -73,7 +77,9 @@ export default function Hero() {
         transition={{ delay: 1.5, duration: 1 }}
         className="absolute bottom-6 left-6 md:bottom-12 md:left-12 z-20"
       >
-        <ArrowDown className="w-5 h-5 text-white/40 animate-bounce" />
+        <a href="#work" onClick={scrollToWork} className="cursor-pointer block text-white/40 hover:text-white/70 transition-colors animate-bounce">
+          <ArrowDown className="w-5 h-5" />
+        </a>
       </motion.div>
     </section>
   );
