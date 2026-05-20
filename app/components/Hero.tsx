@@ -2,11 +2,12 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-neutral-950 flex items-center">
+    <section className="relative min-h-screen w-full overflow-hidden bg-neutral-950 flex flex-col justify-center pt-24 pb-12">
       {/* --- VIDEO BACKGROUND --- */}
       <div className="absolute inset-0 z-0">
         <video
@@ -23,24 +24,42 @@ export default function Hero() {
       </div>
 
       {/* --- CONTENT --- */}
-      <div className="relative z-10 px-6 md:px-12 max-w-7xl">
+      {/* Expanded max-width to allow the 2-column layout to breathe on big screens */}
+      <div className="relative z-10 px-6 md:px-12 w-full max-w-[1600px] mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
+          // Here is the magic: Flex col on mobile, Flex row on large screens, aligned to the bottom.
+          className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10 lg:gap-16"
         >
-          {/* BEATLES STYLE HEADLINE */}
-          {/* Added 'whitespace-nowrap' to ensure & always stays with the word */}
-          <h1 className="text-5xl sm:text-6xl md:text-9xl font-black tracking-tighter text-white mb-8 leading-[0.9] md:leading-[0.8] whitespace-nowrap">
-            Journalist &<br />
-            CreativeDirector &<br />
-            InfoDesigner &<br />
-            ProductDesigner.
-          </h1>
+          {/* LEFT COLUMN: THE MASSIVE STACK */}
+          <div className="flex-shrink-0">
+            {/* Kept the fluid vw sizing for mobile, adjusted desktop scaling slightly for the split */}
+            <h1 className="text-[14vw] sm:text-[11vw] lg:text-[7.5rem] xl:text-[8.5rem] font-black tracking-tighter text-white leading-[0.85] lg:leading-[0.8] whitespace-nowrap">
+              Director &<br />
+              Innovator &<br />
+              Designer &<br />
+              Storyteller.
+            </h1>
+          </div>
 
-          <p className="text-xl md:text-2xl text-neutral-300 font-light max-w-2xl leading-relaxed">
-            Graham Roberts is a multidisciplinary designer exploring how technology can shape and advance form and narrative.
-          </p>
+          {/* RIGHT COLUMN: MANIFESTO & CTA */}
+          {/* max-w-xl keeps the paragraph from stretching too wide and looking unreadable */}
+          <div className="max-w-xl pb-2 lg:pb-4">
+            <p className="text-lg md:text-xl xl:text-2xl text-neutral-300 font-light leading-relaxed mb-8">
+              Graham Roberts provides multidisciplinary design leadership—exploring how AI and emerging technologies can advance human-computer interaction.
+            </p>
+
+            {/* MINIMALIST CTA */}
+            <Link
+              href="/#work"
+              className="group inline-flex items-center gap-3 border-b border-white pb-1 text-white hover:text-neutral-300 hover:border-neutral-300 transition-colors uppercase tracking-widest text-xs md:text-sm font-mono"
+            >
+              <span>View Selected Works</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
         </motion.div>
       </div>
 
@@ -49,9 +68,9 @@ export default function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-12 left-6 md:left-12 z-20"
+        className="absolute bottom-6 left-6 md:bottom-12 md:left-12 z-20"
       >
-        <ArrowDown className="w-6 h-6 text-white/50 animate-bounce" />
+        <ArrowDown className="w-5 h-5 text-white/40 animate-bounce" />
       </motion.div>
     </section>
   );
