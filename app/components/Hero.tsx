@@ -8,20 +8,26 @@ import Link from "next/link";
 export default function Hero() {
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-neutral-950 flex flex-col justify-center pt-24 pb-12">
-      {/* --- VIDEO BACKGROUND --- */}
+      {/* --- VIDEO BACKGROUND (The Nuclear React Bypass) --- */}
       <div className="absolute inset-0 z-0">
-        {/* Restored to your exact original working video code */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover opacity-60"
-        >
-          <source src="/Kronos_lbrt-8966.mp4" type="video/mp4" />
-        </video>
+        <div
+          className="w-full h-full"
+          dangerouslySetInnerHTML={{
+            __html: `
+              <video 
+                autoplay 
+                loop 
+                muted 
+                playsinline 
+                class="w-full h-full object-cover opacity-60"
+              >
+                <source src="/Kronos_lbrt-8966.mp4" type="video/mp4" />
+              </video>
+            `,
+          }}
+        />
         {/* Gradient Overlay for Text Readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/80 via-neutral-950/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/80 via-neutral-950/20 to-transparent pointer-events-none" />
       </div>
 
       {/* --- CONTENT --- */}
