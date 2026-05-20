@@ -1,20 +1,38 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    // This forcibly tells mobile browsers to mute and play the video,
+    // bypassing React's occasional hydration lag.
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      videoRef.current.play().catch((error) => {
+        console.warn("Mobile browser prevented autoplay:", error);
+      });
+    }
+  }, []);
+
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-neutral-950 flex flex-col justify-center pt-24 pb-12">
       {/* --- VIDEO BACKGROUND --- */}
       <div className="absolute inset-0 z-0">
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
+          // Add a static JPG of your video here. It shows instantly on mobile 
+          // and acts as the fallback for Low Power Mode users.
+          poster="/video-fallback-poster.jpg" 
           className="w-full h-full object-cover opacity-60"
         >
           <source src="/Kronos_lbrt-8966.mp4" type="video/mp4" />
@@ -24,18 +42,15 @@ export default function Hero() {
       </div>
 
       {/* --- CONTENT --- */}
-      {/* Expanded max-width to allow the 2-column layout to breathe on big screens */}
       <div className="relative z-10 px-6 md:px-12 w-full max-w-[1600px] mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
-          // Here is the magic: Flex col on mobile, Flex row on large screens, aligned to the bottom.
           className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10 lg:gap-16"
         >
           {/* LEFT COLUMN: THE MASSIVE STACK */}
           <div className="flex-shrink-0">
-            {/* Kept the fluid vw sizing for mobile, adjusted desktop scaling slightly for the split */}
             <h1 className="text-[14vw] sm:text-[11vw] lg:text-[7.5rem] xl:text-[8.5rem] font-black tracking-tighter text-white leading-[0.85] lg:leading-[0.8] whitespace-nowrap">
               Director &<br />
               Innovator &<br />
@@ -45,7 +60,6 @@ export default function Hero() {
           </div>
 
           {/* RIGHT COLUMN: MANIFESTO & CTA */}
-          {/* max-w-xl keeps the paragraph from stretching too wide and looking unreadable */}
           <div className="max-w-xl pb-2 lg:pb-4">
             <p className="text-lg md:text-xl xl:text-2xl text-neutral-300 font-light leading-relaxed mb-8">
               Graham Roberts provides multidisciplinary design leadership—exploring how AI and emerging technologies can advance human-computer interaction.
