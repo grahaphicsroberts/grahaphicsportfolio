@@ -22,7 +22,7 @@ const WORKS = [
     link: "/google-trends",
   },
   {
-    title: "Spatial Computing / AR and Product Design",
+    title: "Spatial Computing / AR & Product Design",
     company: "The New York Times",
     year: "2014 — 2019",
     image: "/AR-hero.jpg",
