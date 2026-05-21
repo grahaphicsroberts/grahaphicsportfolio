@@ -77,7 +77,7 @@ const HIGHLIGHTS = [
       "SND Best of Digital Design: Gold Medal",
     ],
     btsStory:
-      "For the 50th anniversary of the Apollo 11 moon landing, we created a new, spatial way to understand the iconic photography taken by Buzz Aldrin and Neil Armstrong on that day in 1969. Referencing maps that identified where every photograph was taken, we were able give readers the ability to see the photographs from the moon in a new light, reconstructing their relationships to one another spatially and offering a new understanding of the images.",
+      "For the 50th anniversary of the Apollo 11 moon landing, we created a new, spatial way to understand the iconic photography taken by Buzz Aldrin and Neil Armstrong on that day in 1969. Referencing maps that identified where every photograph was taken, we were able to give readers the ability to see the photographs from the moon in a new light, reconstructing their relationships to one another spatially and offering a new understanding of the images.",
     images: ["/moon-1.jpg", "/moon-2.jpg"],
   },
 ];
