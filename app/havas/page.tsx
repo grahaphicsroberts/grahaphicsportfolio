@@ -54,6 +54,14 @@ const WORK_ITEMS = [
     aspect: "aspect-square",
   },
   {
+    id: 11,
+    type: "video",
+    src: "/FlareViz.mp4",
+    title: "Flare Visualization",
+    category: "Data Dynamics",
+    aspect: "aspect-square", 
+  },
+  {
     id: 6,
     type: "video",
     src: "/havas-work-6.mp4",
@@ -68,6 +76,15 @@ const WORK_ITEMS = [
     title: "Clinical Trial Timeline",
     category: "Information Design",
     aspect: "aspect-[16/9]",
+  },
+  // --- NEW PATIENT PROFILE VIZ VIDEO (4:3) ---
+  {
+    id: 12,
+    type: "video",
+    src: "/PatientProfileViz.mp4",
+    title: "Patient Journey",
+    category: "Data Storytelling",
+    aspect: "aspect-[4/3]",
   },
   {
     id: 8,
