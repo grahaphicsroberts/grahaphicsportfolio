@@ -310,7 +310,7 @@ export default function NYTVRPage() {
             <div className="prose prose-lg text-neutral-600 mb-12">
               <p className="mb-6">
                 The NYT VR program was built on the premise that we could reach
-                readers in an entirely way — through creating presense. If the
+                readers in an entirely new way — through creating presense. If the
                 best journalism could transport readers to give them a new
                 perspective and new understanding, this technology held a
                 promise to do that more directly than ever before.
