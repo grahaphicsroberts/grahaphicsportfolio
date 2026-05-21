@@ -1,12 +1,28 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function Hero() {
-  // The custom smooth scroll function
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // The "Invisible Nudge" for Desktop Chrome & SPA Routing
+    if (containerRef.current) {
+      const videoElement = containerRef.current.querySelector("video");
+      if (videoElement) {
+        // Redundantly lock the muted state (Chrome sometimes forgets during route changes)
+        videoElement.muted = true;
+        // Explicitly force play
+        videoElement.play().catch((error) => {
+          console.warn("Autoplay required a manual nudge:", error);
+        });
+      }
+    }
+  }, []);
+
   const scrollToWork = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const workSection = document.getElementById("work");
@@ -17,9 +33,10 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-neutral-950 flex flex-col justify-center pt-24 pb-12">
-      {/* --- VIDEO BACKGROUND (The React Bypass for Chrome Mobile) --- */}
+      {/* --- VIDEO BACKGROUND --- */}
       <div className="absolute inset-0 z-0 bg-neutral-900">
         <div
+          ref={containerRef}
           className="w-full h-full"
           dangerouslySetInnerHTML={{
             __html: `

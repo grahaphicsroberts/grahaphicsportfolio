@@ -7,47 +7,47 @@ import { ArrowUpRight } from "lucide-react";
 const WORKS = [
   // 1. Most Recent Leadership Role (This will be PINNED)
   {
-    title: "Havas Global Design",
-    category: "Enterprise Innovation & Practice Building",
+    title: "Health & Science Visualization",
+    company: "Havas",
     year: "2023 — 2026",
     image: "/havas-hero.jpg",
     link: "/havas",
   },
   // --- EVERYTHING BELOW THIS WILL BE SHUFFLED ---
   {
-    title: "Google Search Trends",
-    category: "Digital Innovation & Brand Strategy",
+    title: "Data Storytelling & Product Design",
+    company: "Google / Brand Studio",
     year: "2019 — 2023",
     image: "/google-hero.jpg",
     link: "/google-trends",
   },
   {
-    title: "NYT Immersive AR",
-    category: "Spatial Computing & Product Strategy",
+    title: "Spatial Computing / AR and Product Design",
+    company: "The New York Times",
     year: "2014 — 2019",
     image: "/AR-hero.jpg",
     link: "/nyt-ar",
     featured: true,
   },
   {
-    title: "The New York Times VR",
-    category: "Emerging Tech & Product Leadership",
+    title: "VR Filmmaking & 3D Interface Design",
+    company: "The New York Times",
     year: "2016 — 2019",
     image: "/NYTVR_studioimage.png",
     link: "/nyt-vr",
     featured: true,
   },
   {
-    title: "Immersive Web Design",
-    category: "Information Design & Digital Storytelling",
+    title: "Immersive Storytelling & Information Design",
+    company: "The New York Times",
     year: "2012 — 2019",
     image: "/immersive-hero.jpg",
     link: "/immersive-web",
     featured: true,
   },
   {
-    title: "Innovation in Video",
-    category: "Motion Design & Data Cinema",
+    title: "Motion Design & Data Cinema",
+    company: "The New York Times",
     year: "2006 — 2019",
     image: "/video-hero.jpg",
     link: "/video-innovation",
@@ -104,14 +104,17 @@ export default function SelectedWorks() {
             {/* Typography */}
             <div className="flex justify-between items-start border-b border-neutral-800 pb-4 group-hover:border-white/50 transition-colors">
               <div>
-                <h3 className="text-2xl font-bold text-neutral-200 group-hover:text-white transition-colors mb-1">
+                {/* The Company Meta-Tag */}
+                <p className="text-neutral-500 font-mono text-xs uppercase tracking-widest mb-1">
+                  {work.company}
+                </p>
+                {/* The Discipline Headline */}
+                <h3 className="text-2xl font-bold text-neutral-200 group-hover:text-white transition-colors">
                   {work.title}
                 </h3>
-                <p className="text-neutral-500 font-mono text-sm uppercase tracking-wider">
-                  {work.category}
-                </p>
               </div>
-              <span className="text-neutral-600 font-mono text-sm">
+              {/* Year - Aligned with the bottom of the title */}
+              <span className="text-neutral-600 font-mono text-sm mt-5">
                 {work.year}
               </span>
             </div>
