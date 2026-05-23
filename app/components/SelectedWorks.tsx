@@ -7,7 +7,7 @@ import { ArrowUpRight } from "lucide-react";
 const WORKS = [
   // 1. Most Recent Leadership Role (This will be PINNED)
   {
-    title: "Health & Science Visualization",
+    title: "Health & BioTech Visualization",
     company: "Havas",
     year: "2023 — 2026",
     image: "/havas-hero.jpg",
