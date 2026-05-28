@@ -126,9 +126,9 @@ export default function Hero() {
                 return (
                   <React.Fragment key={role.text}>
                     <span className="relative group inline-block cursor-default">
-                      {/* Ghost Render: The Blurred Glow Layer */}
+                      {/* Ghost Render: The Blurred Glow Layer - Added pr-[0.1em] to prevent clipping */}
                       <span
-                        className={`absolute left-0 top-0 text-transparent bg-clip-text bg-gradient-to-r ${role.gradient} blur-[12px] transition-opacity duration-700 ${
+                        className={`absolute left-0 top-0 text-transparent bg-clip-text bg-gradient-to-r ${role.gradient} blur-[12px] transition-opacity duration-700 pr-[0.1em] ${
                           isFlashing ? "opacity-80" : "opacity-0 group-hover:opacity-80"
                         }`}
                         aria-hidden="true"
@@ -136,9 +136,9 @@ export default function Hero() {
                         {role.text}
                       </span>
                       
-                      {/* Foreground: The Crisp Gradient Layer */}
+                      {/* Foreground: The Crisp Gradient Layer - Added pr-[0.1em] to prevent clipping */}
                       <span
-                        className={`relative bg-clip-text bg-gradient-to-r ${role.gradient} transition-colors duration-500 ${
+                        className={`relative bg-clip-text bg-gradient-to-r ${role.gradient} transition-colors duration-500 pr-[0.1em] ${
                           isFlashing ? "text-transparent" : "text-white group-hover:text-transparent"
                         }`}
                       >
