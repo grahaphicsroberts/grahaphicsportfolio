@@ -29,26 +29,14 @@ const ROLES = [
   },
 ];
 
-export default function Hero() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
+// --- EXTRACTED TEXT COMPONENT (Isolates the re-renders away from the video) ---
+const AnimatedRoleStack = () => {
   const [flashIndex, setFlashIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      const videoElement = containerRef.current.querySelector("video");
-      if (videoElement) {
-        videoElement.muted = true;
-        videoElement.play().catch((error) => {
-          console.warn("Autoplay required a manual nudge:", error);
-        });
-      }
-    }
-  }, []);
 
   useEffect(() => {
     let timeouts: NodeJS.Timeout[] = [];
     
+    // Wait 1.5 seconds after page load to start the sequence
     const startDelay = setTimeout(() => {
       ROLES.forEach((_, i) => {
         const t = setTimeout(() => {
@@ -67,6 +55,63 @@ export default function Hero() {
       clearTimeout(startDelay);
       timeouts.forEach(clearTimeout);
     };
+  }, []);
+
+  return (
+    <h1 className="text-[14vw] sm:text-[11vw] lg:text-[7.5rem] xl:text-[8.5rem] font-black tracking-tighter text-white leading-[0.85] lg:leading-[0.8] whitespace-nowrap">
+      {ROLES.map((role, i) => {
+        const isFlashing = flashIndex === i;
+
+        return (
+          <React.Fragment key={role.text}>
+            <Link href={role.link} className="relative group inline-block cursor-pointer">
+              <span
+                className={`absolute left-0 top-0 text-transparent bg-clip-text bg-gradient-to-r ${role.gradient} blur-[12px] transition-opacity duration-700 pr-[0.1em] ${
+                  isFlashing ? "opacity-80" : "opacity-0 md:group-hover:opacity-80"
+                }`}
+                aria-hidden="true"
+              >
+                {role.text}
+              </span>
+              
+              <span
+                className={`relative bg-clip-text bg-gradient-to-r ${role.gradient} transition-colors duration-500 pr-[0.1em] ${
+                  isFlashing ? "text-transparent" : "text-white md:group-hover:text-transparent"
+                }`}
+              >
+                {role.text}
+              </span>
+            </Link>
+
+            {i < ROLES.length - 1 ? (
+              <span className="text-white"> &</span>
+            ) : (
+              <span className="text-white">.</span>
+            )}
+            
+            {i < ROLES.length - 1 && <br />}
+          </React.Fragment>
+        );
+      })}
+    </h1>
+  );
+};
+
+// --- MAIN HERO COMPONENT ---
+export default function Hero() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // The "Invisible Nudge" for Desktop Chrome & SPA Routing
+    if (containerRef.current) {
+      const videoElement = containerRef.current.querySelector("video");
+      if (videoElement) {
+        videoElement.muted = true;
+        videoElement.play().catch((error) => {
+          console.warn("Autoplay required a manual nudge:", error);
+        });
+      }
+    }
   }, []);
 
   const scrollToWork = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -112,44 +157,8 @@ export default function Hero() {
         >
           {/* LEFT COLUMN: THE GLOWING STACK */}
           <div className="flex-shrink-0">
-            <h1 className="text-[14vw] sm:text-[11vw] lg:text-[7.5rem] xl:text-[8.5rem] font-black tracking-tighter text-white leading-[0.85] lg:leading-[0.8] whitespace-nowrap">
-              {ROLES.map((role, i) => {
-                const isFlashing = flashIndex === i;
-
-                return (
-                  <React.Fragment key={role.text}>
-                    <Link href={role.link} className="relative group inline-block cursor-pointer">
-                      {/* Ghost Render: Notice md:group-hover here */}
-                      <span
-                        className={`absolute left-0 top-0 text-transparent bg-clip-text bg-gradient-to-r ${role.gradient} blur-[12px] transition-opacity duration-700 pr-[0.1em] ${
-                          isFlashing ? "opacity-80" : "opacity-0 md:group-hover:opacity-80"
-                        }`}
-                        aria-hidden="true"
-                      >
-                        {role.text}
-                      </span>
-                      
-                      {/* Foreground: Notice md:group-hover here */}
-                      <span
-                        className={`relative bg-clip-text bg-gradient-to-r ${role.gradient} transition-colors duration-500 pr-[0.1em] ${
-                          isFlashing ? "text-transparent" : "text-white md:group-hover:text-transparent"
-                        }`}
-                      >
-                        {role.text}
-                      </span>
-                    </Link>
-
-                    {i < ROLES.length - 1 ? (
-                      <span className="text-white"> &</span>
-                    ) : (
-                      <span className="text-white">.</span>
-                    )}
-                    
-                    {i < ROLES.length - 1 && <br />}
-                  </React.Fragment>
-                );
-              })}
-            </h1>
+            {/* We dropped the isolated component right here */}
+            <AnimatedRoleStack />
           </div>
 
           {/* RIGHT COLUMN: MANIFESTO & CTA */}
