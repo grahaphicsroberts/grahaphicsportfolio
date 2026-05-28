@@ -5,38 +5,36 @@ import { motion } from "framer-motion";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-// --- THE APPLE GRADIENT DEFINITIONS ---
+// --- THE APPLE GRADIENT DEFINITIONS & LINKS ---
 const ROLES = [
   {
     text: "Director",
-    // Siri Intelligence vibe (Purple to Pink)
     gradient: "from-indigo-400 via-purple-400 to-pink-400",
+    link: "/nyt-vr#antarctica", 
   },
   {
     text: "Innovator",
-    // Deep Tech vibe (Cyan to Blue)
     gradient: "from-cyan-400 via-blue-400 to-indigo-400",
+    link: "/nyt-ar#major-features", 
   },
   {
     text: "Designer",
-    // Creative Sunset vibe (Amber to Rose)
     gradient: "from-amber-400 via-orange-500 to-rose-500",
+    link: "/havas#explorations", 
   },
   {
     text: "Storyteller",
-    // Aurora vibe (Emerald to Cyan)
     gradient: "from-emerald-400 via-teal-400 to-cyan-400",
+    link: "/immersive-web#snow-fall", 
   },
 ];
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // State to track which word is currently flashing during the auto-sequence
   const [flashIndex, setFlashIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    // The "Invisible Nudge" for Desktop Chrome & SPA Routing
     if (containerRef.current) {
       const videoElement = containerRef.current.querySelector("video");
       if (videoElement) {
@@ -49,27 +47,22 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
-    // The Auto-Flash Cascade Sequence
     let timeouts: NodeJS.Timeout[] = [];
     
-    // Wait 1.5 seconds after page load to start the sequence
     const startDelay = setTimeout(() => {
       ROLES.forEach((_, i) => {
-        // Stagger each word's glow by 600ms
         const t = setTimeout(() => {
           setFlashIndex(i);
         }, i * 600);
         timeouts.push(t);
       });
 
-      // Clear the final word's glow to return everything to white
       const finalClear = setTimeout(() => {
         setFlashIndex(null);
       }, ROLES.length * 600);
       timeouts.push(finalClear);
     }, 1500);
 
-    // Cleanup function to prevent memory leaks if the user navigates away early
     return () => {
       clearTimeout(startDelay);
       timeouts.forEach(clearTimeout);
@@ -125,35 +118,33 @@ export default function Hero() {
 
                 return (
                   <React.Fragment key={role.text}>
-                    <span className="relative group inline-block cursor-default">
-                      {/* Ghost Render: The Blurred Glow Layer - Added pr-[0.1em] to prevent clipping */}
+                    <Link href={role.link} className="relative group inline-block cursor-pointer">
+                      {/* Ghost Render: Notice md:group-hover here */}
                       <span
                         className={`absolute left-0 top-0 text-transparent bg-clip-text bg-gradient-to-r ${role.gradient} blur-[12px] transition-opacity duration-700 pr-[0.1em] ${
-                          isFlashing ? "opacity-80" : "opacity-0 group-hover:opacity-80"
+                          isFlashing ? "opacity-80" : "opacity-0 md:group-hover:opacity-80"
                         }`}
                         aria-hidden="true"
                       >
                         {role.text}
                       </span>
                       
-                      {/* Foreground: The Crisp Gradient Layer - Added pr-[0.1em] to prevent clipping */}
+                      {/* Foreground: Notice md:group-hover here */}
                       <span
                         className={`relative bg-clip-text bg-gradient-to-r ${role.gradient} transition-colors duration-500 pr-[0.1em] ${
-                          isFlashing ? "text-transparent" : "text-white group-hover:text-transparent"
+                          isFlashing ? "text-transparent" : "text-white md:group-hover:text-transparent"
                         }`}
                       >
                         {role.text}
                       </span>
-                    </span>
+                    </Link>
 
-                    {/* The Ampersand / Period (Stays static white) */}
                     {i < ROLES.length - 1 ? (
                       <span className="text-white"> &</span>
                     ) : (
                       <span className="text-white">.</span>
                     )}
                     
-                    {/* Line Break */}
                     {i < ROLES.length - 1 && <br />}
                   </React.Fragment>
                 );

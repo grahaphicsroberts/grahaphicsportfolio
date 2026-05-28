@@ -345,7 +345,7 @@ export default function NYTARPage() {
       </section>
 
       {/* --- CHAPTER 2: STACKED HIGHLIGHTS --- */}
-      <section className="py-32 bg-neutral-900">
+      <section id="major-features" className="py-32 bg-neutral-900 scroll-mt-24">
         {/* Section Header */}
         <div className="px-6 md:px-24 mb-24 max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">

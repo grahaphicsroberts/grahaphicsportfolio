@@ -379,7 +379,8 @@ export default function HavasPage() {
       </section>
 
       {/* --- MOOD BOARD SECTION (MASONRY GRID) --- */}
-      <section className="py-32 px-4 md:px-12 bg-neutral-950">
+      {/* Added id="explorations" and scroll-mt-24 for the hash link jump */}
+      <section id="explorations" className="py-32 px-4 md:px-12 bg-neutral-950 scroll-mt-24">
         <div className="max-w-[1600px] mx-auto">
           {/* Header */}
           <div className="mb-24 px-4">

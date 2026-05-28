@@ -206,7 +206,8 @@ export default function ImmersiveWebPage() {
       </section>
 
       {/* --- PROJECT 1: SNOW FALL --- */}
-      <section className="py-32 bg-neutral-950 border-b border-neutral-800">
+      {/* Added id="snow-fall" and scroll-mt-24 for the hash link jump */}
+      <section id="snow-fall" className="py-32 bg-neutral-950 border-b border-neutral-800 scroll-mt-24">
         <div className="px-6 md:px-24 max-w-[1400px] mx-auto">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">

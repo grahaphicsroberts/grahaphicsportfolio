@@ -25,6 +25,7 @@ import Link from "next/link";
 // --- DATA: FEATURED VR PROJECTS ---
 const HIGHLIGHTS = [
   {
+    anchorId: "antarctica", // Added anchor ID for deep linking
     title: "The Antarctica Series",
     subtitle: "Four-Part Documentary",
     tribeca: true,
@@ -47,6 +48,7 @@ const HIGHLIGHTS = [
     images: ["/antarctica-1.jpg", "/antarctica-2.jpg"],
   },
   {
+    anchorId: "pluto", // Added anchor ID
     title: "Seeking Pluto's Frigid Heart",
     subtitle: "Data Visualization in VR",
     tribeca: true,
@@ -64,6 +66,7 @@ const HIGHLIGHTS = [
     images: ["/pluto-1.jpg", "/pluto-2.jpg"],
   },
   {
+    anchorId: "apollo", // Added anchor ID
     title: "Apollo 11: As They Shot It",
     subtitle: "Interactive VR",
     tribeca: false,
@@ -102,7 +105,7 @@ const ARCHIVE = [
   {
     title: "Pilgrimage",
     image: "/vr-pilgrimage.jpg",
-    link: "https://www.youtube.com/watch?v=ecavbpCuvkI", // Linked to The Displaced as representative journey
+    link: "https://www.youtube.com/watch?v=ecavbpCuvkI", 
   },
   {
     title: "The National: Something out of Nothing",
@@ -396,7 +399,8 @@ export default function NYTVRPage() {
           {HIGHLIGHTS.map((project, index) => (
             <div
               key={index}
-              className="relative w-full max-w-[1400px] mx-auto px-6 md:px-12"
+              id={project.anchorId} // This tells the browser exactly where to scroll
+              className="relative w-full max-w-[1400px] mx-auto px-6 md:px-12 scroll-mt-32" // Added scroll margin so the nav bar doesn't cover the title!
             >
               {/* 1. Header & Intro */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-12 items-end">
