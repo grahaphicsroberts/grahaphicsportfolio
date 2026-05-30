@@ -121,7 +121,7 @@ export default function VideoInnovationPage() {
           onClick={() => setIsMenuOpen(false)}
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-bold tracking-tight">BACK TO INDEX</span>
+          <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
         {/* Right: Desktop Links */}

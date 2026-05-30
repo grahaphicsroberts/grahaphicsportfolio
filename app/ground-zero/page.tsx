@@ -27,7 +27,7 @@ export default function GroundZeroCaseStudy() {
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-bold tracking-tight">BACK TO INDEX</span>
+          <span className="font-bold tracking-tight">HOME</span>
         </Link>
         <span className="hidden md:block font-mono text-sm opacity-50">
           CASE STUDY 02

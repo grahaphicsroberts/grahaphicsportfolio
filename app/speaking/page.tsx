@@ -411,7 +411,7 @@ export default function SpeakingPage() {
           onClick={() => setIsMenuOpen(false)}
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-bold tracking-tight">BACK TO INDEX</span>
+          <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
         {/* Desktop Links */}
