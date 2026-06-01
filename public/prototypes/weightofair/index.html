@@ -6,11 +6,80 @@
     <title>3D Data Visualization - Final Interaction Fix</title>
     <style>
         body { margin: 0; overflow: hidden; width: 100%; height: 100%;background-color: #000; cursor: default; color: #FFF; font-family: sans-serif; }
-        #overlay { position: absolute; bottom: 30px; width: 100%; text-align: center; pointer-events: none; letter-spacing: 2px; color: rgba(255,255,255,0.2); text-transform: uppercase; }
+        #overlay {
+            position: absolute;
+            bottom: 28px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+        #overlay span {
+            display: inline-block;
+            padding: 14px 28px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            color: #fff;
+            text-transform: uppercase;
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+        #rotate-hint {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            pointer-events: none;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 14px;
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+            color: #fff;
+        }
+        #rotate-hint svg {
+            width: 26px;
+            height: 26px;
+        }
+        #rotate-hint .orbit-ring {
+            transform-origin: 12px 12px;
+            animation: orbit-spin 4s linear infinite;
+        }
+        @keyframes orbit-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <div id="overlay">Click to Structure Data</div>
+    <div id="rotate-hint" title="Drag to rotate" aria-label="Drag to rotate view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <!-- Isometric cube -->
+            <path d="M12 5.5 17.5 8.5v6L12 17.5 6.5 14.5v-6L12 5.5z" />
+            <path d="M12 5.5v12" />
+            <path d="M6.5 8.5 12 11.5 17.5 8.5" />
+            <!-- Orbit ring + arrow (animated) -->
+            <g class="orbit-ring">
+                <path d="M4 13.5a8 8 0 0 1 13.5-5.2" />
+                <path d="M16 6.5 18.5 8 16.5 10" />
+            </g>
+        </svg>
+    </div>
+    <div id="overlay"><span id="overlay-text">Click to Structure Data</span></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -69,6 +138,17 @@
         let targets = { shape: 0, color: 0, split: 0, lung: 0 };
         let startX = 0, startY = 0;
 
+        const PHASE_PROMPTS = [
+            "Click to Structure Data",
+            "Click to Split 25/75",
+            "Click to Assemble Anatomy",
+            "Click to Reset Swarm"
+        ];
+
+        function updatePrompt() {
+            document.getElementById('overlay-text').innerText = PHASE_PROMPTS[currentState];
+        }
+
         renderer.domElement.addEventListener('pointerdown', e => {
             startX = e.clientX;
             startY = e.clientY;
@@ -84,9 +164,7 @@
                 targets.color = currentState >= 2 ? 1 : 0;
                 targets.split = currentState === 2 ? 1 : 0;
                 targets.lung  = currentState === 3 ? 1 : 0;
-                
-                const labels = ["Structure Data", "Split 25/75", "Assemble Anatomy", "Reset Swarm"];
-                document.getElementById('overlay').innerText = labels[currentState];
+                updatePrompt();
             }
         });
 
