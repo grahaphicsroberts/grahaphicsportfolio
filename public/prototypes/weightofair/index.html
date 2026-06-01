@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Data Visualization - Final Interaction Fix</title>
     <style>
-        body { margin: 0; overflow: hidden; width: 100%; height: 100%;background-color: #000; cursor: default; color: #FFF; font-family: sans-serif; }
+        html, body { margin: 0; overflow: hidden; width: 100%; height: 100%; background-color: #000; cursor: default; color: #FFF; font-family: sans-serif; }
+        canvas { touch-action: none; }
         #overlay {
             position: absolute;
             bottom: 28px;
@@ -62,6 +63,24 @@
         @keyframes orbit-spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+        @media (max-width: 767px) {
+            #overlay { bottom: 16px; padding: 0 12px; box-sizing: border-box; }
+            #overlay span {
+                padding: 11px 20px;
+                font-size: 11px;
+                letter-spacing: 0.1em;
+                max-width: 100%;
+                line-height: 1.35;
+            }
+            #rotate-hint {
+                top: 12px;
+                right: 12px;
+                width: 42px;
+                height: 42px;
+                border-radius: 12px;
+            }
+            #rotate-hint svg { width: 22px; height: 22px; }
         }
     </style>
 </head>
@@ -149,6 +168,32 @@
             document.getElementById('overlay-text').innerText = PHASE_PROMPTS[currentState];
         }
 
+        function isMobileViewport() {
+            return window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches;
+        }
+
+        function getClickThreshold() {
+            return isMobileViewport() ? 22 : 7;
+        }
+
+        function getPointSizeScale() {
+            return isMobileViewport() ? 1.4 : 1;
+        }
+
+        function updateCameraForViewport(w, h) {
+            const portrait = w / h < 1;
+            camera.position.set(0, 10, portrait ? 26 : 32);
+            camera.updateProjectionMatrix();
+        }
+
+        function updatePointSize(h) {
+            mat.uniforms.uBaseSize.value =
+                0.15 * h * window.devicePixelRatio / 2.0 *
+                camera.projectionMatrix.elements[5] * getPointSizeScale();
+        }
+
+        renderer.domElement.style.touchAction = 'none';
+
         renderer.domElement.addEventListener('pointerdown', e => {
             startX = e.clientX;
             startY = e.clientY;
@@ -157,8 +202,8 @@
         renderer.domElement.addEventListener('pointerup', e => {
             const dragDistance = Math.sqrt(Math.pow(e.clientX - startX, 2) + Math.pow(e.clientY - startY, 2));
             
-            // THRESHOLD: If the mouse moved more than 7 pixels, assume the user was dragging the camera.
-            if (dragDistance < 7) {
+            // THRESHOLD: Ignore taps that were really orbit drags (higher on touch screens).
+            if (dragDistance < getClickThreshold()) {
                 currentState = (currentState + 1) % 4;
                 targets.shape = currentState >= 1 ? 1 : 0;
                 targets.color = currentState >= 2 ? 1 : 0;
@@ -283,11 +328,18 @@
         }
         animate();
 
+        updateCameraForViewport(window.innerWidth, window.innerHeight);
+        updatePointSize(window.innerHeight);
+
         window.addEventListener('resize', () => {
             const w = window.innerWidth, h = window.innerHeight;
-            camera.aspect = w / h; camera.updateProjectionMatrix();
-            renderer.setSize(w, h); readBuffer.setSize(w, h); writeBuffer.setSize(w, h); sceneTarget.setSize(w, h);
-            mat.uniforms.uBaseSize.value = 0.15 * h * window.devicePixelRatio / 2.0 * camera.projectionMatrix.elements[5];
+            camera.aspect = w / h;
+            updateCameraForViewport(w, h);
+            renderer.setSize(w, h);
+            readBuffer.setSize(w, h);
+            writeBuffer.setSize(w, h);
+            sceneTarget.setSize(w, h);
+            updatePointSize(h);
         });
     </script>
 </body>

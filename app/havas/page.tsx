@@ -403,7 +403,7 @@ export default function HavasPage() {
       </section>
 
       {/* --- LIVE INTERACTIVE PROTOTYPE SECTION --- */}
-      <section className="py-24 px-6 md:px-24 bg-neutral-900 border-t border-neutral-800">
+      <section className="py-16 md:py-24 px-4 md:px-24 bg-neutral-900 border-t border-neutral-800">
         <div className="max-w-[1400px] mx-auto">
           <div className="mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
@@ -414,8 +414,8 @@ export default function HavasPage() {
             </p>
           </div>
 
-          {/* The iframe Wrapper */}
-          <div className="w-full aspect-[16/9] md:aspect-[21/9] bg-black rounded-[2rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl relative group">
+          {/* Taller portrait frame on mobile; cinematic wide ratio on desktop */}
+          <div className="w-full aspect-[4/5] min-h-[min(72svh,640px)] max-h-[85svh] md:aspect-[21/9] md:min-h-0 md:max-h-none bg-black rounded-2xl md:rounded-[2rem] border-4 md:border-[8px] border-neutral-800 overflow-hidden shadow-2xl relative group">
             {/* The src points exactly to the weightofair folder inside your public/prototypes directory */}
             <iframe
               src="/prototypes/weightofair/index.html"
