@@ -55,6 +55,27 @@ const WORKS = [
   },
 ];
 
+/**
+ * One line when there is room; otherwise wrap only after "&".
+ * flex-wrap + nowrap on the first segment forces the break point.
+ */
+function WorkTitle({ title }: { title: string }) {
+  const ampIndex = title.indexOf("&");
+  if (ampIndex === -1) {
+    return <span className="whitespace-nowrap">{title}</span>;
+  }
+
+  const beforeAmp = title.slice(0, ampIndex + 1).trimEnd();
+  const afterAmp = title.slice(ampIndex + 1).trimStart();
+
+  return (
+    <span className="inline-flex max-w-full flex-wrap items-baseline gap-x-1">
+      <span className="whitespace-nowrap">{beforeAmp}</span>
+      {afterAmp ? <span>{afterAmp}</span> : null}
+    </span>
+  );
+}
+
 export default function SelectedWorks() {
   const [displayWorks, setDisplayWorks] = useState(WORKS);
 
@@ -102,21 +123,18 @@ export default function SelectedWorks() {
             </div>
 
             {/* Typography */}
-            <div className="flex justify-between items-start border-b border-neutral-800 pb-4 group-hover:border-white/50 transition-colors">
-              <div>
-                {/* The Company Meta-Tag */}
-                <p className="text-neutral-500 font-mono text-xs uppercase tracking-widest mb-1">
+            <div className="border-b border-neutral-800 pb-4 group-hover:border-white/50 transition-colors">
+              <div className="mb-2 flex items-baseline justify-between gap-4">
+                <p className="min-w-0 text-neutral-500 font-mono text-xs uppercase tracking-widest">
                   {work.company}
                 </p>
-                {/* The Discipline Headline */}
-                <h3 className="text-2xl font-bold text-neutral-200 group-hover:text-white transition-colors">
-                  {work.title}
-                </h3>
+                <span className="shrink-0 text-neutral-600 font-mono text-sm">
+                  {work.year}
+                </span>
               </div>
-              {/* Year - Aligned with the bottom of the title */}
-              <span className="text-neutral-600 font-mono text-sm mt-5">
-                {work.year}
-              </span>
+              <h3 className="text-2xl font-bold leading-tight text-neutral-200 group-hover:text-white transition-colors">
+                <WorkTitle title={work.title} />
+              </h3>
             </div>
           </Link>
         ))}
