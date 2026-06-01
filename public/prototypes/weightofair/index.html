@@ -180,10 +180,16 @@
             return isMobileViewport() ? 1.4 : 1;
         }
 
+        const DESKTOP_CAMERA_Z = 32;
+
         function updateCameraForViewport(w, h) {
-            const portrait = w / h < 1;
-            camera.position.set(0, 10, portrait ? 26 : 32);
+            // Pull back on mobile/narrow iframes so the structured cube fits in frame.
+            // Desktop widescreen keeps the original camera distance.
+            const z = isMobileViewport() ? 46 : DESKTOP_CAMERA_Z;
+            camera.position.set(0, 10, z);
+            camera.fov = 75;
             camera.updateProjectionMatrix();
+            controls.update();
         }
 
         function updatePointSize(h) {
