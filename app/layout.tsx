@@ -13,8 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Graham Roberts Portfolio",
-  description: "Information Design and Data Visualization by Graham Yves Roberts.",
+  title: {
+    default: "Graham Roberts | Storyteller & Design Leader",
+    template: "%s | Graham Roberts",
+  },
+  description:
+    "Graham Roberts is a storyteller and design leader specializing in information design, data visualization, and immersive experiences.",
 };
 
 export default function RootLayout({
