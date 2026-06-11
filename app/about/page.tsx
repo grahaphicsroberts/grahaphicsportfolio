@@ -37,7 +37,7 @@ export default function AboutMagazine() {
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           onClick={() => setIsMenuOpen(false)}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
@@ -70,9 +70,9 @@ export default function AboutMagazine() {
           aria-label="Toggle Menu"
         >
           {isMenuOpen ? (
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           ) : (
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" aria-hidden="true" />
           )}
         </button>
       </nav>
@@ -346,7 +346,7 @@ export default function AboutMagazine() {
               className="group flex flex-col items-center gap-4 p-8 rounded-lg hover:bg-neutral-900 transition-colors"
             >
               <div className="p-4 bg-neutral-900 rounded-full group-hover:bg-white group-hover:text-black transition-colors border border-neutral-800">
-                <Mail className="w-5 h-5" />
+                <Mail className="w-5 h-5" aria-hidden="true" />
               </div>
               <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest">
                 Email
@@ -360,7 +360,7 @@ export default function AboutMagazine() {
               className="group flex flex-col items-center gap-4 p-8 rounded-lg hover:bg-neutral-900 transition-colors"
             >
               <div className="p-4 bg-neutral-900 rounded-full group-hover:bg-white group-hover:text-black transition-colors border border-neutral-800">
-                <Linkedin className="w-5 h-5" />
+                <Linkedin className="w-5 h-5" aria-hidden="true" />
               </div>
               <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest">
                 LinkedIn
@@ -374,7 +374,7 @@ export default function AboutMagazine() {
               className="group flex flex-col items-center gap-4 p-8 rounded-lg hover:bg-neutral-900 transition-colors"
             >
               <div className="p-4 bg-neutral-900 rounded-full group-hover:bg-white group-hover:text-black transition-colors border border-neutral-800">
-                <Twitter className="w-5 h-5" />
+                <Twitter className="w-5 h-5" aria-hidden="true" />
               </div>
               <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest">
                 Twitter
@@ -383,7 +383,7 @@ export default function AboutMagazine() {
           </div>
 
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 rounded-full text-xs font-mono text-neutral-500">
-            <MapPin className="w-3 h-3" />
+            <MapPin className="w-3 h-3" aria-hidden="true" />
             <span>Berkeley, CA</span>
           </div>
         </div>

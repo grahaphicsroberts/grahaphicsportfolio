@@ -15,19 +15,19 @@ export default function Footer() {
             href="mailto:grahaphics@gmail.com"
             className="flex items-center gap-2 hover:underline"
           >
-            <Mail className="w-5 h-5" /> Email
+            <Mail className="w-5 h-5" aria-hidden="true" /> Email
           </a>
           <a
             href="https://www.linkedin.com/in/grahaphics/"
             className="flex items-center gap-2 hover:underline"
           >
-            <Linkedin className="w-5 h-5" /> LinkedIn
+            <Linkedin className="w-5 h-5" aria-hidden="true" /> LinkedIn
           </a>
           <a
             href="https://twitter.com/grahaphics"
             className="flex items-center gap-2 hover:underline"
           >
-            <Twitter className="w-5 h-5" /> Twitter / X
+            <Twitter className="w-5 h-5" aria-hidden="true" /> Twitter / X
           </a>
         </div>
         <p className="mt-24 text-sm text-neutral-500">

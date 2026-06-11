@@ -182,9 +182,9 @@ const WorkItem = ({ item }: { item: any }) => {
           `}
         >
           {item.type === "video" ? (
-            <Play className="w-4 h-4 text-white fill-current" />
+            <Play className="w-4 h-4 text-white fill-current" aria-hidden="true" />
           ) : (
-            <Maximize2 className="w-4 h-4 text-white" />
+            <Maximize2 className="w-4 h-4 text-white" aria-hidden="true" />
           )}
         </div>
       </div>
@@ -213,7 +213,7 @@ export default function HavasPage() {
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           onClick={() => setIsMenuOpen(false)}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
@@ -367,7 +367,7 @@ export default function HavasPage() {
                 clients the &quot;art of the possible.&quot;
               </p>
               <div className="flex items-center gap-2 text-sm font-mono text-neutral-500 mt-8">
-                <Lock className="w-4 h-4" />
+                <Lock className="w-4 h-4" aria-hidden="true" />
                 <span>
                   Note: Much of this work is confidential. Data in these
                   examples has been blinded or abstracted.
@@ -420,7 +420,8 @@ export default function HavasPage() {
             <iframe
               src="/prototypes/weightofair/index.html"
               className="w-full h-full border-none"
-              title="Interactive Prototype"
+              title="Interactive 3D prototype: a particle swarm that assembles health data into a structured grid, splits it into a 25/75 comparison, and forms human lung anatomy"
+              aria-label="Interactive 3D data visualization prototype. Click to advance through phases: a particle swarm structures into a data grid, splits into a 25/75 comparison, then assembles into lung anatomy. Drag to rotate the view."
               sandbox="allow-scripts allow-same-origin"
             />
             
@@ -438,7 +439,7 @@ export default function HavasPage() {
         <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Text Column (Left) */}
           <div className="order-2 lg:order-1">
-            <Eye className="w-12 h-12 text-neutral-500 mb-8" />
+            <Eye className="w-12 h-12 text-neutral-500 mb-8" aria-hidden="true" />
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 leading-tight">
               &quot;We are not just designing charts. We are designing
               understanding for critical, life-saving innovations.&quot;
@@ -449,7 +450,7 @@ export default function HavasPage() {
               href="/#work"
               className="inline-flex items-center gap-2 text-neutral-500 hover:text-white transition-colors font-mono text-sm uppercase tracking-widest"
             >
-              <ArrowLeft className="w-4 h-4" /> Back to Selected Works
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to Selected Works
             </Link>
           </div>
 

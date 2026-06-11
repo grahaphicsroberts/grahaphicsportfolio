@@ -86,7 +86,7 @@ export default function NYTARPage() {
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           onClick={() => setIsMenuOpen(false)}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
@@ -119,9 +119,9 @@ export default function NYTARPage() {
           aria-label="Toggle Menu"
         >
           {isMenuOpen ? (
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           ) : (
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" aria-hidden="true" />
           )}
         </button>
       </nav>
@@ -256,7 +256,7 @@ export default function NYTARPage() {
           <div>
             {/* Header */}
             <div className="flex items-center gap-3 mb-6 text-blue-600">
-              <Box className="w-6 h-6" />
+              <Box className="w-6 h-6" aria-hidden="true" />
               <span className="font-bold tracking-tight uppercase">
                 The Launch
               </span>
@@ -382,7 +382,7 @@ export default function NYTARPage() {
                         key={i}
                         className="flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full text-yellow-500 text-xs font-mono uppercase tracking-wider"
                       >
-                        <Award className="w-3 h-3" />
+                        <Award className="w-3 h-3" aria-hidden="true" />
                         {award}
                       </div>
                     ))}
@@ -401,7 +401,7 @@ export default function NYTARPage() {
                       target="_blank"
                       className="inline-flex items-center gap-2 text-white border border-white/20 px-6 py-3 rounded-full hover:bg-white hover:text-black transition-colors text-sm font-mono uppercase tracking-wider"
                     >
-                      Launch Experience <ArrowUpRight className="w-4 h-4" />
+                      Launch Experience <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
                     </Link>
                   </div>
                 )}
@@ -460,7 +460,7 @@ export default function NYTARPage() {
             </p>
           </div>
           <div className="hidden md:flex items-center gap-2 text-neutral-600 font-mono text-xs uppercase tracking-widest animate-pulse">
-            Scroll <ArrowRight className="w-4 h-4" />
+            Scroll <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </div>
         </div>
 
@@ -551,7 +551,7 @@ export default function NYTARPage() {
           href="/#work"
           className="inline-flex items-center gap-2 text-neutral-500 hover:text-white transition-colors font-mono text-sm uppercase tracking-widest"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Selected Works
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to Selected Works
         </Link>
       </section>
     </div>

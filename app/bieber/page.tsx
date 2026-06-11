@@ -29,7 +29,7 @@ export default function BieberCaseStudy() {
           href="/"
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
         <span className="hidden md:block font-mono text-sm opacity-50">
@@ -148,7 +148,7 @@ export default function BieberCaseStudy() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
             <div className="flex items-center gap-3 mb-6 text-yellow-600">
-              <AudioWaveform className="w-6 h-6" />
+              <AudioWaveform className="w-6 h-6" aria-hidden="true" />
               <span className="font-bold tracking-tight uppercase">
                 The "Dolphin" Sound
               </span>
@@ -193,15 +193,17 @@ export default function BieberCaseStudy() {
           <div className="aspect-[9/16] bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden relative group">
             <img
               src="https://grahaphics.com/Phone-Mock-1.jpg"
+              alt="The 'Making a Hit' vertical video experience shown on a smartphone screen"
               className="w-full h-full object-cover opacity-60"
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Smartphone className="w-8 h-8 text-neutral-700" />
+              <Smartphone className="w-8 h-8 text-neutral-700" aria-hidden="true" />
             </div>
           </div>
           <div className="aspect-[9/16] bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden relative group mt-0 md:-mt-12 shadow-2xl shadow-yellow-900/20">
             <img
               src="https://grahaphics.com/Phone-Mock-2.jpg"
+              alt="A focal frame of the 'Where Are Ü Now' deconstruction, composed for vertical mobile viewing"
               className="w-full h-full object-cover opacity-60"
             />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -213,10 +215,11 @@ export default function BieberCaseStudy() {
           <div className="aspect-[9/16] bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden relative group">
             <img
               src="https://grahaphics.com/Phone-Mock-3.jpg"
+              alt="The 'Making a Hit' experience displayed full-screen on a mobile device"
               className="w-full h-full object-cover opacity-60"
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Smartphone className="w-8 h-8 text-neutral-700" />
+              <Smartphone className="w-8 h-8 text-neutral-700" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -225,7 +228,7 @@ export default function BieberCaseStudy() {
       {/* --- MODULE D: QUOTE --- */}
       <section className="py-24 px-6 md:px-24 bg-yellow-400 text-black">
         <div className="max-w-4xl mx-auto text-center">
-          <Quote className="w-12 h-12 mx-auto mb-6 opacity-50" />
+          <Quote className="w-12 h-12 mx-auto mb-6 opacity-50" aria-hidden="true" />
           <h3 className="text-3xl md:text-5xl font-bold leading-tight mb-8">
             "The New York Times just revolutionized music journalism."
           </h3>
@@ -245,7 +248,7 @@ export default function BieberCaseStudy() {
         </span>
         <h2 className="text-5xl md:text-7xl font-bold text-white inline-flex items-center gap-4">
           Ground Zero{" "}
-          <ArrowUpRight className="w-12 h-12 text-neutral-600 group-hover:text-white transition-colors" />
+          <ArrowUpRight className="w-12 h-12 text-neutral-600 group-hover:text-white transition-colors" aria-hidden="true" />
         </h2>
       </Link>
     </div>

@@ -47,7 +47,11 @@ export default function Navbar() {
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle Menu"
         >
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isOpen ? (
+            <X className="w-6 h-6" aria-hidden="true" />
+          ) : (
+            <Menu className="w-6 h-6" aria-hidden="true" />
+          )}
         </button>
       </nav>
 

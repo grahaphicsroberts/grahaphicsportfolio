@@ -136,7 +136,7 @@ export default function NYTVRPage() {
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           onClick={() => setIsMenuOpen(false)}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
@@ -169,9 +169,9 @@ export default function NYTVRPage() {
           aria-label="Toggle Menu"
         >
           {isMenuOpen ? (
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           ) : (
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" aria-hidden="true" />
           )}
         </button>
       </nav>
@@ -300,7 +300,7 @@ export default function NYTVRPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
             <div className="flex items-center gap-3 mb-6 text-orange-600">
-              <Glasses className="w-6 h-6" />
+              <Glasses className="w-6 h-6" aria-hidden="true" />
               <span className="font-bold tracking-tight uppercase">
                 The Platform
               </span>
@@ -342,7 +342,7 @@ export default function NYTVRPage() {
           {/* Text Left */}
           <div className="order-2 md:order-1">
             <div className="flex items-center gap-3 mb-6 text-blue-500">
-              <Box className="w-6 h-6" />
+              <Box className="w-6 h-6" aria-hidden="true" />
               <span className="font-bold tracking-tight uppercase">
                 UX Design
               </span>
@@ -408,7 +408,7 @@ export default function NYTVRPage() {
                   {/* TRIBECA BADGE */}
                   {project.tribeca && (
                     <div className="flex items-center gap-3 mb-4 text-yellow-500">
-                      <Award className="w-5 h-5" />
+                      <Award className="w-5 h-5" aria-hidden="true" />
                       <span className="font-mono text-xs uppercase tracking-widest">
                         Official Selection: Tribeca Film Festival
                       </span>
@@ -434,7 +434,7 @@ export default function NYTVRPage() {
                       className="inline-flex items-center gap-2 text-white border border-white/20 px-4 py-2 rounded-full hover:bg-white hover:text-black transition-colors text-sm font-mono uppercase tracking-wider"
                     >
                       {project.linkText || "View Project"}{" "}
-                      <ArrowUpRight className="w-4 h-4" />
+                      <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
                     </Link>
                   )}
                 </div>
@@ -470,7 +470,7 @@ export default function NYTVRPage() {
                   <source src={project.video} type="video/mp4" />
                 </video>
                 <div className="absolute top-4 left-4 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-mono text-white border border-white/20 flex items-center gap-2">
-                  <ImageIcon className="w-3 h-3" /> Motion Experience
+                  <ImageIcon className="w-3 h-3" aria-hidden="true" /> Motion Experience
                 </div>
               </div>
 
@@ -479,7 +479,7 @@ export default function NYTVRPage() {
                 <div className="bg-neutral-950 border-x border-b border-neutral-800 p-4 flex flex-wrap items-center gap-6">
                   {project.awards.map((award, aIndex) => (
                     <div key={aIndex} className="flex items-center gap-2">
-                      <Trophy className="w-4 h-4 text-orange-500" />
+                      <Trophy className="w-4 h-4 text-orange-500" aria-hidden="true" />
                       <span className="font-mono text-xs uppercase tracking-wider text-neutral-400">
                         {award}
                       </span>
@@ -494,7 +494,7 @@ export default function NYTVRPage() {
                   {/* Left: The Story */}
                   <div>
                     <div className="flex items-center gap-3 mb-6 text-orange-500">
-                      <Layers className="w-5 h-5" />
+                      <Layers className="w-5 h-5" aria-hidden="true" />
                       <h4 className="font-mono text-sm uppercase tracking-widest">
                         Behind the Scenes
                       </h4>
@@ -538,7 +538,7 @@ export default function NYTVRPage() {
             </p>
           </div>
           <div className="hidden md:flex items-center gap-2 text-neutral-600 font-mono text-xs uppercase tracking-widest">
-            Scroll <ArrowRight className="w-4 h-4" />
+            Scroll <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </div>
         </div>
 
@@ -567,7 +567,7 @@ export default function NYTVRPage() {
                   {film.title}
                 </h4>
                 <div className="flex items-center gap-2 mt-2 text-xs font-mono text-neutral-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-                  Watch <ArrowUpRight className="w-3 h-3" />
+                  Watch <ArrowUpRight className="w-3 h-3" aria-hidden="true" />
                 </div>
               </div>
             </Link>
@@ -621,7 +621,7 @@ export default function NYTVRPage() {
           href="/#work"
           className="inline-flex items-center gap-2 text-neutral-500 hover:text-white transition-colors font-mono text-sm uppercase tracking-widest"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Selected Works
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to Selected Works
         </Link>
       </section>
     </div>

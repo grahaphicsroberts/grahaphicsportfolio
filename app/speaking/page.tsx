@@ -410,7 +410,7 @@ export default function SpeakingPage() {
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           onClick={() => setIsMenuOpen(false)}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
@@ -440,9 +440,9 @@ export default function SpeakingPage() {
           aria-label="Toggle Menu"
         >
           {isMenuOpen ? (
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           ) : (
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" aria-hidden="true" />
           )}
         </button>
       </nav>
@@ -529,7 +529,7 @@ export default function SpeakingPage() {
         {/* --- SECTION: TEACHING --- */}
         <section className="mb-32">
           <div className="flex items-center gap-3 mb-12 text-white border-b border-white/20 pb-4">
-            <Users className="w-6 h-6" />
+            <Users className="w-6 h-6" aria-hidden="true" />
             <h2 className="text-2xl font-bold">Teaching & Academia</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -557,7 +557,7 @@ export default function SpeakingPage() {
                       {item.org}
                     </h3>
                     {item.link && (
-                      <ExternalLink className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" />
+                      <ExternalLink className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" aria-hidden="true" />
                     )}
                   </div>
                   <div className="font-mono text-xs text-neutral-500 uppercase tracking-widest mb-4">
@@ -575,7 +575,7 @@ export default function SpeakingPage() {
         {/* --- SECTION: ERA 1 (Recent) --- */}
         <section>
           <div className="flex items-center gap-3 mb-12 text-white border-b border-white/20 pb-4 sticky top-24 bg-neutral-950 z-20">
-            <Mic className="w-6 h-6" />
+            <Mic className="w-6 h-6" aria-hidden="true" />
             <h2 className="text-2xl font-bold">Recent Engagements</h2>
           </div>
           <div className="space-y-0">
@@ -663,7 +663,7 @@ const EngagementItem = ({
         <span className="text-xl font-medium text-neutral-300 group-hover:text-white transition-colors flex items-center gap-3">
           {event}
           {link && (
-            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-50 transition-opacity" />
+            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-50 transition-opacity" aria-hidden="true" />
           )}
         </span>
       </div>
@@ -672,7 +672,7 @@ const EngagementItem = ({
           {role}
         </span>
         <span className="flex items-center gap-2 w-48 justify-end">
-          <MapPin className="w-3 h-3" />
+          <MapPin className="w-3 h-3" aria-hidden="true" />
           {location}
         </span>
       </div>

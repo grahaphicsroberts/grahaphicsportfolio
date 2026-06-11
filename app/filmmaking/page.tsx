@@ -67,7 +67,7 @@ export default function FilmmakingPage() {
           href="/"
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
         <span className="hidden md:block font-mono text-sm opacity-50">
@@ -191,7 +191,7 @@ export default function FilmmakingPage() {
           href="/#work"
           className="inline-flex items-center gap-2 text-neutral-500 hover:text-white transition-colors font-mono text-sm uppercase tracking-widest"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Selected Works
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to Selected Works
         </Link>
       </section>
     </div>

@@ -72,7 +72,7 @@ export default function ImmersiveWebPage() {
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           onClick={() => setIsMenuOpen(false)}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
@@ -105,9 +105,9 @@ export default function ImmersiveWebPage() {
           aria-label="Toggle Menu"
         >
           {isMenuOpen ? (
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           ) : (
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" aria-hidden="true" />
           )}
         </button>
       </nav>
@@ -221,7 +221,7 @@ export default function ImmersiveWebPage() {
               {/* Award Strip */}
               <div className="flex flex-wrap gap-4 mb-6">
                 <div className="flex items-center gap-2 px-3 py-1 bg-yellow-900/20 border border-yellow-700/50 rounded-full text-yellow-500 text-xs font-mono uppercase tracking-wide">
-                  <Trophy className="w-3 h-3" /> Pulitzer Prize Winner
+                  <Trophy className="w-3 h-3" aria-hidden="true" /> Pulitzer Prize Winner
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1 bg-neutral-800 border border-neutral-700 rounded-full text-neutral-400 text-xs font-mono uppercase tracking-wide">
                   Peabody Award
@@ -271,7 +271,7 @@ export default function ImmersiveWebPage() {
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-full font-mono text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors mb-8"
               >
                 <span>Launch Experience</span>
-                <ArrowUpRight className="w-4 h-4" />
+                <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
               </a>
 
               <div className="aspect-video bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800">
@@ -337,7 +337,7 @@ export default function ImmersiveWebPage() {
               <div className="flex flex-wrap gap-4 mb-6">
                 {/* NEW MOMA BADGE */}
                 <div className="flex items-center gap-2 px-3 py-1 bg-blue-900/20 border border-blue-700/50 rounded-full text-blue-400 text-xs font-mono uppercase tracking-wide">
-                  <Landmark className="w-3 h-3" /> MoMA Permanent Collection
+                  <Landmark className="w-3 h-3" aria-hidden="true" /> MoMA Permanent Collection
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1 bg-neutral-800 border border-neutral-700 rounded-full text-neutral-400 text-xs font-mono uppercase tracking-wide">
                   Malofiej Gold
@@ -398,7 +398,7 @@ export default function ImmersiveWebPage() {
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-full font-mono text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors"
                 >
                   <span>Launch Experience</span>
-                  <ArrowUpRight className="w-4 h-4" />
+                  <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
                 </a>
               </div>
             </div>
@@ -488,7 +488,7 @@ export default function ImmersiveWebPage() {
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-full font-mono text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors mb-8"
               >
                 <span>Launch Experience</span>
-                <ArrowUpRight className="w-4 h-4" />
+                <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
               </a>
 
               <div className="aspect-video bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800">
@@ -546,7 +546,7 @@ export default function ImmersiveWebPage() {
                   className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                 />
                 <div className="absolute top-4 right-4 bg-black/60 backdrop-blur p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <ArrowUpRight className="w-4 h-4 text-white" />
+                  <ArrowUpRight className="w-4 h-4 text-white" aria-hidden="true" />
                 </div>
               </div>
               <h3 className="text-white font-bold text-lg group-hover:text-cyan-400 transition-colors">
@@ -566,7 +566,7 @@ export default function ImmersiveWebPage() {
           href="/#work"
           className="inline-flex items-center gap-2 text-neutral-500 hover:text-white transition-colors font-mono text-sm uppercase tracking-widest"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Selected Works
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to Selected Works
         </Link>
       </section>
     </div>

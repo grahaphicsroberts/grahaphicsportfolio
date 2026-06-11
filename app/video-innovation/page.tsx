@@ -120,7 +120,7 @@ export default function VideoInnovationPage() {
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           onClick={() => setIsMenuOpen(false)}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
@@ -153,9 +153,9 @@ export default function VideoInnovationPage() {
           aria-label="Toggle Menu"
         >
           {isMenuOpen ? (
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           ) : (
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" aria-hidden="true" />
           )}
         </button>
       </nav>
@@ -313,7 +313,7 @@ export default function VideoInnovationPage() {
                       target="_blank"
                       className="inline-flex items-center gap-2 text-white border border-white/20 px-4 py-2 rounded-full hover:bg-white hover:text-black transition-colors text-sm font-mono uppercase tracking-wider"
                     >
-                      Watch Film <ArrowUpRight className="w-4 h-4" />
+                      Watch Film <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
                     </Link>
                   )}
                 </div>
@@ -352,7 +352,7 @@ export default function VideoInnovationPage() {
                   <source src={project.video} type="video/mp4" />
                 </video>
                 <div className="absolute top-4 left-4 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-mono text-white border border-white/20 flex items-center gap-2">
-                  <Video className="w-3 h-3" /> Motion Analysis
+                  <Video className="w-3 h-3" aria-hidden="true" /> Motion Analysis
                 </div>
               </div>
 
@@ -361,7 +361,7 @@ export default function VideoInnovationPage() {
                 <div className="bg-neutral-950 border-x border-b border-neutral-800 p-4 flex flex-wrap items-center gap-6">
                   {project.awards.map((award, aIndex) => (
                     <div key={aIndex} className="flex items-center gap-2">
-                      <Trophy className="w-4 h-4 text-orange-500" />
+                      <Trophy className="w-4 h-4 text-orange-500" aria-hidden="true" />
                       <span className="font-mono text-xs uppercase tracking-wider text-neutral-400">
                         {award}
                       </span>
@@ -376,7 +376,7 @@ export default function VideoInnovationPage() {
                   {/* Story */}
                   <div>
                     <div className="flex items-center gap-3 mb-6 text-orange-500">
-                      <Layers className="w-5 h-5" />
+                      <Layers className="w-5 h-5" aria-hidden="true" />
                       <h4 className="font-mono text-sm uppercase tracking-widest">
                         The Process
                       </h4>
@@ -420,7 +420,7 @@ export default function VideoInnovationPage() {
             </p>
           </div>
           <div className="hidden md:flex items-center gap-2 text-neutral-600 font-mono text-xs uppercase tracking-widest">
-            Scroll <ArrowRight className="w-4 h-4" />
+            Scroll <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </div>
         </div>
 
@@ -463,7 +463,7 @@ export default function VideoInnovationPage() {
                   {/* Only show "Watch" if there is a link */}
                   {film.link && (
                     <div className="flex items-center gap-2 mt-2 text-xs font-mono text-neutral-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-                      Watch <ArrowUpRight className="w-3 h-3" />
+                      Watch <ArrowUpRight className="w-3 h-3" aria-hidden="true" />
                     </div>
                   )}
                 </div>
@@ -479,7 +479,7 @@ export default function VideoInnovationPage() {
           href="/#work"
           className="inline-flex items-center gap-2 text-neutral-500 hover:text-white transition-colors font-mono text-sm uppercase tracking-widest"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Selected Works
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to Selected Works
         </Link>
       </section>
     </div>

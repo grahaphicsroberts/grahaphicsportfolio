@@ -53,7 +53,7 @@ export default function GoogleTrendsPage() {
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           onClick={() => setIsMenuOpen(false)}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
@@ -86,9 +86,9 @@ export default function GoogleTrendsPage() {
           aria-label="Toggle Menu"
         >
           {isMenuOpen ? (
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           ) : (
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" aria-hidden="true" />
           )}
         </button>
       </nav>
@@ -224,7 +224,7 @@ export default function GoogleTrendsPage() {
 
               {/* Award Element */}
               <div className="flex items-center gap-2 text-yellow-500 mb-6">
-                <Award className="w-5 h-5" />
+                <Award className="w-5 h-5" aria-hidden="true" />
                 <span className="font-mono text-xs uppercase tracking-widest">
                   Anthem Award Gold Winner
                 </span>
@@ -245,7 +245,7 @@ export default function GoogleTrendsPage() {
                 <Monitor className="w-4 h-4" /> Web App
               </span>
               <span className="flex items-center gap-2">
-                <Smartphone className="w-4 h-4" /> Responsive
+                <Smartphone className="w-4 h-4" aria-hidden="true" /> Responsive
               </span>
             </div>
           </div>
@@ -306,8 +306,8 @@ export default function GoogleTrendsPage() {
                         9:41
                       </span>
                       <div className="flex gap-1 items-center text-black opacity-50">
-                        <Wifi className="w-3 h-3" />
-                        <BatteryMedium className="w-3 h-3" />
+                        <Wifi className="w-3 h-3" aria-hidden="true" />
+                        <BatteryMedium className="w-3 h-3" aria-hidden="true" />
                       </div>
                     </div>
 
@@ -333,7 +333,7 @@ export default function GoogleTrendsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-yellow-400" />
+                  <Sparkles className="w-5 h-5 text-yellow-400" aria-hidden="true" />
                   <span className="font-mono text-xs text-yellow-400 uppercase tracking-widest">
                     Innovation Spotlight
                   </span>
@@ -364,15 +364,15 @@ export default function GoogleTrendsPage() {
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-full font-mono text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors mb-8"
                 >
                   <span>Read the Story</span>
-                  <ArrowUpRight className="w-4 h-4" />
+                  <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
                 </a>
 
                 <div className="flex flex-wrap gap-3">
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-black/50 border border-white/10 rounded-full text-xs font-mono text-neutral-300">
-                    <Smartphone className="w-3 h-3" /> Android 2025
+                    <Smartphone className="w-3 h-3" aria-hidden="true" /> Android 2025
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-black/50 border border-white/10 rounded-full text-xs font-mono text-neutral-300">
-                    <Type className="w-3 h-3" /> Variable Type
+                    <Type className="w-3 h-3" aria-hidden="true" /> Variable Type
                   </div>
                 </div>
               </div>
@@ -489,7 +489,7 @@ export default function GoogleTrendsPage() {
               </div>
               <div>
                 <h4 className="text-white font-bold mb-2 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-neutral-500" /> Interface
+                  <Layers className="w-4 h-4 text-neutral-500" aria-hidden="true" /> Interface
                   Design
                 </h4>
                 <p className="text-neutral-400 text-sm leading-relaxed">
@@ -518,7 +518,7 @@ export default function GoogleTrendsPage() {
               </h2>
               {/* Concept Tag */}
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-900/20 border border-purple-500/30 rounded-full text-purple-400 text-xs font-mono uppercase tracking-wide mb-6">
-                <LayoutTemplate className="w-3 h-3" /> Strategic Concept /
+                <LayoutTemplate className="w-3 h-3" aria-hidden="true" /> Strategic Concept /
                 Ideation
               </div>
               <p className="text-xl text-neutral-400 max-w-xl leading-relaxed">
@@ -534,7 +534,7 @@ export default function GoogleTrendsPage() {
                 <Search className="w-4 h-4" /> Data Product
               </span>
               <span className="flex items-center gap-2">
-                <Share2 className="w-4 h-4" /> Social
+                <Share2 className="w-4 h-4" aria-hidden="true" /> Social
               </span>
             </div>
           </div>
@@ -559,7 +559,7 @@ export default function GoogleTrendsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mb-24">
             <div>
               <div className="flex items-center gap-3 mb-6 text-purple-400">
-                <FileBox className="w-6 h-6" />
+                <FileBox className="w-6 h-6" aria-hidden="true" />
                 <h3 className="font-bold tracking-tight uppercase">
                   The Atomic Unit
                 </h3>
@@ -603,7 +603,7 @@ export default function GoogleTrendsPage() {
             </div>
             <div className="order-1 md:order-2">
               <div className="flex items-center gap-3 mb-6 text-purple-400">
-                <Edit3 className="w-6 h-6" />
+                <Edit3 className="w-6 h-6" aria-hidden="true" />
                 <h3 className="font-bold tracking-tight uppercase">
                   Trends Studio
                 </h3>
@@ -632,7 +632,7 @@ export default function GoogleTrendsPage() {
           href="/#work"
           className="inline-flex items-center gap-2 text-neutral-500 hover:text-white transition-colors font-mono text-sm uppercase tracking-widest"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Selected Works
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to Selected Works
         </Link>
       </section>
     </div>

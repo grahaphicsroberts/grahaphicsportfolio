@@ -32,7 +32,7 @@ export default function SnowfallCaseStudy() {
           href="/"
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
         <span className="hidden md:block font-mono text-sm opacity-50">
@@ -153,7 +153,7 @@ export default function SnowfallCaseStudy() {
       <section className="py-32 px-6 md:px-24 bg-white text-black">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-6 text-blue-600">
-            <Layers className="w-6 h-6" />
+            <Layers className="w-6 h-6" aria-hidden="true" />
             <span className="font-bold tracking-tight uppercase">
               The Logic
             </span>
@@ -208,7 +208,7 @@ export default function SnowfallCaseStudy() {
           </span>
           <h2 className="text-5xl md:text-7xl font-bold text-neutral-700 group-hover:text-white transition-colors flex items-center gap-6">
             Google Brand Studio{" "}
-            <ArrowUpRight className="w-12 h-12 md:w-20 md:h-20" />
+            <ArrowUpRight className="w-12 h-12 md:w-20 md:h-20" aria-hidden="true" />
           </h2>
         </Link>
       </section>

@@ -587,7 +587,7 @@ export default function AwardsPage() {
           className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           onClick={() => setIsMenuOpen(false)}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
           <span className="font-bold tracking-tight">HOME</span>
         </Link>
 
@@ -617,9 +617,9 @@ export default function AwardsPage() {
           aria-label="Toggle Menu"
         >
           {isMenuOpen ? (
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           ) : (
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" aria-hidden="true" />
           )}
         </button>
       </nav>
@@ -693,7 +693,7 @@ export default function AwardsPage() {
         {/* Major Honors Grid */}
         <section className="mb-32">
           <div className="flex items-center justify-center gap-3 mb-12 text-yellow-500">
-            <Trophy className="w-6 h-6" />
+            <Trophy className="w-6 h-6" aria-hidden="true" />
             <h2 className="text-sm font-mono uppercase tracking-widest">
               Major Honors
             </h2>
@@ -730,7 +730,7 @@ export default function AwardsPage() {
                   </div>
                   {item.link && (
                     <div className="mt-4 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ExternalLink className="w-4 h-4 text-neutral-600" />
+                      <ExternalLink className="w-4 h-4 text-neutral-600" aria-hidden="true" />
                     </div>
                   )}
                 </Wrapper>
@@ -742,7 +742,7 @@ export default function AwardsPage() {
         {/* The Archive List */}
         <section>
           <div className="flex items-center gap-3 mb-12 text-neutral-500 border-b border-neutral-800 pb-4">
-            <Award className="w-6 h-6" />
+            <Award className="w-6 h-6" aria-hidden="true" />
             <h2 className="text-sm font-mono uppercase tracking-widest">
               Complete Archive
             </h2>
@@ -791,7 +791,7 @@ export default function AwardsPage() {
                         <div className="mt-2 md:mt-0 font-mono text-xs text-neutral-500 uppercase tracking-wider shrink-0 flex items-center gap-2">
                           {award.detail}
                           {award.link && (
-                            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                           )}
                         </div>
                       </Wrapper>
