@@ -157,9 +157,6 @@ export default function GoogleTrendsPage() {
             <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md">
               Google
             </span>
-            <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md">
-              2019 — 2023
-            </span>
           </div>
           <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-[0.9]">
             Visualizing the <br /> World&apos;s Curiosity

@@ -224,9 +224,6 @@ export default function VideoInnovationPage() {
             <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md">
               The New York Times
             </span>
-            <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md">
-              2016 — 2020
-            </span>
           </div>
           <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-[0.9]">
             Innovation in <br /> Video & Motion

@@ -60,9 +60,6 @@ export default function BieberCaseStudy() {
             <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md">
               The New York Times
             </span>
-            <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md">
-              2015
-            </span>
           </div>
           <h1 className="text-6xl md:text-9xl font-bold tracking-tighter text-white mb-4">
             MAKING A HIT

@@ -9,7 +9,6 @@ const WORKS = [
   {
     title: "Health & BioTech Visualization",
     company: "Havas",
-    year: "2023 — 2026",
     image: "/havas-hero.jpg",
     link: "/havas",
   },
@@ -17,14 +16,12 @@ const WORKS = [
   {
     title: "Data Storytelling & Product Design",
     company: "Google / Brand Studio",
-    year: "2019 — 2023",
     image: "/google-hero.jpg",
     link: "/google-trends",
   },
   {
     title: "Spatial Computing / AR & Product Design",
     company: "The New York Times",
-    year: "2014 — 2019",
     image: "/AR-hero.jpg",
     link: "/nyt-ar",
     featured: true,
@@ -32,7 +29,6 @@ const WORKS = [
   {
     title: "VR Filmmaking & 3D Interface Design",
     company: "The New York Times",
-    year: "2016 — 2019",
     image: "/NYTVR_studioimage.png",
     link: "/nyt-vr",
     featured: true,
@@ -40,7 +36,6 @@ const WORKS = [
   {
     title: "Immersive Storytelling & Information Design",
     company: "The New York Times",
-    year: "2012 — 2019",
     image: "/immersive-hero.jpg",
     link: "/immersive-web",
     featured: true,
@@ -48,7 +43,6 @@ const WORKS = [
   {
     title: "Motion Design & Data Cinema",
     company: "The New York Times",
-    year: "2006 — 2019",
     image: "/video-hero.jpg",
     link: "/video-innovation",
     featured: true,
@@ -124,14 +118,9 @@ export default function SelectedWorks() {
 
             {/* Typography */}
             <div className="border-b border-neutral-800 pb-4 group-hover:border-white/50 transition-colors">
-              <div className="mb-2 flex items-baseline justify-between gap-4">
-                <p className="min-w-0 text-neutral-500 font-mono text-xs uppercase tracking-widest">
-                  {work.company}
-                </p>
-                <span className="shrink-0 text-neutral-600 font-mono text-sm">
-                  {work.year}
-                </span>
-              </div>
+              <p className="mb-2 text-neutral-500 font-mono text-xs uppercase tracking-widest">
+                {work.company}
+              </p>
               <h3 className="text-2xl font-bold leading-tight text-neutral-200 group-hover:text-white transition-colors">
                 <WorkTitle title={work.title} />
               </h3>
