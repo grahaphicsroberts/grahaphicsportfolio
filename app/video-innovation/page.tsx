@@ -424,7 +424,7 @@ export default function VideoInnovationPage() {
         <div className="flex gap-6 overflow-x-auto pb-12 px-6 md:px-12 scrollbar-hide">
           {ARCHIVE.map((film, i) => {
             // CONDITIONAL RENDERING: Link vs Div
-            const Wrapper = film.link ? Link : "div";
+            const Wrapper: React.ElementType = film.link ? Link : "div";
             const props = film.link
               ? { href: film.link, target: "_blank" }
               : {};

@@ -535,7 +535,7 @@ export default function SpeakingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {TEACHING.map((item, i) => {
               // Wrapper logic for teaching items
-              const Wrapper = item.link ? Link : "div";
+              const Wrapper: React.ElementType = item.link ? Link : "div";
               const props = item.link
                 ? {
                     href: item.link,
@@ -644,7 +644,7 @@ const EngagementItem = ({
   role: string;
   link?: string;
 }) => {
-  const Wrapper = link ? Link : "div";
+  const Wrapper: React.ElementType = link ? Link : "div";
   const props = link
     ? { href: link, target: "_blank", rel: "noopener noreferrer" }
     : {};

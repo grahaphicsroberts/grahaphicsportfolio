@@ -702,7 +702,7 @@ export default function AwardsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {MAJOR_HONORS.map((item, i) => {
               // Conditional wrapper logic
-              const Wrapper = item.link ? Link : "div";
+              const Wrapper: React.ElementType = item.link ? Link : "div";
               const props = item.link
                 ? {
                     href: item.link,
@@ -758,7 +758,7 @@ export default function AwardsPage() {
                 </div>
                 <div className="md:col-span-10 space-y-4">
                   {group.awards.map((award, j) => {
-                    const Wrapper = award.link ? Link : "div";
+                    const Wrapper: React.ElementType = award.link ? Link : "div";
                     const props = award.link
                       ? {
                           href: award.link,

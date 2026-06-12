@@ -15,6 +15,9 @@ import {
   Award,
   Menu,
   X,
+  Hexagon,
+  Quote,
+  Glasses,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -442,6 +445,176 @@ export default function NYTARPage() {
               )}
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* --- SPATIAL COMPUTING / MAGIC LEAP --- */}
+      <section className="relative py-32 overflow-hidden border-y border-indigo-500/20 bg-gradient-to-b from-neutral-950 via-indigo-900/50 to-neutral-950">
+        {/* Color-block ambient accent */}
+        <div
+          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/40 to-transparent"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none"
+          aria-hidden="true"
+        />
+
+        {/* Centered Header */}
+        <div className="relative max-w-4xl mx-auto text-center px-6">
+          <Hexagon className="w-10 h-10 text-indigo-400 mx-auto mb-6" aria-hidden="true" />
+          <p className="font-mono text-xs uppercase tracking-widest text-indigo-300/80 mb-4">
+            Spatial Computing / Magic Leap
+          </p>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Designing the Spatial Article
+          </h2>
+
+          {/* Metadata Tags */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {[
+              "Hardware: Magic Leap One",
+              "Distribution: Helio Browser",
+              "Capture: 700-pt Photogrammetry",
+            ].map((tag) => (
+              <span
+                key={tag}
+                className="px-3 py-1 bg-indigo-500/10 border border-indigo-400/20 rounded-full font-mono text-xs uppercase tracking-wider text-indigo-200/80"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Short lead-in before the visual */}
+          <p className="text-lg md:text-xl text-neutral-400 leading-relaxed max-w-2xl mx-auto">
+            Reimagining a New York Times article as a fully spatial experience —
+            built side-by-side with Magic Leap and launched as the very first
+            news story on the headset.
+          </p>
+        </div>
+
+        {/* Centered Hero Video — screen capture from the headset */}
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12 mt-20">
+          {/* Hologram ambient glow */}
+          <div
+            className="absolute -inset-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 blur-3xl pointer-events-none"
+            aria-hidden="true"
+          />
+          <figure className="relative">
+            {/* Headset viewport chrome */}
+            <div className="relative overflow-hidden rounded-[2rem] border border-indigo-400/30 bg-black shadow-2xl shadow-indigo-950/50">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full aspect-video object-cover bg-black"
+              >
+                <source src="/MagicLeap_Guatemala.mp4" type="video/mp4" />
+              </video>
+
+              {/* Top HUD status bar */}
+              <div className="absolute top-0 inset-x-0 z-20 flex items-center justify-between px-5 py-3 bg-gradient-to-b from-black/70 to-transparent text-[11px] md:text-xs font-mono uppercase tracking-wider text-neutral-200 pointer-events-none">
+                <div className="flex items-center gap-2">
+                  <Glasses className="w-4 h-4 text-indigo-400" aria-hidden="true" />
+                  <span>Magic Leap One · Creator Edition</span>
+                </div>
+                <div className="flex items-center gap-2 text-indigo-200">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" aria-hidden="true" />
+                  <span>Live Screen Capture</span>
+                </div>
+              </div>
+
+              {/* AR HUD corner brackets */}
+              <div className="absolute inset-4 md:inset-6 z-10 pointer-events-none" aria-hidden="true">
+                <span className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-indigo-400/60 rounded-tl-md" />
+                <span className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-indigo-400/60 rounded-tr-md" />
+                <span className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-indigo-400/60 rounded-bl-md" />
+                <span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-indigo-400/60 rounded-br-md" />
+              </div>
+            </div>
+            <figcaption className="mt-4 text-center text-sm font-mono uppercase tracking-wider text-neutral-500">
+              The reader&apos;s view through the Magic Leap One Creator Edition
+              headset
+            </figcaption>
+          </figure>
+        </div>
+
+        {/* Narrative copy + speaking image (two-column for a more dynamic feel) */}
+        <div className="max-w-6xl mx-auto px-6 lg:px-12 mt-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Speaking image */}
+            <figure className="order-2 lg:order-1">
+              <img
+                src="/GuatemalaTalk.jpeg"
+                alt="Graham Roberts presenting the Guatemala spatial article on stage at the XR For Change Summit in 2018"
+                className="w-full rounded-[2rem] border border-neutral-800 object-cover"
+              />
+              <figcaption className="mt-4 text-sm font-mono uppercase tracking-wider text-neutral-500">
+                Presenting the project at the XR For Change Summit, 2018
+              </figcaption>
+            </figure>
+
+            {/* Narrative copy */}
+            <div className="order-1 lg:order-2 prose prose-invert prose-lg text-neutral-400">
+              <p>
+                To explore the future of immersive reading, we brought a
+                specialized team down to Magic Leap&apos;s headquarters in
+                Florida. Working side-by-side with their engineering and design
+                teams, we investigated what a New York Times article might look
+                like as a fully spatial experience.
+              </p>
+              <p>
+                We chose to prototype a breaking news event: the devastating 2018
+                volcanic eruption in Guatemala. We trained a stringer
+                photographer on the ground to capture 700 precise photos of a
+                truck buried in ash, which we then processed into a 1:1 scale 3D
+                model using photogrammetry.
+              </p>
+              <p>
+                Launching as the very first news story available on the Magic
+                Leap One headset, the design successfully mixed the traditional
+                reading experience with 3D exploration, utilizing the physical
+                space around the reader to convey the immense scale of the
+                disaster.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Press Quotes Grid */}
+        <div className="max-w-6xl mx-auto px-6 lg:px-12 mt-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                quote:
+                  "A glimpse into the future of journalism, using the physical space around you as a canvas.",
+                publication: "The Verge",
+              },
+              {
+                quote:
+                  "The New York Times is defining what spatial storytelling looks like on Magic Leap.",
+                publication: "Fast Company",
+              },
+              {
+                quote:
+                  "Mixing breaking news with spatial computing to convey the immense scale of a disaster.",
+                publication: "TechCrunch",
+              },
+            ].map(({ quote, publication }) => (
+              <div
+                key={publication}
+                className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-8"
+              >
+                <Quote className="w-5 h-5 text-neutral-600 mb-4" aria-hidden="true" />
+                <p className="text-lg text-neutral-300 italic">{quote}</p>
+                <p className="text-sm font-mono uppercase text-neutral-500 mt-4">
+                  {publication}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
