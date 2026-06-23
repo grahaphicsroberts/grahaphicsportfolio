@@ -386,12 +386,20 @@ function EngineeringDiagram() {
   );
 }
 
-// --- PHONE 3D MODEL: stacked depth + optional screen overlay ---
+// --- PHONE 3D MODEL: stacked depth + crossfading screen ---
+const PHONE_SCREEN_A = "/Apple_AR_productDesign.png";
+const PHONE_SCREEN_B = "/Apple_AR_productDesign_2.png";
+const PHONE_CROSSFADE_STEP = 2; // step 3 (0-indexed): switch to screen B
+
 function PhoneModel({
+  progress,
+  total,
   onMouseMove,
   onMouseLeave,
   children,
 }: {
+  progress: MotionValue<number>;
+  total: number;
   onMouseMove?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onMouseLeave?: () => void;
   children?: React.ReactNode;
@@ -407,6 +415,20 @@ function PhoneModel({
     damping: 18,
   });
 
+  const slice = 1 / total;
+  const crossfadeAt = (PHONE_CROSSFADE_STEP / total);
+  const fade = slice * 0.35;
+  const screenAOpacity = useTransform(
+    progress,
+    [0, crossfadeAt - fade / 2, crossfadeAt + fade / 2, 1],
+    [1, 1, 0, 0]
+  );
+  const screenBOpacity = useTransform(
+    progress,
+    [0, crossfadeAt - fade / 2, crossfadeAt + fade / 2, 1],
+    [0, 0, 1, 1]
+  );
+
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     px.set((e.clientX - rect.left) / rect.width - 0.5);
@@ -418,6 +440,8 @@ function PhoneModel({
     py.set(0);
     onMouseLeave?.();
   };
+
+  const corner = "rounded-[17px] md:rounded-[21px]";
 
   return (
     <div
@@ -441,7 +465,7 @@ function PhoneModel({
               <div
                 key={k}
                 aria-hidden="true"
-                className="absolute inset-0 rounded-[17px] md:rounded-[21px]"
+                className={`absolute inset-0 ${corner}`}
                 style={{
                   transform: `translateZ(-${(k + 1) * 1.1}px)`,
                   background:
@@ -450,16 +474,73 @@ function PhoneModel({
               />
             ))}
             <div className="relative">
-              <img
-                src="/Apple_AR_productDesign.png"
-                alt="AR product design mockup: a phone showing an AR mode toggle, a 3D cube in the camera view, and a 'Tap to place' prompt"
-                className="relative block w-full h-auto rounded-[17px] md:rounded-[21px] select-none"
+              <motion.img
+                src={PHONE_SCREEN_A}
+                alt="AR product design mockup: early UI with AR mode toggle and scale controls"
+                style={{ opacity: screenAOpacity }}
+                className={`absolute inset-0 block h-full w-full ${corner} select-none`}
+                draggable={false}
+              />
+              <motion.img
+                src={PHONE_SCREEN_B}
+                alt="AR product design mockup: shipped minimal interface with essential controls"
+                style={{ opacity: screenBOpacity }}
+                className={`relative block w-full h-auto ${corner} select-none`}
                 draggable={false}
               />
               {children}
             </div>
           </div>
         </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
+function PhoneLeftPanel({
+  progress,
+  total,
+}: {
+  progress: MotionValue<number>;
+  total: number;
+}) {
+  const slice = 1 / total;
+  const crossfadeAt = PHONE_CROSSFADE_STEP / total;
+  const fade = slice * 0.35;
+  const initialOpacity = useTransform(
+    progress,
+    [0, crossfadeAt - fade / 2, crossfadeAt + fade / 2, 1],
+    [1, 1, 0, 0]
+  );
+  const shippedOpacity = useTransform(
+    progress,
+    [0, crossfadeAt - fade / 2, crossfadeAt + fade / 2, 1],
+    [0, 0, 1, 1]
+  );
+
+  return (
+    <div className="relative z-10 w-full min-h-[5rem] md:min-h-[7rem] pointer-events-none">
+      <motion.div
+        style={{ opacity: initialOpacity }}
+        className="absolute inset-0 flex items-center justify-center px-6"
+      >
+        <p className="text-xl md:text-3xl font-bold text-white tracking-tight">
+          Initial UI
+        </p>
+      </motion.div>
+      <motion.div
+        style={{ opacity: shippedOpacity }}
+        className="absolute inset-0 flex items-center justify-center px-6"
+      >
+        <div className="w-full max-w-sm text-left">
+          <p className="text-xl md:text-2xl font-bold text-white tracking-tight mb-3">
+            The inevitable interface
+          </p>
+          <p className="text-sm md:text-base text-neutral-400 leading-relaxed">
+            Reduced to the absolute essential. An interface that vanishes,
+            allowing the spatial content to hold the user&apos;s complete focus.
+          </p>
+        </div>
       </motion.div>
     </div>
   );
@@ -525,6 +606,44 @@ function PhoneHighlightRing({
   );
 }
 
+function PhoneFrostedGlow({
+  progress,
+  blockIndex,
+  total,
+}: {
+  progress: MotionValue<number>;
+  blockIndex: number;
+  total: number;
+}) {
+  const slice = 1 / total;
+  const start = blockIndex * slice;
+  const end = start + slice;
+  const fade = slice * 0.3;
+  const opacity = useTransform(
+    progress,
+    [start, start + fade, end - fade, end],
+    [0, 1, 1, 0]
+  );
+
+  return (
+    <motion.div
+      style={{ opacity }}
+      className="absolute inset-0 overflow-hidden rounded-[17px] md:rounded-[21px] pointer-events-none"
+      aria-hidden="true"
+    >
+      {/* Semi-transparent sky-blue wash */}
+      <div className="absolute inset-0 bg-sky-400/20" />
+
+      {/* Soft pulsing blue luminance — no stroke */}
+      <motion.div
+        animate={{ opacity: [0.45, 0.75, 0.45] }}
+        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0 bg-sky-500/18 shadow-[0_0_32px_rgba(56,189,248,0.55),inset_0_0_44px_rgba(56,189,248,0.22)]"
+      />
+    </motion.div>
+  );
+}
+
 // --- PHONE SCROLLYTELLING: sticky phone with annotated text blocks ---
 const PHONE_BLOCKS: AnnotatedScrollBlock[] = [
   {
@@ -535,6 +654,17 @@ const PHONE_BLOCKS: AnnotatedScrollBlock[] = [
     header: "SCALE AND MOVE CONTROLS",
     body: "We also experimented with controls that allowed a user to move and scale the object in space.",
   },
+  {
+    body: "The shipped design was about maximizing simplicity and a UI that mostly got out of the way, while still providing the necessary functionality.",
+  },
+  {
+    header: "FROSTED WINDOW AESTHETIC",
+    body: "Key elements were getting the frosted window aesthetic dialed in just right, and editing and testing simple prompt language.",
+  },
+  { body: "" },
+  { body: "" },
+  { body: "" },
+  { body: "" },
 ];
 
 function PhoneScrollytelling() {
@@ -559,14 +689,20 @@ function PhoneScrollytelling() {
       className="relative bg-black"
       style={{ height: `${(PHONE_BLOCKS.length + 1) * 100}vh` }}
     >
-      <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center bg-black px-6">
+      <div className="sticky top-0 h-screen overflow-hidden grid w-full grid-cols-[1fr_auto_1fr] items-center bg-black px-6">
         {/* Ambient glow */}
         <div
           className="absolute left-1/2 top-1/2 h-[70%] w-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500/15 blur-3xl"
           aria-hidden="true"
         />
 
-        <PhoneModel>
+        {/* Left panel — crossfades at step 3 */}
+        <PhoneLeftPanel
+          progress={scrollYProgress}
+          total={PHONE_BLOCKS.length}
+        />
+
+        <PhoneModel progress={scrollYProgress} total={PHONE_BLOCKS.length}>
           <PhoneHighlightRing
             progress={scrollYProgress}
             blockIndex={0}
@@ -581,7 +717,15 @@ function PhoneScrollytelling() {
             side="right"
             shape="circle"
           />
+          <PhoneFrostedGlow
+            progress={scrollYProgress}
+            blockIndex={3}
+            total={PHONE_BLOCKS.length}
+          />
         </PhoneModel>
+
+        {/* Balance column (scroll blocks overlay on the right) */}
+        <div aria-hidden="true" />
 
         {PHONE_BLOCKS.map((block, i) => (
           <AnnotatedScrollBlock
