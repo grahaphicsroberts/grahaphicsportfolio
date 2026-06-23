@@ -118,6 +118,56 @@ function ScrollBlock({
   );
 }
 
+type AnnotatedScrollBlock = {
+  header?: string;
+  body: string;
+};
+
+function AnnotatedScrollBlock({
+  header,
+  body,
+  index,
+  total,
+  progress,
+}: AnnotatedScrollBlock & {
+  index: number;
+  total: number;
+  progress: MotionValue<number>;
+}) {
+  const slice = 1 / total;
+  const start = index * slice;
+  const end = start + slice;
+  const fade = slice * 0.3;
+  const opacity = useTransform(
+    progress,
+    [start, start + fade, end - fade, end],
+    [0, 1, 1, 0]
+  );
+  const y = useTransform(progress, [start, end], ["45vh", "-45vh"]);
+
+  if (!header && !body) return null;
+
+  return (
+    <motion.div
+      style={{ opacity, y }}
+      className="absolute inset-0 flex items-center justify-end px-6 lg:pr-[6%] pointer-events-none"
+    >
+      <div className="w-full max-w-sm rounded-2xl bg-black/50 backdrop-blur-md px-7 py-6 border border-white/10">
+        {header ? (
+          <p className="text-xs font-mono uppercase tracking-widest text-sky-400 mb-3">
+            {header}
+          </p>
+        ) : null}
+        {body ? (
+          <p className="text-lg md:text-xl font-medium leading-relaxed text-white">
+            {body}
+          </p>
+        ) : null}
+      </div>
+    </motion.div>
+  );
+}
+
 function PrototypeScrollytelling() {
   const ref = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -336,168 +386,230 @@ function EngineeringDiagram() {
   );
 }
 
-// --- FLOATING PHONE: 3D-tilt phone that reacts to mouse + scroll ---
-const PHONE_DEPTH = 22; // visible slab thickness (px)
-
-function FloatingPhone() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-  // Scroll drives a gentle parallax tilt + vertical drift.
-  const scrollRotateY = useTransform(scrollYProgress, [0, 1], [18, -18]);
-  const scrollY = useTransform(scrollYProgress, [0, 1], [50, -50]);
-
-  // Pointer position (-0.5..0.5) drives the interactive tilt.
+// --- PHONE 3D MODEL: stacked depth + optional screen overlay ---
+function PhoneModel({
+  onMouseMove,
+  onMouseLeave,
+  children,
+}: {
+  onMouseMove?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onMouseLeave?: () => void;
+  children?: React.ReactNode;
+}) {
   const px = useMotionValue(0);
   const py = useMotionValue(0);
-  const rotX = useSpring(useTransform(py, [-0.5, 0.5], [16, -16]), {
+  const rotX = useSpring(useTransform(py, [-0.5, 0.5], [14, -14]), {
     stiffness: 150,
     damping: 18,
   });
-  const rotY = useSpring(useTransform(px, [-0.5, 0.5], [-22, 22]), {
+  const rotY = useSpring(useTransform(px, [-0.5, 0.5], [-18, 18]), {
     stiffness: 150,
     damping: 18,
   });
 
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = ref.current?.getBoundingClientRect();
-    if (!rect) return;
+    const rect = e.currentTarget.getBoundingClientRect();
     px.set((e.clientX - rect.left) / rect.width - 0.5);
     py.set((e.clientY - rect.top) / rect.height - 0.5);
+    onMouseMove?.(e);
   };
   const handleLeave = () => {
     px.set(0);
     py.set(0);
+    onMouseLeave?.();
   };
-
-  const half = PHONE_DEPTH / 2;
-  const corner = "rounded-[17px] md:rounded-[21px]";
 
   return (
     <div
-      ref={ref}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      className="relative flex justify-center py-10 [perspective:900px]"
+      className="relative [perspective:1200px]"
     >
-      {/* Ambient glow */}
-      <div
-        className="absolute left-1/2 top-1/2 h-[70%] w-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500/15 blur-3xl"
-        aria-hidden="true"
-      />
-      {/* Scroll parallax layer */}
       <motion.div
-        style={{
-          rotateY: scrollRotateY,
-          y: scrollY,
-          transformStyle: "preserve-3d",
-        }}
+        style={{ rotateX: rotX, rotateY: rotY, transformStyle: "preserve-3d" }}
       >
-        {/* Pointer tilt layer — slight default Y so an edge is always visible */}
         <motion.div
-          style={{
-            rotateX: rotX,
-            rotateY: rotY,
-            rotateZ: -2,
-            transformStyle: "preserve-3d",
-          }}
+          animate={{ y: [0, -14, 0], rotateZ: [-1.5, 1.5, -1.5] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          style={{ transformStyle: "preserve-3d" }}
         >
-          {/* Idle float layer */}
-          <motion.div
-            animate={{ y: [0, -14, 0], rotateZ: [-1.5, 1.5, -1.5] }}
-            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          <div
+            className="relative w-[240px] md:w-[300px] drop-shadow-2xl"
             style={{ transformStyle: "preserve-3d" }}
           >
-            {/* Phone slab: explicit side faces + front screen */}
-            <div
-              className="relative w-[240px] md:w-[300px] aspect-[1902/3924]"
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              {/* Back */}
+            {Array.from({ length: 42 }).map((_, k) => (
               <div
+                key={k}
                 aria-hidden="true"
-                className={`absolute inset-0 ${corner}`}
+                className="absolute inset-0 rounded-[17px] md:rounded-[21px]"
                 style={{
-                  transform: `translateZ(-${half}px)`,
+                  transform: `translateZ(-${(k + 1) * 1.1}px)`,
                   background:
-                    "linear-gradient(165deg,#1c1c1f 0%,#09090b 55%,#141417 100%)",
-                  boxShadow: "inset 0 0 24px rgba(0,0,0,0.6)",
+                    "linear-gradient(180deg,#3a3a3f,#161618 55%,#2c2c30)",
                 }}
               />
-
-              {/* Left edge — shadow side */}
-              <div
-                aria-hidden="true"
-                className="absolute left-0 top-[3%] h-[94%]"
-                style={{
-                  width: PHONE_DEPTH,
-                  transformOrigin: "left center",
-                  transform: "rotateY(-90deg)",
-                  background:
-                    "linear-gradient(to right,#0a0a0c 0%,#27272a 45%,#3f3f46 100%)",
-                  borderRadius: "3px 0 0 3px",
-                }}
-              />
-
-              {/* Right edge — lit side */}
-              <div
-                aria-hidden="true"
-                className="absolute right-0 top-[3%] h-[94%]"
-                style={{
-                  width: PHONE_DEPTH,
-                  transformOrigin: "right center",
-                  transform: "rotateY(90deg)",
-                  background:
-                    "linear-gradient(to left,#18181b 0%,#52525b 35%,#a1a1aa 85%,#71717a 100%)",
-                  borderRadius: "0 3px 3px 0",
-                }}
-              />
-
-              {/* Top edge */}
-              <div
-                aria-hidden="true"
-                className="absolute left-[3%] top-0 w-[94%]"
-                style={{
-                  height: PHONE_DEPTH,
-                  transformOrigin: "center top",
-                  transform: "rotateX(90deg)",
-                  background: "linear-gradient(to bottom,#3f3f46,#18181b)",
-                  borderRadius: "3px 3px 0 0",
-                }}
-              />
-
-              {/* Bottom edge */}
-              <div
-                aria-hidden="true"
-                className="absolute bottom-0 left-[3%] w-[94%]"
-                style={{
-                  height: PHONE_DEPTH,
-                  transformOrigin: "center bottom",
-                  transform: "rotateX(-90deg)",
-                  background: "linear-gradient(to top,#27272a,#0a0a0c)",
-                  borderRadius: "0 0 3px 3px",
-                }}
-              />
-
-              {/* Front screen */}
+            ))}
+            <div className="relative">
               <img
                 src="/Apple_AR_productDesign.png"
                 alt="AR product design mockup: a phone showing an AR mode toggle, a 3D cube in the camera view, and a 'Tap to place' prompt"
-                className={`absolute inset-0 block h-full w-full ${corner} select-none`}
-                style={{
-                  transform: `translateZ(${half}px)`,
-                  boxShadow:
-                    "0 24px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)",
-                }}
+                className="relative block w-full h-auto rounded-[17px] md:rounded-[21px] select-none"
                 draggable={false}
               />
+              {children}
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       </motion.div>
     </div>
+  );
+}
+
+function PhoneHighlightRing({
+  progress,
+  blockIndex,
+  total,
+  side,
+  shape,
+}: {
+  progress: MotionValue<number>;
+  blockIndex: number;
+  total: number;
+  side: "left" | "right";
+  shape: "pill" | "circle";
+}) {
+  const slice = 1 / total;
+  const start = blockIndex * slice;
+  const end = start + slice;
+  const fade = slice * 0.3;
+  const opacity = useTransform(
+    progress,
+    [start, start + fade, end - fade, end],
+    [0, 1, 1, 0]
+  );
+  const scale = useTransform(
+    progress,
+    [start, start + fade, end - fade, end],
+    [0.92, 1, 1, 0.92]
+  );
+
+  const position =
+    side === "left" ? "left-[7%]" : "right-[calc(7%+2px)]";
+  const dimensions =
+    shape === "pill"
+      ? "w-[30%] aspect-[2.35/1]"
+      : "w-[12%] aspect-square";
+
+  return (
+    <motion.div
+      style={{ opacity }}
+      className={`absolute top-[calc(15%-5px)] ${position} ${dimensions} pointer-events-none`}
+      aria-hidden="true"
+    >
+      <motion.div style={{ scale }} className="h-full w-full">
+        <motion.div
+          animate={{
+            scale: [1, 1.045, 1],
+            opacity: [0.72, 1, 0.72],
+          }}
+          transition={{
+            duration: 2.8,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: blockIndex * 0.35,
+          }}
+          className="h-full w-full rounded-full border-2 border-sky-400 shadow-[0_0_16px_rgba(56,189,248,0.55)]"
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// --- PHONE SCROLLYTELLING: sticky phone with annotated text blocks ---
+const PHONE_BLOCKS: AnnotatedScrollBlock[] = [
+  {
+    header: "AR MODE TOGGLE",
+    body: "Our first designs focused on a self-contained AR module that would include a switch for moving between AR and 3D modes for the object, essentially pulling it out of the environment and letting you manipulate it on screen.",
+  },
+  {
+    header: "SCALE AND MOVE CONTROLS",
+    body: "We also experimented with controls that allowed a user to move and scale the object in space.",
+  },
+];
+
+function PhoneScrollytelling() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end end"],
+  });
+
+  const [activeBlock, setActiveBlock] = useState(0);
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    const idx = Math.min(
+      PHONE_BLOCKS.length - 1,
+      Math.max(0, Math.floor(v * PHONE_BLOCKS.length))
+    );
+    setActiveBlock(idx);
+  });
+
+  return (
+    <section
+      ref={ref}
+      className="relative bg-black"
+      style={{ height: `${(PHONE_BLOCKS.length + 1) * 100}vh` }}
+    >
+      <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center bg-black px-6">
+        {/* Ambient glow */}
+        <div
+          className="absolute left-1/2 top-1/2 h-[70%] w-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500/15 blur-3xl"
+          aria-hidden="true"
+        />
+
+        <PhoneModel>
+          <PhoneHighlightRing
+            progress={scrollYProgress}
+            blockIndex={0}
+            total={PHONE_BLOCKS.length}
+            side="left"
+            shape="pill"
+          />
+          <PhoneHighlightRing
+            progress={scrollYProgress}
+            blockIndex={1}
+            total={PHONE_BLOCKS.length}
+            side="right"
+            shape="circle"
+          />
+        </PhoneModel>
+
+        {PHONE_BLOCKS.map((block, i) => (
+          <AnnotatedScrollBlock
+            key={i}
+            header={block.header}
+            body={block.body}
+            index={i}
+            total={PHONE_BLOCKS.length}
+            progress={scrollYProgress}
+          />
+        ))}
+
+        {/* Progress dot nav */}
+        <div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10"
+          aria-hidden="true"
+        >
+          {PHONE_BLOCKS.map((_, i) => (
+            <span
+              key={i}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i === activeBlock ? "w-6 bg-white" : "w-2 bg-white/30"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -1013,11 +1125,10 @@ export default function NYTARPage() {
             versions of the experience.
           </p>
         </div>
-
-        <div className="mt-8 md:mt-12">
-          <FloatingPhone />
-        </div>
       </section>
+
+      {/* --- PHONE SCROLLYTELLING --- */}
+      <PhoneScrollytelling />
 
       {/* --- CHAPTER 1: THE LAUNCH (UPDATED ORDER) --- */}
       <section className="py-32 px-6 md:px-24 bg-white text-black border-b border-neutral-200">
