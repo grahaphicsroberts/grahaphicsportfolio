@@ -35,7 +35,7 @@ const HIGHLIGHTS = [
     title: "Four of the Best Olympians",
     subtitle: "Spatial Analysis",
     description:
-      "Analyzing the athletic prowess of Olympic champions using spatial analysis and volumetric video.",
+      "The first full spatial experience we shipped was produced for the Olympics — after many rounds of ideation, we arrived at the idea to scan the top athletes competing that year using photogrammetry, creating an experience where you could project them at real scale into your space, and learn about their sport while they were frozen mid performance.",
     desktop: "/olympics-desktop.mp4",
     mobile: "/olympics-mobile.mp4",
     link: "https://www.nytimes.com/interactive/2018/02/05/sports/olympics/ar-augmented-reality-olympic-athletes-ul.html",
@@ -44,8 +44,10 @@ const HIGHLIGHTS = [
   {
     title: "David Bowie in 3 Dimensions",
     subtitle: "Cultural Heritage",
-    description:
-      "Exploring the costumes and artifacts of the legendary artist in your own space, in collaboration with the Bowie Archive.",
+    description: [
+      "On top of this product development we were then able to create dozens of projects, and 2 solid years of innovative award winning visual storytelling using spatial principles across a variety of topics, like this culture project on David Bowie, looking at a new exhibit of his iconic fashion pieces. Here we could bring the museum experience to users in high fidelity.",
+      "We were obsessive about getting every detail right, recreating the experience of the material down to the way it sparkled or shined, developing custom shaders that would look highly realistic on mobile devices. We also created guidelines and a tech stack for capturing and processing real world objects through photogrammetry, which became a key supporting technology for our approach.",
+    ],
     desktop: "/bowie-desktop.mp4",
     mobile: "/bowie-mobile.mp4",
     link: "https://www.nytimes.com/interactive/2018/03/20/arts/design/bowie-costumes-ar-3d-ul.html",
@@ -55,7 +57,7 @@ const HIGHLIGHTS = [
     title: "One Building, One Bomb",
     subtitle: "Forensic Architecture",
     description:
-      "Reconstructing a chemical weapons attack in Syria to prove culpability, winning a News & Documentary Emmy.",
+      "This Emmy award winning visual investigation of an attack in Syria uses a 3D reconstruction of the crime scene in partnership with Forensic Architecture. Here, in what could be perceived as closer to a VR experience, a user can walk around the roof where the bomb landed, and investigate the evidence themselves, navigating to \"flags\" indicating perspectives of interest.",
     desktop: "/syria-desktop.mp4",
     mobile: "/syria-mobile.mp4",
     link: "https://www.nytimes.com/interactive/2018/06/24/world/middleeast/douma-syria-chemical-attack-augmented-reality-ar-ul.html",
@@ -1655,9 +1657,22 @@ export default function NYTARPage() {
                   </div>
                 )}
 
-                <p className="text-xl text-neutral-400 leading-relaxed max-w-2xl mx-auto mb-8">
-                  {project.description}
-                </p>
+                {Array.isArray(project.description) ? (
+                  <div className="grid md:grid-cols-2 gap-8 text-left max-w-3xl mx-auto mb-8">
+                    {project.description.map((para, i) => (
+                      <p
+                        key={i}
+                        className="text-lg text-neutral-400 leading-relaxed"
+                      >
+                        {para}
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xl text-neutral-400 leading-relaxed max-w-2xl mx-auto mb-8">
+                    {project.description}
+                  </p>
+                )}
 
                 {/* --- NEW PROJECT LINK BUTTON --- */}
                 {project.link && (
@@ -1676,34 +1691,59 @@ export default function NYTARPage() {
               {/* Visuals Row */}
               <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 w-full">
                 {/* Mobile Frame */}
-                <div className="relative shrink-0 w-[240px] md:w-[320px] aspect-[9/19] bg-black rounded-[2.5rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl z-20">
-                  <div className="absolute top-0 w-full h-6 z-20 flex justify-center items-center pointer-events-none">
-                    <div className="w-20 h-5 bg-black rounded-b-lg" />
+                <figure className="shrink-0 flex flex-col items-center">
+                  <div className="relative w-[240px] md:w-[320px] aspect-[9/19] bg-black rounded-[2.5rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl z-20">
+                    <div className="absolute top-0 w-full h-6 z-20 flex justify-center items-center pointer-events-none">
+                      <div className="w-20 h-5 bg-black rounded-b-lg" />
+                    </div>
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover bg-neutral-900"
+                    >
+                      <source src={project.mobile} type="video/mp4" />
+                    </video>
                   </div>
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover bg-neutral-900"
-                  >
-                    <source src={project.mobile} type="video/mp4" />
-                  </video>
-                </div>
+                  <figcaption className="mt-4 text-xs font-mono uppercase tracking-widest text-neutral-500">
+                    Mobile AR experience
+                  </figcaption>
+                </figure>
 
                 {/* Desktop Frame */}
-                <div className="relative shrink-0 w-full md:w-[600px] lg:w-[800px] aspect-video bg-black rounded-[2rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl z-10">
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover bg-neutral-900"
-                  >
-                    <source src={project.desktop} type="video/mp4" />
-                  </video>
-                </div>
+                <figure className="shrink-0 w-full md:w-[600px] lg:w-[800px] flex flex-col items-center">
+                  <div className="relative w-full aspect-video bg-black rounded-[2rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl z-10">
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover bg-neutral-900"
+                    >
+                      <source src={project.desktop} type="video/mp4" />
+                    </video>
+                  </div>
+                  <figcaption className="mt-4 text-xs font-mono uppercase tracking-widest text-neutral-500">
+                    Desktop realtime 3D experience
+                  </figcaption>
+                </figure>
               </div>
+
+              {/* Reading copy after the Olympics videos */}
+              {index === 0 && (
+                <div className="max-w-3xl mx-auto text-center mt-20 md:mt-24">
+                  <p className="text-lg md:text-xl text-neutral-400 leading-relaxed">
+                    For each AR project we created a parallel 3D web experience
+                    that would leverage the same assets and storytelling. This
+                    put the user first, understanding that the AR experience only
+                    made sense when you had the space and time to engage with it.
+                    I feel this struck a good balance between our explorations of
+                    spatial storytelling, and the realities of the user
+                    experience.
+                  </p>
+                </div>
+              )}
 
               {/* Divider (except last) */}
               {index !== HIGHLIGHTS.length - 1 && (
