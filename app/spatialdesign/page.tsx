@@ -260,11 +260,11 @@ function PrototypeScrollytelling() {
         {/* Mobile: the same clip split into stacked left/right halves so it can
             fill the vertical space at a larger size. */}
         <div
-          className="md:hidden flex w-full max-w-sm flex-col gap-3"
+          className="md:hidden flex flex-col items-center"
           aria-label="Screen recording of the first AR article prototype, shown as a stacked split of the left and right halves of the frame"
           role="img"
         >
-          <div className="relative w-full aspect-[8/9] overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+          <div className="relative h-[36vh] aspect-[8/9] mx-auto overflow-hidden rounded-t-2xl border border-b-0 border-white/10 shadow-2xl">
             <video
               ref={topRef}
               src="/AR_FirstPrototypeDemo.mp4"
@@ -280,7 +280,7 @@ function PrototypeScrollytelling() {
               First AR Prototype
             </span>
           </div>
-          <div className="relative w-full aspect-[8/9] overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+          <div className="relative h-[36vh] aspect-[8/9] mx-auto overflow-hidden rounded-b-2xl border border-white/10 shadow-2xl">
             <video
               ref={botRef}
               src="/AR_FirstPrototypeDemo.mp4"
@@ -668,10 +668,11 @@ function MoonscapeScreen() {
         style={{ rotateX: rotX, rotateY: rotY, transformStyle: "preserve-3d" }}
         className="relative"
       >
-        {/* Lunar surface receding behind / below the screen */}
+        {/* Lunar surface receding behind / below the screen. Hidden on mobile so
+            the floor doesn't crop the video — there we just show the full clip. */}
         <div
           aria-hidden="true"
-          className="absolute left-1/2 top-[52%] h-[720px] w-[200%] origin-top"
+          className="hidden md:block absolute left-1/2 top-[52%] h-[720px] w-[200%] origin-top"
           style={{
             transform: "translateX(-50%) rotateX(74deg)",
             backgroundImage: [
@@ -701,7 +702,7 @@ function MoonscapeScreen() {
         {/* Soft contact shadow grounding the screen on the surface */}
         <div
           aria-hidden="true"
-          className="absolute left-1/2 top-[56%] h-24 w-[70%] rounded-[50%] bg-black/70 blur-2xl"
+          className="hidden md:block absolute left-1/2 top-[56%] h-24 w-[70%] rounded-[50%] bg-black/70 blur-2xl"
           style={{ transform: "translate(-50%,0) translateZ(-40px)" }}
         />
 
@@ -1545,6 +1546,8 @@ export default function NYTARPage() {
             className="w-full h-full object-cover opacity-30 grayscale"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-transparent" />
+          {/* Darken the top to hide the bright studio light/ceiling in the source image */}
+          <div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-neutral-950/40 to-transparent" />
         </motion.div>
 
         <motion.div
