@@ -1468,54 +1468,60 @@ export default function NYTARPage() {
   return (
     <div
       ref={containerRef}
-      className="bg-neutral-950 text-neutral-200 min-h-screen font-sans selection:bg-white selection:text-black"
+      className="isolate bg-neutral-950 text-neutral-200 min-h-screen font-sans selection:bg-white selection:text-black"
     >
       {/* --- NAV --- */}
-      <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 mix-blend-difference text-white">
-        {/* Left: Home Link */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 hover:opacity-70 transition-opacity"
-          onClick={() => setIsMenuOpen(false)}
-        >
-          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
-          <span className="font-bold tracking-tight">HOME</span>
-        </Link>
+      {/* Keep position:fixed and mix-blend-difference on SEPARATE elements.
+          Chrome on mobile renders a stray blend-colored rectangle at the page
+          origin when both are on the same fixed element; moving the blend to a
+          non-fixed inner wrapper avoids the artifact while keeping the blend. */}
+      <nav className="fixed top-0 left-0 w-full z-50">
+        <div className="p-6 flex justify-between items-center mix-blend-difference text-white">
+          {/* Left: Home Link */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+            <span className="font-bold tracking-tight">HOME</span>
+          </Link>
 
-        {/* Right: Desktop Links */}
-        <div className="hidden md:flex gap-6 text-sm font-medium">
-          <Link href="/about" className="hover:opacity-50 transition-opacity">
-            About
-          </Link>
-          <Link href="/#work" className="hover:opacity-50 transition-opacity">
-            Work
-          </Link>
-          <Link
-            href="/recognition"
-            className="hover:opacity-50 transition-opacity"
+          {/* Right: Desktop Links */}
+          <div className="hidden md:flex gap-6 text-sm font-medium">
+            <Link href="/about" className="hover:opacity-50 transition-opacity">
+              About
+            </Link>
+            <Link href="/#work" className="hover:opacity-50 transition-opacity">
+              Work
+            </Link>
+            <Link
+              href="/recognition"
+              className="hover:opacity-50 transition-opacity"
+            >
+              Recognition
+            </Link>
+            <Link
+              href="/speaking"
+              className="hover:opacity-50 transition-opacity"
+            >
+              Speaking
+            </Link>
+          </div>
+
+          {/* Right: Mobile Toggle */}
+          <button
+            className="md:hidden text-white"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle Menu"
           >
-            Recognition
-          </Link>
-          <Link
-            href="/speaking"
-            className="hover:opacity-50 transition-opacity"
-          >
-            Speaking
-          </Link>
+            {isMenuOpen ? (
+              <X className="w-6 h-6" aria-hidden="true" />
+            ) : (
+              <Menu className="w-6 h-6" aria-hidden="true" />
+            )}
+          </button>
         </div>
-
-        {/* Right: Mobile Toggle */}
-        <button
-          className="md:hidden text-white"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle Menu"
-        >
-          {isMenuOpen ? (
-            <X className="w-6 h-6" aria-hidden="true" />
-          ) : (
-            <Menu className="w-6 h-6" aria-hidden="true" />
-          )}
-        </button>
       </nav>
 
       {/* --- MOBILE MENU OVERLAY --- */}
