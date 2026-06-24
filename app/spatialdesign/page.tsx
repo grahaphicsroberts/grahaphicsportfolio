@@ -388,6 +388,63 @@ function EngineeringDiagram() {
   );
 }
 
+// Drive a pair of motion values from the device's orientation sensor so 3D
+// objects react to phone tilt on touch devices, mirroring desktop mouse-move
+// tilt. No-op on non-touch devices, so desktop behavior is unchanged.
+function useDeviceTilt(px: MotionValue<number>, py: MotionValue<number>) {
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.DeviceOrientationEvent) return;
+    const isTouch = window.matchMedia(
+      "(hover: none) and (pointer: coarse)"
+    ).matches;
+    if (!isTouch) return;
+
+    let baseBeta: number | null = null;
+    const clamp = (v: number) => Math.max(-0.5, Math.min(0.5, v));
+
+    const handle = (e: DeviceOrientationEvent) => {
+      const gamma = e.gamma ?? 0; // left/right tilt, -90..90
+      const beta = e.beta ?? 0; // front/back tilt
+      if (baseBeta === null) baseBeta = beta; // calibrate to holding angle
+      px.set(clamp(gamma / 45));
+      py.set(clamp((beta - baseBeta) / 45));
+    };
+
+    const attach = () =>
+      window.addEventListener("deviceorientation", handle, true);
+
+    const DOE = window.DeviceOrientationEvent as unknown as {
+      requestPermission?: () => Promise<"granted" | "denied">;
+    };
+
+    let cleanupGesture: (() => void) | undefined;
+    if (typeof DOE.requestPermission === "function") {
+      // iOS 13+ requires permission, granted from a user gesture.
+      const onGesture = () => {
+        DOE.requestPermission?.()
+          .then((res) => {
+            if (res === "granted") attach();
+          })
+          .catch(() => {});
+        cleanupGesture?.();
+      };
+      window.addEventListener("touchend", onGesture, { once: true });
+      window.addEventListener("click", onGesture, { once: true });
+      cleanupGesture = () => {
+        window.removeEventListener("touchend", onGesture);
+        window.removeEventListener("click", onGesture);
+      };
+    } else {
+      attach();
+    }
+
+    return () => {
+      window.removeEventListener("deviceorientation", handle, true);
+      cleanupGesture?.();
+    };
+  }, [px, py]);
+}
+
 // --- PHONE 3D MODEL: stacked depth + crossfading screen ---
 const PHONE_SCREEN_A = "/Apple_AR_productDesign.png";
 const PHONE_SCREEN_B = "/Apple_AR_productDesign_2.png";
@@ -410,6 +467,7 @@ function PhoneModel({
 }) {
   const px = useMotionValue(0);
   const py = useMotionValue(0);
+  useDeviceTilt(px, py);
   const rotX = useSpring(useTransform(py, [-0.5, 0.5], [14, -14]), {
     stiffness: 150,
     damping: 18,
@@ -519,6 +577,7 @@ function PhoneModel({
 function MoonscapeScreen() {
   const px = useMotionValue(0);
   const py = useMotionValue(0);
+  useDeviceTilt(px, py);
   const rotX = useSpring(useTransform(py, [-0.5, 0.5], [6, -6]), {
     stiffness: 120,
     damping: 20,
@@ -603,7 +662,7 @@ function MoonscapeScreen() {
               loop
               muted
               playsInline
-              className="block aspect-[3/2] w-full bg-black object-cover"
+              className="block aspect-[3/4] md:aspect-[3/2] w-full bg-black object-cover"
               style={{ objectPosition: "center calc(50% - 150px)" }}
             >
               <source src="/Apollo_TheMill.mp4" type="video/mp4" />
@@ -657,7 +716,7 @@ function MagicLeapHeadsetReveal() {
         aria-hidden="true"
       />
       <figure className="relative">
-        <div className="relative aspect-video overflow-hidden rounded-[2rem] border border-indigo-400/30 bg-black shadow-2xl shadow-indigo-950/50">
+        <div className="relative aspect-[3/4] md:aspect-video overflow-hidden rounded-[2rem] border border-indigo-400/30 bg-black shadow-2xl shadow-indigo-950/50">
           {/* Merged single video — the fused result once the headset is on */}
           <motion.video
             style={{ opacity: finalOpacity }}
@@ -677,7 +736,7 @@ function MagicLeapHeadsetReveal() {
           >
             <motion.div
               style={{ x: leftX, scale: lensScale, opacity: lensOpacity }}
-              className="relative h-[88%] aspect-square overflow-hidden rounded-full ring-1 ring-indigo-300/20"
+              className="relative w-[46%] aspect-square overflow-hidden rounded-full ring-1 ring-indigo-300/20 md:w-auto md:h-[88%]"
             >
               <video
                 autoPlay
@@ -695,7 +754,7 @@ function MagicLeapHeadsetReveal() {
             </motion.div>
             <motion.div
               style={{ x: rightX, scale: lensScale, opacity: lensOpacity }}
-              className="relative h-[88%] aspect-square overflow-hidden rounded-full ring-1 ring-indigo-300/20"
+              className="relative w-[46%] aspect-square overflow-hidden rounded-full ring-1 ring-indigo-300/20 md:w-auto md:h-[88%]"
             >
               <video
                 autoPlay
@@ -840,50 +899,61 @@ function QuadrantDiagram() {
     { d: "M50,50 L50,96 A46,46 0 0 1 4,50 Z", lx: 30, ly: 70 },
   ];
 
+  const ZoneSvg = () => (
+    <svg viewBox="0 0 100 100" className="h-full w-full">
+      {wedges.map((w, i) => (
+        <path
+          key={i}
+          d={w.d}
+          fill="#38bdf8"
+          fillOpacity={active === i ? 0.55 : 0.08}
+          stroke="#38bdf8"
+          strokeWidth="0.6"
+          strokeOpacity="0.45"
+          style={{ transition: "fill-opacity 0.4s ease" }}
+        />
+      ))}
+      <circle
+        cx="50"
+        cy="50"
+        r="46"
+        fill="none"
+        stroke="#38bdf8"
+        strokeWidth="1.5"
+      />
+      {wedges.map((w, i) => (
+        <text
+          key={i}
+          x={w.lx}
+          y={w.ly}
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontSize="11"
+          fontFamily="monospace"
+          fontWeight="bold"
+          fill={active === i ? "#fff" : "#7dd3fc"}
+          style={{ transition: "fill 0.4s ease" }}
+        >
+          {i + 1}
+        </text>
+      ))}
+    </svg>
+  );
+
   return (
-    <div className="relative shrink-0 -mt-12 md:-mt-20 w-80 h-80 md:w-[30rem] md:h-[30rem] [perspective:900px]">
-      {/* Tilted floor plane */}
-      <div className="absolute inset-0 [transform:rotateX(62deg)] [transform-style:preserve-3d]">
-        <svg viewBox="0 0 100 100" className="h-full w-full">
-          {wedges.map((w, i) => (
-            <path
-              key={i}
-              d={w.d}
-              fill="#38bdf8"
-              fillOpacity={active === i ? 0.55 : 0.08}
-              stroke="#38bdf8"
-              strokeWidth="0.6"
-              strokeOpacity="0.45"
-              style={{ transition: "fill-opacity 0.4s ease" }}
-            />
-          ))}
-          <circle
-            cx="50"
-            cy="50"
-            r="46"
-            fill="none"
-            stroke="#38bdf8"
-            strokeWidth="1.5"
-          />
-          {wedges.map((w, i) => (
-            <text
-              key={i}
-              x={w.lx}
-              y={w.ly}
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize="11"
-              fontFamily="monospace"
-              fontWeight="bold"
-              fill={active === i ? "#fff" : "#7dd3fc"}
-              style={{ transition: "fill 0.4s ease" }}
-            >
-              {i + 1}
-            </text>
-          ))}
-        </svg>
+    <>
+      {/* Mobile: compact, flat zone map that fits in the top header */}
+      <div className="md:hidden relative shrink-0 mt-2 w-28 h-28">
+        <ZoneSvg />
       </div>
-    </div>
+
+      {/* Desktop: large floor-perspective zone map */}
+      <div className="hidden md:block relative shrink-0 -mt-20 w-[30rem] h-[30rem] [perspective:900px]">
+        <div className="absolute inset-0 [transform:rotateX(62deg)] [transform-style:preserve-3d]">
+          <ZoneSvg />
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -915,7 +985,7 @@ function PhoneLeftPanel({
   );
 
   return (
-    <div className="relative z-10 w-full min-h-[5rem] md:min-h-[7rem] pointer-events-none">
+    <div className="relative z-10 w-full min-h-[11rem] md:min-h-[7rem] pointer-events-none">
       <motion.div
         style={{ opacity: initialOpacity }}
         className="absolute inset-0 flex items-center justify-center px-6"
@@ -1207,7 +1277,7 @@ function PhoneScrollytelling() {
       className="relative bg-black"
       style={{ height: `${(PHONE_BLOCKS.length + 1) * 100}vh` }}
     >
-      <div className="sticky top-0 h-screen overflow-hidden grid w-full grid-cols-[1fr_auto_1fr] items-center bg-black px-6">
+      <div className="sticky top-0 h-screen overflow-hidden flex flex-col items-center justify-center gap-4 w-full bg-black px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-0">
         {/* Ambient glow */}
         <div
           className="absolute left-1/2 top-1/2 h-[70%] w-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500/15 blur-3xl"
@@ -1505,8 +1575,8 @@ export default function NYTARPage() {
 
           {/* Visual paired with copy */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Video */}
-            <figure className="order-2 lg:order-1">
+            {/* Video — on mobile this sits right after the intro paragraph */}
+            <figure className="order-1 lg:order-1">
               <div className="relative rounded-2xl overflow-hidden border border-neutral-800">
                 <video
                   autoPlay
@@ -1524,7 +1594,7 @@ export default function NYTARPage() {
             </figure>
 
             {/* Copy */}
-            <div className="order-1 lg:order-2 prose prose-invert prose-lg text-neutral-400">
+            <div className="order-2 lg:order-2 prose prose-invert prose-lg text-neutral-400">
               <p>
                 The work needed to feel uniquely Timesian, and feel like an
                 evolution from our past work. It needed to respect the user — our
@@ -1586,7 +1656,7 @@ export default function NYTARPage() {
           {/* Paired: copy + insets on the left, team image on the right */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             {/* Left column: copy + process insets */}
-            <div className="order-1">
+            <div className="order-2 lg:order-1">
               <div className="prose prose-invert prose-lg text-neutral-400">
                 <p>
                   I led the architecture of a specialized, cross-functional
@@ -1614,8 +1684,8 @@ export default function NYTARPage() {
               </figure>
             </div>
 
-            {/* Team image */}
-            <figure className="order-2">
+            {/* Team image — on mobile this sits right after the intro paragraph */}
+            <figure className="order-1 lg:order-2">
               <img
                 src="/ARteam.jpg"
                 alt="The New York Times AR team gathered around a phone, reviewing an early prototype"
