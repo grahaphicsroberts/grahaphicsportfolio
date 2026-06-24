@@ -2256,7 +2256,7 @@ export default function NYTARPage() {
         </div>
 
         {/* Horizontal Scroll Container */}
-        <div className="flex gap-8 overflow-x-auto pb-12 px-6 md:px-12 snap-x scrollbar-hide">
+        <div className="flex gap-8 overflow-x-auto pt-8 pb-12 px-6 md:px-12 snap-x scrollbar-hide">
           {MORE_PROJECTS.map((project, i) => (
             <div
               key={i}
