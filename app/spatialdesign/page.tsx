@@ -389,7 +389,9 @@ function EngineeringDiagram() {
 // --- PHONE 3D MODEL: stacked depth + crossfading screen ---
 const PHONE_SCREEN_A = "/Apple_AR_productDesign.png";
 const PHONE_SCREEN_B = "/Apple_AR_productDesign_2.png";
+const PHONE_SCREEN_C = "/Apple_AR_productDesign_3.png";
 const PHONE_CROSSFADE_STEP = 2; // step 3 (0-indexed): switch to screen B
+const PHONE_CROSSFADE_STEP_2 = 7; // step 8 (0-indexed): switch to screen C
 
 function PhoneModel({
   progress,
@@ -416,16 +418,22 @@ function PhoneModel({
   });
 
   const slice = 1 / total;
-  const crossfadeAt = (PHONE_CROSSFADE_STEP / total);
+  const cf1 = PHONE_CROSSFADE_STEP / total;
+  const cf2 = PHONE_CROSSFADE_STEP_2 / total;
   const fade = slice * 0.35;
   const screenAOpacity = useTransform(
     progress,
-    [0, crossfadeAt - fade / 2, crossfadeAt + fade / 2, 1],
+    [0, cf1 - fade / 2, cf1 + fade / 2, 1],
     [1, 1, 0, 0]
   );
   const screenBOpacity = useTransform(
     progress,
-    [0, crossfadeAt - fade / 2, crossfadeAt + fade / 2, 1],
+    [0, cf1 - fade / 2, cf1 + fade / 2, cf2 - fade / 2, cf2 + fade / 2, 1],
+    [0, 0, 1, 1, 0, 0]
+  );
+  const screenCOpacity = useTransform(
+    progress,
+    [0, cf2 - fade / 2, cf2 + fade / 2, 1],
     [0, 0, 1, 1]
   );
 
@@ -488,11 +496,81 @@ function PhoneModel({
                 className={`relative block w-full h-auto ${corner} select-none`}
                 draggable={false}
               />
+              <motion.img
+                src={PHONE_SCREEN_C}
+                alt="AR product design mockup: zoned interaction view with a life-sized hand and 'Lean in close to see' prompt"
+                style={{ opacity: screenCOpacity }}
+                className={`absolute inset-0 block h-full w-full ${corner} select-none`}
+                draggable={false}
+              />
               {children}
             </div>
           </div>
         </motion.div>
       </motion.div>
+    </div>
+  );
+}
+
+// Floor-perspective zone map: 4 quadrants that highlight clockwise on a loop.
+function QuadrantDiagram() {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setActive((a) => (a + 1) % 4), 1100);
+    return () => clearInterval(id);
+  }, []);
+
+  // Order is clockwise from top-left: 1 = TL, 2 = TR, 3 = BR, 4 = BL.
+  const wedges = [
+    { d: "M50,50 L4,50 A46,46 0 0 1 50,4 Z", lx: 30, ly: 30 },
+    { d: "M50,50 L50,4 A46,46 0 0 1 96,50 Z", lx: 70, ly: 30 },
+    { d: "M50,50 L96,50 A46,46 0 0 1 50,96 Z", lx: 70, ly: 70 },
+    { d: "M50,50 L50,96 A46,46 0 0 1 4,50 Z", lx: 30, ly: 70 },
+  ];
+
+  return (
+    <div className="relative shrink-0 -mt-12 md:-mt-20 w-80 h-80 md:w-[30rem] md:h-[30rem] [perspective:900px]">
+      {/* Tilted floor plane */}
+      <div className="absolute inset-0 [transform:rotateX(62deg)] [transform-style:preserve-3d]">
+        <svg viewBox="0 0 100 100" className="h-full w-full">
+          {wedges.map((w, i) => (
+            <path
+              key={i}
+              d={w.d}
+              fill="#38bdf8"
+              fillOpacity={active === i ? 0.55 : 0.08}
+              stroke="#38bdf8"
+              strokeWidth="0.6"
+              strokeOpacity="0.45"
+              style={{ transition: "fill-opacity 0.4s ease" }}
+            />
+          ))}
+          <circle
+            cx="50"
+            cy="50"
+            r="46"
+            fill="none"
+            stroke="#38bdf8"
+            strokeWidth="1.5"
+          />
+          {wedges.map((w, i) => (
+            <text
+              key={i}
+              x={w.lx}
+              y={w.ly}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize="11"
+              fontFamily="monospace"
+              fontWeight="bold"
+              fill={active === i ? "#fff" : "#7dd3fc"}
+              style={{ transition: "fill 0.4s ease" }}
+            >
+              {i + 1}
+            </text>
+          ))}
+        </svg>
+      </div>
     </div>
   );
 }
@@ -505,16 +583,22 @@ function PhoneLeftPanel({
   total: number;
 }) {
   const slice = 1 / total;
-  const crossfadeAt = PHONE_CROSSFADE_STEP / total;
+  const cf1 = PHONE_CROSSFADE_STEP / total;
+  const cf2 = PHONE_CROSSFADE_STEP_2 / total;
   const fade = slice * 0.35;
   const initialOpacity = useTransform(
     progress,
-    [0, crossfadeAt - fade / 2, crossfadeAt + fade / 2, 1],
+    [0, cf1 - fade / 2, cf1 + fade / 2, 1],
     [1, 1, 0, 0]
   );
   const shippedOpacity = useTransform(
     progress,
-    [0, crossfadeAt - fade / 2, crossfadeAt + fade / 2, 1],
+    [0, cf1 - fade / 2, cf1 + fade / 2, cf2 - fade / 2, cf2 + fade / 2, 1],
+    [0, 0, 1, 1, 0, 0]
+  );
+  const movementOpacity = useTransform(
+    progress,
+    [0, cf2 - fade / 2, cf2 + fade / 2, 1],
     [0, 0, 1, 1]
   );
 
@@ -542,6 +626,15 @@ function PhoneLeftPanel({
           </p>
         </div>
       </motion.div>
+      <motion.div
+        style={{ opacity: movementOpacity }}
+        className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6"
+      >
+        <p className="text-xl md:text-2xl font-bold text-white tracking-tight text-center">
+          Interaction through spatial movement
+        </p>
+        <QuadrantDiagram />
+      </motion.div>
     </div>
   );
 }
@@ -552,12 +645,16 @@ function PhoneHighlightRing({
   total,
   side,
   shape,
+  offsetX = 0,
+  offsetY = 0,
 }: {
   progress: MotionValue<number>;
   blockIndex: number;
   total: number;
   side: "left" | "right";
-  shape: "pill" | "circle";
+  shape: "pill" | "pill-narrow" | "circle";
+  offsetX?: number;
+  offsetY?: number;
 }) {
   const slice = 1 / total;
   const start = blockIndex * slice;
@@ -579,11 +676,17 @@ function PhoneHighlightRing({
   const dimensions =
     shape === "pill"
       ? "w-[30%] aspect-[2.35/1]"
-      : "w-[12%] aspect-square";
+      : shape === "pill-narrow"
+        ? "w-[19%] aspect-[1.9/1]"
+        : "w-[12%] aspect-square";
+
+  // Positive offsetX always moves the ring rightward, regardless of anchor side.
+  const horizontalOffset =
+    side === "left" ? { marginLeft: offsetX } : { marginRight: -offsetX };
 
   return (
     <motion.div
-      style={{ opacity }}
+      style={{ opacity, ...horizontalOffset, marginTop: offsetY }}
       className={`absolute top-[calc(15%-5px)] ${position} ${dimensions} pointer-events-none`}
       aria-hidden="true"
     >
@@ -599,7 +702,7 @@ function PhoneHighlightRing({
             ease: "easeInOut",
             delay: blockIndex * 0.35,
           }}
-          className="h-full w-full rounded-full border-2 border-sky-400 shadow-[0_0_16px_rgba(56,189,248,0.55)]"
+          className="h-full w-full rounded-full border-2 border-sky-400 bg-sky-400/40 shadow-[0_0_16px_rgba(56,189,248,0.55)]"
         />
       </motion.div>
     </motion.div>
@@ -644,6 +747,96 @@ function PhoneFrostedGlow({
   );
 }
 
+function PhonePlacementHighlight({
+  progress,
+  blockIndex,
+  total,
+}: {
+  progress: MotionValue<number>;
+  blockIndex: number;
+  total: number;
+}) {
+  const slice = 1 / total;
+  const start = blockIndex * slice;
+  const end = start + slice;
+  const fade = slice * 0.3;
+  const opacity = useTransform(
+    progress,
+    [start, start + fade, end - fade, end],
+    [0, 1, 1, 0]
+  );
+
+  return (
+    <motion.div
+      style={{ opacity }}
+      className="absolute inset-0 pointer-events-none"
+      aria-hidden="true"
+    >
+      {/* Wide pill around the "Tap to place" button */}
+      <motion.div
+        animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.03, 1] }}
+        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute left-[calc(18%+2px)] right-[calc(18%-2px)] top-[calc(68%+8px)] h-[5.4%] rounded-full border-2 border-sky-400 shadow-[0_0_16px_rgba(56,189,248,0.55)]"
+      />
+
+      {/* Floor-plane arrows drawn in the cube's perspective */}
+      <div className="absolute left-[15%] right-[15%] top-[33%] aspect-square">
+        <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+          <defs>
+            <marker
+              id="ph-arrowhead"
+              markerUnits="userSpaceOnUse"
+              markerWidth="9"
+              markerHeight="9"
+              refX="4.5"
+              refY="4.5"
+              orient="auto-start-reverse"
+            >
+              <path d="M1.5,1.5 L7.5,4.5 L1.5,7.5 Z" fill="#7dd3fc" />
+            </marker>
+          </defs>
+
+          {/* Axis A — down-right ground direction */}
+          <motion.g
+            animate={{ x: [-3.5, 3.5, -3.5], y: [-2, 2, -2] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <line
+              x1="28.35"
+              y1="37.5"
+              x2="71.65"
+              y2="62.5"
+              stroke="#7dd3fc"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              markerStart="url(#ph-arrowhead)"
+              markerEnd="url(#ph-arrowhead)"
+            />
+          </motion.g>
+
+          {/* Axis B — down-left ground direction */}
+          <motion.g
+            animate={{ x: [-3.5, 3.5, -3.5], y: [2, -2, 2] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <line
+              x1="28.35"
+              y1="62.5"
+              x2="71.65"
+              y2="37.5"
+              stroke="#7dd3fc"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              markerStart="url(#ph-arrowhead)"
+              markerEnd="url(#ph-arrowhead)"
+            />
+          </motion.g>
+        </svg>
+      </div>
+    </motion.div>
+  );
+}
+
 // --- PHONE SCROLLYTELLING: sticky phone with annotated text blocks ---
 const PHONE_BLOCKS: AnnotatedScrollBlock[] = [
   {
@@ -655,16 +848,29 @@ const PHONE_BLOCKS: AnnotatedScrollBlock[] = [
     body: "We also experimented with controls that allowed a user to move and scale the object in space.",
   },
   {
+    header: "FINAL DESIGN",
     body: "The shipped design was about maximizing simplicity and a UI that mostly got out of the way, while still providing the necessary functionality.",
   },
   {
     header: "FROSTED WINDOW AESTHETIC",
     body: "Key elements were getting the frosted window aesthetic dialed in just right, and editing and testing simple prompt language.",
   },
-  { body: "" },
-  { body: "" },
-  { body: "" },
-  { body: "" },
+  {
+    header: "OBJECT PLACEMENT FLOW",
+    body: "Design of the object placement flow, which was done through phone movement only, eliminating all onscreen controls.",
+  },
+  {
+    header: "SCENE REFRESH BUTTON",
+    body: "Creating a simple way to refresh the scene if it was placed poorly, or any other issue with how it loaded.",
+  },
+  {
+    header: "SCALE TOGGLE",
+    body: "Designing a toggle switch for scale, removing all user scale controls and simplifying it to simply switch between real scale and tabletop mode.",
+  },
+  {
+    header: "ZONED INTERACTION",
+    body: "We simplified interactivity in the scene from hot spots you needed to reach or tap, as seen in the prototype, into a zone system, where the scene would detect where the user was in space and load different non-diegetic annotations and models to develop the story from that perspective.",
+  },
 ];
 
 function PhoneScrollytelling() {
@@ -721,6 +927,29 @@ function PhoneScrollytelling() {
             progress={scrollYProgress}
             blockIndex={3}
             total={PHONE_BLOCKS.length}
+          />
+          <PhonePlacementHighlight
+            progress={scrollYProgress}
+            blockIndex={4}
+            total={PHONE_BLOCKS.length}
+          />
+          <PhoneHighlightRing
+            progress={scrollYProgress}
+            blockIndex={5}
+            total={PHONE_BLOCKS.length}
+            side="left"
+            shape="circle"
+            offsetX={2}
+            offsetY={1}
+          />
+          <PhoneHighlightRing
+            progress={scrollYProgress}
+            blockIndex={6}
+            total={PHONE_BLOCKS.length}
+            side="right"
+            shape="pill-narrow"
+            offsetX={6}
+            offsetY={4}
           />
         </PhoneModel>
 
@@ -1276,20 +1505,20 @@ export default function NYTARPage() {
 
       {/* --- CHAPTER 1: THE LAUNCH (UPDATED ORDER) --- */}
       <section className="py-32 px-6 md:px-24 bg-white text-black border-b border-neutral-200">
+        {/* Prominent centered section header */}
+        <div className="flex flex-col items-center text-center mb-16 md:mb-24">
+          <Box className="w-8 h-8 text-blue-600 mb-4" aria-hidden="true" />
+          <h2 className="text-5xl md:text-7xl font-bold tracking-tighter leading-none uppercase">
+            The Launch
+          </h2>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
           {/* TEXT COLUMN */}
           <div>
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-6 text-blue-600">
-              <Box className="w-6 h-6" aria-hidden="true" />
-              <span className="font-bold tracking-tight uppercase">
-                The Launch
-              </span>
-            </div>
-
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 tracking-tighter leading-tight">
+            <h3 className="text-4xl md:text-5xl font-bold mb-8 tracking-tighter leading-tight">
               Hello, World. <br /> Meet the "Honor Box."
-            </h2>
+            </h3>
 
             <div className="prose prose-lg text-neutral-600 mb-12">
               <p className="mb-6">
@@ -1367,6 +1596,18 @@ export default function NYTARPage() {
             <div className="absolute -z-10 bottom-12 -left-12 w-64 h-64 bg-yellow-100 rounded-full blur-3xl opacity-50" />
           </div>
         </div>
+
+        {/* Pull quote */}
+        <figure className="max-w-4xl mx-auto text-center mt-24 md:mt-32">
+          <blockquote className="text-2xl md:text-4xl font-medium tracking-tight leading-snug text-black">
+            &ldquo;… by using your smartphone as a &lsquo;window,&rsquo; we are
+            extending stories beyond the inches of a screen, by digitally adding
+            objects into your space at real scale.&rdquo;
+          </blockquote>
+          <figcaption className="mt-6 text-sm font-mono uppercase tracking-widest text-neutral-500">
+            Graham Roberts
+          </figcaption>
+        </figure>
       </section>
 
       {/* --- CHAPTER 2: STACKED HIGHLIGHTS --- */}
