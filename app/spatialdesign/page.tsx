@@ -1439,13 +1439,39 @@ export default function NYTARPage() {
   // Mobile Menu State
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Perf: only let videos decode/play while they're near the viewport. The page
+  // has many autoplaying loops; running them all at once makes mobile playback
+  // stutter. Pausing the off-screen ones keeps the visible video smooth.
+  useEffect(() => {
+    const root = containerRef.current as HTMLElement | null;
+    if (!root || typeof IntersectionObserver === "undefined") return;
+    const videos = Array.from(root.querySelectorAll("video"));
+    if (videos.length === 0) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const v = entry.target as HTMLVideoElement;
+          if (entry.isIntersecting) {
+            v.play().catch(() => {});
+          } else {
+            v.pause();
+          }
+        }
+      },
+      { rootMargin: "200px 0px", threshold: 0.1 }
+    );
+    videos.forEach((v) => io.observe(v));
+    return () => io.disconnect();
+  }, []);
+
   return (
     <div
       ref={containerRef}
       className="bg-neutral-950 text-neutral-200 min-h-screen font-sans selection:bg-white selection:text-black"
     >
       {/* --- NAV --- */}
-      <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 md:mix-blend-difference text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] md:[text-shadow:none]">
+      <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 mix-blend-difference text-white">
         {/* Left: Home Link */}
         <Link
           href="/"
