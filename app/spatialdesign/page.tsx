@@ -514,6 +514,111 @@ function PhoneModel({
   );
 }
 
+// 3D "movie screen on the moon": a tilted lunar floor with the video standing on
+// it, reacting subtly to mouse movement and gently floating like the phone model.
+function MoonscapeScreen() {
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const rotX = useSpring(useTransform(py, [-0.5, 0.5], [6, -6]), {
+    stiffness: 120,
+    damping: 20,
+  });
+  const rotY = useSpring(useTransform(px, [-0.5, 0.5], [-10, 10]), {
+    stiffness: 120,
+    damping: 20,
+  });
+
+  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    px.set((e.clientX - rect.left) / rect.width - 0.5);
+    py.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  const handleLeave = () => {
+    px.set(0);
+    py.set(0);
+  };
+
+  return (
+    <div
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      className="relative mx-auto w-full max-w-5xl [perspective:1600px]"
+    >
+      <motion.div
+        style={{ rotateX: rotX, rotateY: rotY, transformStyle: "preserve-3d" }}
+        className="relative"
+      >
+        {/* Lunar surface receding behind / below the screen */}
+        <div
+          aria-hidden="true"
+          className="absolute left-1/2 top-[52%] h-[720px] w-[200%] origin-top"
+          style={{
+            transform: "translateX(-50%) rotateX(74deg)",
+            backgroundImage: [
+              // Craters: each built from overlapping, irregular ellipses so the
+              // rims read as jagged/lumpy rather than perfect circles.
+              "radial-gradient(ellipse 38px 26px at 28% 20%, rgba(0,0,0,0.5) 0 58%, rgba(255,255,255,0.13) 82%, transparent 100%)",
+              "radial-gradient(ellipse 22px 32px at 31% 21%, rgba(0,0,0,0.34) 0 60%, transparent 88%)",
+              "radial-gradient(ellipse 56px 40px at 64% 31%, rgba(0,0,0,0.46) 0 60%, rgba(255,255,255,0.1) 84%, transparent 100%)",
+              "radial-gradient(ellipse 34px 50px at 67% 28%, rgba(0,0,0,0.3) 0 58%, transparent 86%)",
+              "radial-gradient(ellipse 84px 60px at 44% 48%, rgba(0,0,0,0.42) 0 62%, rgba(255,255,255,0.09) 85%, transparent 100%)",
+              "radial-gradient(ellipse 52px 78px at 47% 51%, rgba(0,0,0,0.26) 0 60%, transparent 88%)",
+              "radial-gradient(ellipse 48px 34px at 82% 58%, rgba(0,0,0,0.45) 0 60%, rgba(255,255,255,0.1) 84%, transparent 100%)",
+              "radial-gradient(ellipse 30px 44px at 80% 60%, rgba(0,0,0,0.3) 0 58%, transparent 86%)",
+              "radial-gradient(ellipse 32px 24px at 16% 52%, rgba(0,0,0,0.4) 0 58%, rgba(255,255,255,0.1) 82%, transparent 100%)",
+              "radial-gradient(ellipse 62px 44px at 72% 72%, rgba(0,0,0,0.38) 0 62%, rgba(255,255,255,0.08) 85%, transparent 100%)",
+              "radial-gradient(ellipse 40px 60px at 74% 74%, rgba(0,0,0,0.24) 0 60%, transparent 88%)",
+              "radial-gradient(ellipse 42px 30px at 36% 78%, rgba(0,0,0,0.36) 0 60%, rgba(255,255,255,0.08) 84%, transparent 100%)",
+              "radial-gradient(ellipse 24px 20px at 54% 14%, rgba(0,0,0,0.42) 0 58%, rgba(255,255,255,0.1) 82%, transparent 100%)",
+              // Fine regolith mottling
+              "radial-gradient(ellipse 60% 40% at 50% 35%, rgba(255,255,255,0.05), transparent 60%)",
+              // Base regolith, lit from the far horizon
+              "radial-gradient(80% 70% at 50% 0%, #8a8a92 0%, #5b5b63 24%, #34343b 50%, #18181d 74%, #08080a 100%)",
+            ].join(","),
+          }}
+        />
+
+        {/* Soft contact shadow grounding the screen on the surface */}
+        <div
+          aria-hidden="true"
+          className="absolute left-1/2 top-[56%] h-24 w-[70%] rounded-[50%] bg-black/70 blur-2xl"
+          style={{ transform: "translate(-50%,0) translateZ(-40px)" }}
+        />
+
+        {/* The screen, lifted forward off the surface and gently floating */}
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          style={{ transformStyle: "preserve-3d", z: 60 }}
+          className="relative z-10 mx-auto w-full"
+        >
+          {/* Ambient glow cast by the bright screen */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-8 bg-gradient-to-tr from-indigo-500/25 via-blue-400/15 to-transparent blur-3xl"
+          />
+          <div className="relative overflow-hidden rounded-2xl border border-neutral-700/80 shadow-[0_50px_140px_rgba(0,0,0,0.85)]">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="block aspect-[3/2] w-full bg-black object-cover"
+              style={{ objectPosition: "center calc(50% - 150px)" }}
+            >
+              <source src="/Apollo_TheMill.mp4" type="video/mp4" />
+            </video>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-white/5"
+            />
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
 // Floor-perspective zone map: 4 quadrants that highlight clockwise on a loop.
 function QuadrantDiagram() {
   const [active, setActive] = useState(0);
@@ -1751,6 +1856,52 @@ export default function NYTARPage() {
               )}
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* --- FULLY IMMERSIVE EXPERIENCES (OCULUS VR / MOON) --- */}
+      <section className="relative py-32 overflow-hidden bg-black border-t border-neutral-900">
+        {/* Deep-space backdrop */}
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-black via-neutral-950 to-black"
+          aria-hidden="true"
+        />
+        {/* Starfield */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-60"
+          style={{
+            backgroundImage:
+              "radial-gradient(1.5px 1.5px at 25% 15%, rgba(255,255,255,0.85), transparent), radial-gradient(1px 1px at 65% 28%, rgba(255,255,255,0.7), transparent), radial-gradient(1.5px 1.5px at 82% 12%, rgba(255,255,255,0.6), transparent), radial-gradient(1px 1px at 40% 42%, rgba(255,255,255,0.5), transparent), radial-gradient(1px 1px at 12% 58%, rgba(255,255,255,0.6), transparent), radial-gradient(1.5px 1.5px at 90% 52%, rgba(255,255,255,0.5), transparent), radial-gradient(1px 1px at 55% 8%, rgba(255,255,255,0.6), transparent)",
+          }}
+        />
+        {/* Distant Earth glow */}
+        <div
+          aria-hidden="true"
+          className="absolute top-16 right-[8%] w-40 h-40 rounded-full bg-gradient-to-br from-blue-400/40 to-indigo-700/30 blur-2xl pointer-events-none"
+        />
+
+        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-12">
+          {/* Header */}
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <div className="flex justify-center mb-6">
+              <Glasses className="w-10 h-10 text-indigo-400" aria-hidden="true" />
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              Fully Immersive Experiences
+            </h2>
+            <p className="text-lg md:text-xl text-neutral-400 leading-relaxed">
+              We explored extending projects from AR mobile onto fully immersive
+              headsets, like in this project that revisited the photography from
+              the moon landing and re-contextualized it from where each photo was
+              shot. You can actually hold the Hasselblad camera they used, and
+              take the photos Buzz and Neil took from the exact spot each was
+              taken.
+            </p>
+          </div>
+
+          {/* 3D moonscape movie screen */}
+          <MoonscapeScreen />
         </div>
       </section>
 
