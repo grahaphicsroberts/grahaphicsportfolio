@@ -1468,60 +1468,58 @@ export default function NYTARPage() {
   return (
     <div
       ref={containerRef}
-      className="isolate bg-neutral-950 text-neutral-200 min-h-screen font-sans selection:bg-white selection:text-black"
+      className="bg-neutral-950 text-neutral-200 min-h-screen font-sans selection:bg-white selection:text-black"
     >
       {/* --- NAV --- */}
-      {/* Keep position:fixed and mix-blend-difference on SEPARATE elements.
-          Chrome on mobile renders a stray blend-colored rectangle at the page
-          origin when both are on the same fixed element; moving the blend to a
-          non-fixed inner wrapper avoids the artifact while keeping the blend. */}
-      <nav className="fixed top-0 left-0 w-full z-50">
-        <div className="p-6 flex justify-between items-center mix-blend-difference text-white">
-          {/* Left: Home Link */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 hover:opacity-70 transition-opacity"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <ArrowLeft className="w-5 h-5" aria-hidden="true" />
-            <span className="font-bold tracking-tight">HOME</span>
+      {/* Desktop uses mix-blend-difference so the nav auto-inverts over light/dark
+          sections. On mobile (Chrome) that blend on a fixed element paints a stray
+          rectangle at the page origin, so we drop the blend there and instead give
+          the items a translucent backdrop to stay legible over any section. */}
+      <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 md:mix-blend-difference text-white">
+        {/* Left: Home Link */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 hover:opacity-70 transition-opacity rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-md md:rounded-none md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none"
+          onClick={() => setIsMenuOpen(false)}
+        >
+          <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+          <span className="font-bold tracking-tight">HOME</span>
+        </Link>
+
+        {/* Right: Desktop Links */}
+        <div className="hidden md:flex gap-6 text-sm font-medium">
+          <Link href="/about" className="hover:opacity-50 transition-opacity">
+            About
           </Link>
-
-          {/* Right: Desktop Links */}
-          <div className="hidden md:flex gap-6 text-sm font-medium">
-            <Link href="/about" className="hover:opacity-50 transition-opacity">
-              About
-            </Link>
-            <Link href="/#work" className="hover:opacity-50 transition-opacity">
-              Work
-            </Link>
-            <Link
-              href="/recognition"
-              className="hover:opacity-50 transition-opacity"
-            >
-              Recognition
-            </Link>
-            <Link
-              href="/speaking"
-              className="hover:opacity-50 transition-opacity"
-            >
-              Speaking
-            </Link>
-          </div>
-
-          {/* Right: Mobile Toggle */}
-          <button
-            className="md:hidden text-white"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle Menu"
+          <Link href="/#work" className="hover:opacity-50 transition-opacity">
+            Work
+          </Link>
+          <Link
+            href="/recognition"
+            className="hover:opacity-50 transition-opacity"
           >
-            {isMenuOpen ? (
-              <X className="w-6 h-6" aria-hidden="true" />
-            ) : (
-              <Menu className="w-6 h-6" aria-hidden="true" />
-            )}
-          </button>
+            Recognition
+          </Link>
+          <Link
+            href="/speaking"
+            className="hover:opacity-50 transition-opacity"
+          >
+            Speaking
+          </Link>
         </div>
+
+        {/* Right: Mobile Toggle */}
+        <button
+          className="md:hidden text-white rounded-full bg-black/40 p-2 backdrop-blur-md"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Toggle Menu"
+        >
+          {isMenuOpen ? (
+            <X className="w-6 h-6" aria-hidden="true" />
+          ) : (
+            <Menu className="w-6 h-6" aria-hidden="true" />
+          )}
+        </button>
       </nav>
 
       {/* --- MOBILE MENU OVERLAY --- */}
@@ -1575,7 +1573,7 @@ export default function NYTARPage() {
           <img
             src="/AR-hero.jpg"
             alt="AR Technology Abstract"
-            className="w-full h-full object-cover opacity-30 grayscale"
+            className="w-full h-full object-cover opacity-30 grayscale translate-x-[200px] md:translate-x-0"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-transparent" />
         </motion.div>
