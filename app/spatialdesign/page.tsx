@@ -264,6 +264,9 @@ function PrototypeScrollytelling() {
           aria-label="Screen recording of the first AR article prototype, shown as a stacked split of the left and right halves of the frame"
           role="img"
         >
+          <span className="mb-4 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white text-xs font-mono uppercase tracking-widest">
+            First AR Prototype
+          </span>
           <div className="relative h-[36vh] aspect-[8/9] mx-auto overflow-hidden rounded-t-2xl border border-b-0 border-white/10 shadow-2xl">
             <video
               ref={topRef}
@@ -276,9 +279,6 @@ function PrototypeScrollytelling() {
               aria-hidden="true"
               className="absolute top-0 left-0 h-full w-[200%] max-w-none object-cover"
             />
-            <span className="absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white text-[10px] font-mono uppercase tracking-widest">
-              First AR Prototype
-            </span>
           </div>
           <div className="relative h-[36vh] aspect-[8/9] mx-auto overflow-hidden rounded-b-2xl border border-white/10 shadow-2xl">
             <video
@@ -1445,7 +1445,7 @@ export default function NYTARPage() {
       className="bg-neutral-950 text-neutral-200 min-h-screen font-sans selection:bg-white selection:text-black"
     >
       {/* --- NAV --- */}
-      <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 mix-blend-difference text-white">
+      <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 md:mix-blend-difference text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.6)] md:[text-shadow:none]">
         {/* Left: Home Link */}
         <Link
           href="/"
@@ -1546,8 +1546,6 @@ export default function NYTARPage() {
             className="w-full h-full object-cover opacity-30 grayscale"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-transparent" />
-          {/* Darken the top to hide the bright studio light/ceiling in the source image */}
-          <div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-neutral-950/40 to-transparent" />
         </motion.div>
 
         <motion.div
