@@ -136,7 +136,6 @@ export default function Hero() {
                 loop 
                 muted 
                 playsinline 
-                poster="/video-poster.jpg"
                 class="w-full h-full object-cover opacity-60"
               >
                 <source src="/Kronos_lbrt-8966.mp4" type="video/mp4" />

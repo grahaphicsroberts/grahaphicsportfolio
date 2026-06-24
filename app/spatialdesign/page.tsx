@@ -173,6 +173,8 @@ function AnnotatedScrollBlock({
 function PrototypeScrollytelling() {
   const ref = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const topRef = useRef<HTMLVideoElement>(null);
+  const botRef = useRef<HTMLVideoElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const inView = useInView(stageRef, { amount: 0.3 });
   const { scrollYProgress } = useScroll({
@@ -190,18 +192,38 @@ function PrototypeScrollytelling() {
     setActiveBlock(idx);
   });
 
-  // Restart the video from the beginning whenever it re-enters the viewport.
+  // Restart the video(s) from the beginning whenever they re-enter the viewport.
+  // Desktop uses one video; mobile uses two stacked halves of the same clip.
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const videos = [
+      videoRef.current,
+      topRef.current,
+      botRef.current,
+    ].filter((v): v is HTMLVideoElement => v !== null);
     if (inView) {
-      video.currentTime = 0;
-      const playback = video.play();
-      if (playback) playback.catch(() => {});
+      videos.forEach((v) => {
+        v.currentTime = 0;
+        const playback = v.play();
+        if (playback) playback.catch(() => {});
+      });
     } else {
-      video.pause();
+      videos.forEach((v) => v.pause());
     }
   }, [inView]);
+
+  // Keep the two mobile halves time-synced so the split frame stays aligned.
+  useEffect(() => {
+    const top = topRef.current;
+    const bot = botRef.current;
+    if (!top || !bot) return;
+    const sync = () => {
+      if (Math.abs(top.currentTime - bot.currentTime) > 0.2) {
+        bot.currentTime = top.currentTime;
+      }
+    };
+    top.addEventListener("timeupdate", sync);
+    return () => top.removeEventListener("timeupdate", sync);
+  }, []);
 
   return (
     <section
@@ -213,7 +235,8 @@ function PrototypeScrollytelling() {
         ref={stageRef}
         className="sticky top-0 h-screen overflow-hidden flex items-center justify-center bg-black px-6"
       >
-        <div className="relative w-full max-w-5xl max-h-[80vh] aspect-video rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl">
+        {/* Desktop: single 16:9 video */}
+        <div className="hidden md:block relative w-full max-w-5xl max-h-[80vh] aspect-video rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl">
           <video
             ref={videoRef}
             src="/AR_FirstPrototypeDemo.mp4"
@@ -232,6 +255,44 @@ function PrototypeScrollytelling() {
           <span className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white text-xs font-mono uppercase tracking-widest">
             First AR Prototype
           </span>
+        </div>
+
+        {/* Mobile: the same clip split into stacked left/right halves so it can
+            fill the vertical space at a larger size. */}
+        <div
+          className="md:hidden flex w-full max-w-sm flex-col gap-3"
+          aria-label="Screen recording of the first AR article prototype, shown as a stacked split of the left and right halves of the frame"
+          role="img"
+        >
+          <div className="relative w-full aspect-[8/9] overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+            <video
+              ref={topRef}
+              src="/AR_FirstPrototypeDemo.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              aria-hidden="true"
+              className="absolute top-0 left-0 h-full w-[200%] max-w-none object-cover"
+            />
+            <span className="absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white text-[10px] font-mono uppercase tracking-widest">
+              First AR Prototype
+            </span>
+          </div>
+          <div className="relative w-full aspect-[8/9] overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+            <video
+              ref={botRef}
+              src="/AR_FirstPrototypeDemo.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              aria-hidden="true"
+              className="absolute top-0 right-0 h-full w-[200%] max-w-none object-cover"
+            />
+          </div>
         </div>
         {PROTOTYPE_BLOCKS.map((text, i) => (
           <ScrollBlock
@@ -662,8 +723,7 @@ function MoonscapeScreen() {
               loop
               muted
               playsInline
-              className="block aspect-[3/4] md:aspect-[3/2] w-full bg-black object-cover"
-              style={{ objectPosition: "center calc(50% - 150px)" }}
+              className="block aspect-video md:aspect-[3/2] w-full bg-black object-cover object-center md:object-[center_calc(50%_-_150px)]"
             >
               <source src="/Apollo_TheMill.mp4" type="video/mp4" />
             </video>
@@ -779,10 +839,11 @@ function MagicLeapHeadsetReveal() {
             aria-hidden="true"
           />
 
-          {/* Visor housing — the goggles interior dropping over the eyes */}
+          {/* Visor housing — the goggles interior dropping over the eyes.
+              Hidden on mobile, where the tall crop distorts its geometry. */}
           <motion.div
             style={{ opacity: visorOpacity, scale: visorScale, y: visorY }}
-            className="absolute inset-0 z-[15] pointer-events-none"
+            className="absolute inset-0 z-[15] pointer-events-none hidden md:block"
             aria-hidden="true"
           >
             <svg
