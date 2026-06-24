@@ -619,6 +619,211 @@ function MoonscapeScreen() {
   );
 }
 
+// Magic Leap "put on the headset" reveal: two stereoscopic lenses play the
+// video doubled and separated, then converge and fuse into a single merged
+// video as you scroll the section into view (like sliding the headset on).
+function MagicLeapHeadsetReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 0.9", "center 0.5"],
+  });
+  const p = useSpring(scrollYProgress, { stiffness: 90, damping: 24 });
+
+  // Lenses slide from far apart to a slight overlap at center.
+  const leftX = useTransform(p, [0, 0.75], ["-58%", "9%"]);
+  const rightX = useTransform(p, [0, 0.75], ["58%", "-9%"]);
+  const lensScale = useTransform(p, [0, 0.75], [0.7, 1.06]);
+  const lensOpacity = useTransform(p, [0.6, 0.9], [1, 0]);
+  const bezelOpacity = useTransform(p, [0, 0.5], [0.9, 0]);
+  const finalOpacity = useTransform(p, [0.72, 0.96], [0, 1]);
+  const hintOpacity = useTransform(p, [0, 0.12, 0.4], [1, 1, 0]);
+
+  // Visor housing sweeps down over the eyes, peaks during the "put on" motion,
+  // then recedes to a faint vignette so the video reads cleanly once you're in.
+  const visorOpacity = useTransform(p, [0.22, 0.62, 0.82, 1], [0, 1, 1, 0.14]);
+  const visorScale = useTransform(p, [0.22, 0.88], [1.32, 1]);
+  const visorY = useTransform(p, [0.22, 0.88], ["-12%", "0%"]);
+
+  const lensVignette = {
+    boxShadow: "inset 0 0 70px 22px rgba(0,0,0,0.65)",
+  } as const;
+
+  return (
+    <div ref={ref} className="relative">
+      {/* Hologram ambient glow */}
+      <div
+        className="absolute -inset-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 blur-3xl pointer-events-none"
+        aria-hidden="true"
+      />
+      <figure className="relative">
+        <div className="relative aspect-video overflow-hidden rounded-[2rem] border border-indigo-400/30 bg-black shadow-2xl shadow-indigo-950/50">
+          {/* Merged single video — the fused result once the headset is on */}
+          <motion.video
+            style={{ opacity: finalOpacity }}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover"
+          >
+            <source src="/MagicLeap_Guatemala.mp4" type="video/mp4" />
+          </motion.video>
+
+          {/* Stereoscopic lens pair */}
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            aria-hidden="true"
+          >
+            <motion.div
+              style={{ x: leftX, scale: lensScale, opacity: lensOpacity }}
+              className="relative h-[88%] aspect-square overflow-hidden rounded-full ring-1 ring-indigo-300/20"
+            >
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="h-full w-full object-cover"
+              >
+                <source src="/MagicLeap_Guatemala.mp4" type="video/mp4" />
+              </video>
+              <div
+                className="pointer-events-none absolute inset-0 rounded-full"
+                style={lensVignette}
+              />
+            </motion.div>
+            <motion.div
+              style={{ x: rightX, scale: lensScale, opacity: lensOpacity }}
+              className="relative h-[88%] aspect-square overflow-hidden rounded-full ring-1 ring-indigo-300/20"
+            >
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="h-full w-full object-cover"
+              >
+                <source src="/MagicLeap_Guatemala.mp4" type="video/mp4" />
+              </video>
+              <div
+                className="pointer-events-none absolute inset-0 rounded-full"
+                style={lensVignette}
+              />
+            </motion.div>
+          </div>
+
+          {/* Nose-bridge bezel between the two lenses */}
+          <motion.div
+            style={{ opacity: bezelOpacity }}
+            className="absolute top-1/2 left-1/2 z-10 h-20 w-12 -translate-x-1/2 -translate-y-1/2 rounded-b-[2rem] bg-neutral-950/80 blur-[2px]"
+            aria-hidden="true"
+          />
+
+          {/* Visor housing — the goggles interior dropping over the eyes */}
+          <motion.div
+            style={{ opacity: visorOpacity, scale: visorScale, y: visorY }}
+            className="absolute inset-0 z-[15] pointer-events-none"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 160 90"
+              preserveAspectRatio="xMidYMid slice"
+              className="h-full w-full"
+            >
+              <defs>
+                <radialGradient id="ml-eye" cx="50%" cy="50%" r="50%">
+                  <stop offset="60%" stopColor="black" />
+                  <stop offset="100%" stopColor="white" />
+                </radialGradient>
+                <mask id="ml-visor-mask">
+                  <rect width="160" height="90" fill="white" />
+                  <ellipse cx="55" cy="45" rx="33" ry="35" fill="url(#ml-eye)" />
+                  <ellipse cx="105" cy="45" rx="33" ry="35" fill="url(#ml-eye)" />
+                </mask>
+                <linearGradient id="ml-housing" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#13131c" />
+                  <stop offset="48%" stopColor="#050507" />
+                  <stop offset="100%" stopColor="#0d0d16" />
+                </linearGradient>
+              </defs>
+              <rect
+                width="160"
+                height="90"
+                fill="url(#ml-housing)"
+                mask="url(#ml-visor-mask)"
+              />
+            </svg>
+
+            {/* Glowing lens rims around each eye opening */}
+            <div
+              className="absolute rounded-full ring-1 ring-indigo-400/25 shadow-[0_0_45px_rgba(99,102,241,0.28)]"
+              style={{
+                left: "34%",
+                top: "50%",
+                width: "41%",
+                height: "78%",
+                transform: "translate(-50%,-50%)",
+              }}
+            />
+            <div
+              className="absolute rounded-full ring-1 ring-indigo-400/25 shadow-[0_0_45px_rgba(99,102,241,0.28)]"
+              style={{
+                left: "66%",
+                top: "50%",
+                width: "41%",
+                height: "78%",
+                transform: "translate(-50%,-50%)",
+              }}
+            />
+          </motion.div>
+
+          {/* HUD chrome — fades in once the headset is fully on */}
+          <motion.div style={{ opacity: finalOpacity }}>
+            {/* Top HUD status bar */}
+            <div className="absolute top-0 inset-x-0 z-20 flex items-center justify-between px-5 py-3 bg-gradient-to-b from-black/70 to-transparent text-[11px] md:text-xs font-mono uppercase tracking-wider text-neutral-200 pointer-events-none">
+              <div className="flex items-center gap-2">
+                <Glasses className="w-4 h-4 text-indigo-400" aria-hidden="true" />
+                <span>Magic Leap One · Creator Edition</span>
+              </div>
+              <div className="flex items-center gap-2 text-indigo-200">
+                <span
+                  className="w-2 h-2 rounded-full bg-red-500 animate-pulse"
+                  aria-hidden="true"
+                />
+                <span>Live Screen Capture</span>
+              </div>
+            </div>
+
+            {/* AR HUD corner brackets */}
+            <div
+              className="absolute inset-4 md:inset-6 z-10 pointer-events-none"
+              aria-hidden="true"
+            >
+              <span className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-indigo-400/60 rounded-tl-md" />
+              <span className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-indigo-400/60 rounded-tr-md" />
+              <span className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-indigo-400/60 rounded-bl-md" />
+              <span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-indigo-400/60 rounded-br-md" />
+            </div>
+          </motion.div>
+
+          {/* Scroll hint while the headset is still "off" */}
+          <motion.div
+            style={{ opacity: hintOpacity }}
+            className="absolute bottom-5 inset-x-0 z-20 text-center text-[11px] font-mono uppercase tracking-widest text-indigo-200/70 pointer-events-none"
+          >
+            Scroll to put on the headset
+          </motion.div>
+        </div>
+        <figcaption className="mt-4 text-center text-sm font-mono uppercase tracking-wider text-neutral-500">
+          The reader&apos;s view through the Magic Leap One Creator Edition
+          headset
+        </figcaption>
+      </figure>
+    </div>
+  );
+}
+
 // Floor-perspective zone map: 4 quadrants that highlight clockwise on a loop.
 function QuadrantDiagram() {
   const [active, setActive] = useState(0);
@@ -1945,62 +2150,22 @@ export default function NYTARPage() {
 
           {/* Short lead-in before the visual */}
           <p className="text-lg md:text-xl text-neutral-400 leading-relaxed max-w-2xl mx-auto">
-            Reimagining a New York Times article as a fully spatial experience —
-            built side-by-side with Magic Leap and launched as the very first
-            news story on the headset.
+            To explore the future of immersive reading, we brought a specialized
+            team down to Magic Leap&apos;s headquarters in Florida. Working
+            side-by-side with their engineering and design teams, we investigated
+            what a New York Times article might look like as a fully spatial
+            experience.
           </p>
         </div>
 
         {/* Centered Hero Video — screen capture from the headset */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12 mt-20">
-          {/* Hologram ambient glow */}
-          <div
-            className="absolute -inset-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 blur-3xl pointer-events-none"
-            aria-hidden="true"
-          />
-          <figure className="relative">
-            {/* Headset viewport chrome */}
-            <div className="relative overflow-hidden rounded-[2rem] border border-indigo-400/30 bg-black shadow-2xl shadow-indigo-950/50">
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full aspect-video object-cover bg-black"
-              >
-                <source src="/MagicLeap_Guatemala.mp4" type="video/mp4" />
-              </video>
-
-              {/* Top HUD status bar */}
-              <div className="absolute top-0 inset-x-0 z-20 flex items-center justify-between px-5 py-3 bg-gradient-to-b from-black/70 to-transparent text-[11px] md:text-xs font-mono uppercase tracking-wider text-neutral-200 pointer-events-none">
-                <div className="flex items-center gap-2">
-                  <Glasses className="w-4 h-4 text-indigo-400" aria-hidden="true" />
-                  <span>Magic Leap One · Creator Edition</span>
-                </div>
-                <div className="flex items-center gap-2 text-indigo-200">
-                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" aria-hidden="true" />
-                  <span>Live Screen Capture</span>
-                </div>
-              </div>
-
-              {/* AR HUD corner brackets */}
-              <div className="absolute inset-4 md:inset-6 z-10 pointer-events-none" aria-hidden="true">
-                <span className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-indigo-400/60 rounded-tl-md" />
-                <span className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-indigo-400/60 rounded-tr-md" />
-                <span className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-indigo-400/60 rounded-bl-md" />
-                <span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-indigo-400/60 rounded-br-md" />
-              </div>
-            </div>
-            <figcaption className="mt-4 text-center text-sm font-mono uppercase tracking-wider text-neutral-500">
-              The reader&apos;s view through the Magic Leap One Creator Edition
-              headset
-            </figcaption>
-          </figure>
+          <MagicLeapHeadsetReveal />
         </div>
 
-        {/* Narrative copy + speaking image (two-column for a more dynamic feel) */}
+        {/* Narrative copy + speaking image (two-column, vertically centered) */}
         <div className="max-w-6xl mx-auto px-6 lg:px-12 mt-24">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             {/* Speaking image */}
             <figure className="order-2 lg:order-1">
               <img
@@ -2015,13 +2180,6 @@ export default function NYTARPage() {
 
             {/* Narrative copy */}
             <div className="order-1 lg:order-2 prose prose-invert prose-lg text-neutral-400">
-              <p>
-                To explore the future of immersive reading, we brought a
-                specialized team down to Magic Leap&apos;s headquarters in
-                Florida. Working side-by-side with their engineering and design
-                teams, we investigated what a New York Times article might look
-                like as a fully spatial experience.
-              </p>
               <p>
                 We chose to prototype a breaking news event: the devastating 2018
                 volcanic eruption in Guatemala. We trained a stringer
@@ -2077,16 +2235,22 @@ export default function NYTARPage() {
 
       {/* --- CHAPTER 3: MORE AR PROJECTS (SIDE SCROLL) --- */}
       <section className="py-24 bg-neutral-950 border-t border-neutral-900 overflow-hidden">
-        <div className="px-6 md:px-12 mb-12 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-2">
-              More AR Projects
-            </h2>
-            <p className="text-neutral-500">
-              A collection of mobile-first experiments
-            </p>
+        <div className="max-w-3xl mx-auto text-center px-6 md:px-12 mb-16">
+          <div className="flex justify-center mb-6">
+            <Box className="w-10 h-10 text-indigo-400" aria-hidden="true" />
           </div>
-          <div className="hidden md:flex items-center gap-2 text-neutral-600 font-mono text-xs uppercase tracking-widest animate-pulse">
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            A creative explosion in spatial storytelling
+          </h2>
+          <p className="text-lg md:text-xl text-neutral-400 leading-relaxed">
+            We visualized the invisible pollution around us, how water might have
+            existed on Mars, used Microsoft&apos;s volumetric video SDK to bring
+            celebrities into your space, and many more from which we developed a
+            perspective and tremendous learnings on how to create engaging,
+            effective, and inspiring work, leaning in to the future of spatial
+            platforms.
+          </p>
+          <div className="mt-8 flex items-center justify-center gap-2 text-neutral-600 font-mono text-xs uppercase tracking-widest animate-pulse">
             Scroll <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </div>
         </div>
@@ -2096,10 +2260,10 @@ export default function NYTARPage() {
           {MORE_PROJECTS.map((project, i) => (
             <div
               key={i}
-              className="shrink-0 snap-center flex flex-col items-center gap-6"
+              className="group shrink-0 snap-center flex flex-col items-center gap-6"
             >
               {/* Phone Frame */}
-              <div className="relative w-[260px] aspect-[9/19] bg-black rounded-[2.5rem] border-[6px] border-neutral-800 overflow-hidden shadow-lg group">
+              <div className="relative w-[260px] aspect-[9/19] bg-black rounded-[2.5rem] border-[6px] border-neutral-800 overflow-hidden shadow-lg transition-all duration-500 group-hover:scale-[1.04] group-hover:border-neutral-600 group-hover:shadow-xl group-hover:shadow-indigo-500/20">
                 <div className="absolute top-0 w-full h-5 z-20 flex justify-center items-center pointer-events-none">
                   <div className="w-16 h-4 bg-black rounded-b-lg" />
                 </div>
@@ -2108,7 +2272,7 @@ export default function NYTARPage() {
                   loop
                   muted
                   playsInline
-                  className={`w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-500 ${
+                  className={`w-full h-full object-cover ${
                     project.title === "Mars Insight Lander"
                       ? "scale-[1.04]"
                       : ""
@@ -2118,7 +2282,7 @@ export default function NYTARPage() {
                 </video>
               </div>
 
-              <span className="text-sm font-mono text-neutral-500 uppercase tracking-wider">
+              <span className="block w-[260px] text-center text-sm font-mono text-neutral-500 uppercase tracking-wider">
                 {project.title}
               </span>
             </div>
