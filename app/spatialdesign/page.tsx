@@ -341,44 +341,23 @@ function EngineeringDiagram() {
       role="img"
       aria-label="Google, Apple, Microsoft, and Unity logos arranged around a central New York Times T, with connections flowing inward."
     >
-      {/* Luminance-to-alpha key: turns the black background transparent.
-          overflow-hidden is required: without it Chrome (esp. mobile) paints
-          this absolutely-positioned filter SVG as a stray rectangle at the page
-          origin (a white/black box at the top-left that scrolls with the page). */}
-      <svg
-        width="0"
-        height="0"
-        className="absolute overflow-hidden"
-        aria-hidden="true"
-      >
-        <defs>
-          <filter id="logo-key" colorInterpolationFilters="sRGB">
-            <feColorMatrix
-              type="matrix"
-              values="1 0 0 0 0
-                      0 1 0 0 0
-                      0 0 1 0 0
-                      0.33 0.59 0.11 0 0"
-            />
-          </filter>
-        </defs>
-      </svg>
-
       {/* Ambient glow behind the artwork */}
       <div
         className="absolute left-1/2 top-1/2 h-2/3 w-2/3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-400/15 blur-3xl"
         aria-hidden="true"
       />
 
-      {/* Partner artwork: black keyed to transparent, with a soft glow */}
+      {/* Partner artwork. The black background is pre-keyed to transparency in the
+          PNG itself (baked luminance-to-alpha), so no runtime SVG url() filter is
+          needed. That filter was triggering a mobile-GPU paint artifact (a stray
+          box at the page's top-left). Only the soft glow remains as a CSS filter. */}
       <img
-        src="/techPartnersArranged.png"
+        src="/techPartnersArranged-keyed.png"
         alt=""
         aria-hidden="true"
         className="relative w-full h-auto"
         style={{
-          filter:
-            "url(#logo-key) drop-shadow(0 0 18px rgba(56,189,248,0.4))",
+          filter: "drop-shadow(0 0 18px rgba(56,189,248,0.4))",
         }}
       />
 
