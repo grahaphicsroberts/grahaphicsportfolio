@@ -1556,7 +1556,7 @@ export default function NYTARPage() {
           <img
             src="/AR-hero.jpg"
             alt="AR Technology Abstract"
-            className="w-full h-full object-cover opacity-30 grayscale object-[25%_center] md:object-center"
+            className="w-full h-full object-cover opacity-60 object-[25%_center] md:object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-transparent" />
         </motion.div>
