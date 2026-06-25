@@ -341,8 +341,16 @@ function EngineeringDiagram() {
       role="img"
       aria-label="Google, Apple, Microsoft, and Unity logos arranged around a central New York Times T, with connections flowing inward."
     >
-      {/* Luminance-to-alpha key: turns the black background transparent */}
-      <svg width="0" height="0" className="absolute" aria-hidden="true">
+      {/* Luminance-to-alpha key: turns the black background transparent.
+          overflow-hidden is required: without it Chrome (esp. mobile) paints
+          this absolutely-positioned filter SVG as a stray rectangle at the page
+          origin (a white/black box at the top-left that scrolls with the page). */}
+      <svg
+        width="0"
+        height="0"
+        className="absolute overflow-hidden"
+        aria-hidden="true"
+      >
         <defs>
           <filter id="logo-key" colorInterpolationFilters="sRGB">
             <feColorMatrix
@@ -1471,11 +1479,7 @@ export default function NYTARPage() {
       className="bg-neutral-950 text-neutral-200 min-h-screen font-sans selection:bg-white selection:text-black"
     >
       {/* --- NAV --- */}
-      {/* Desktop keeps mix-blend-difference (auto-inverts over light/dark sections).
-          On mobile that blend on a fixed element leaves a ghost rectangle (Chrome
-          mobile bug), so we drop it there and use a faint text-shadow for legibility.
-          Paired with `-webkit-tap-highlight-color: transparent` in globals.css. */}
-      <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 md:mix-blend-difference text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] md:[text-shadow:none]">
+      <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 mix-blend-difference text-white">
         {/* Left: Home Link */}
         <Link
           href="/"
