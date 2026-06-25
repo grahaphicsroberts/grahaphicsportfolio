@@ -1471,15 +1471,15 @@ export default function NYTARPage() {
       className="bg-neutral-950 text-neutral-200 min-h-screen font-sans selection:bg-white selection:text-black"
     >
       {/* --- NAV --- */}
-      {/* Desktop uses mix-blend-difference so the nav auto-inverts over light/dark
-          sections. On mobile (Chrome) that blend on a fixed element paints a stray
-          rectangle at the page origin, so we drop the blend there and instead give
-          the items a translucent backdrop to stay legible over any section. */}
-      <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 md:mix-blend-difference text-white">
+      {/* Desktop keeps mix-blend-difference (auto-inverts over light/dark sections).
+          On mobile that blend on a fixed element leaves a ghost rectangle (Chrome
+          mobile bug), so we drop it there and use a faint text-shadow for legibility.
+          Paired with `-webkit-tap-highlight-color: transparent` in globals.css. */}
+      <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 md:mix-blend-difference text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] md:[text-shadow:none]">
         {/* Left: Home Link */}
         <Link
           href="/"
-          className="flex items-center gap-2 hover:opacity-70 transition-opacity rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-md md:rounded-none md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none"
+          className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           onClick={() => setIsMenuOpen(false)}
         >
           <ArrowLeft className="w-5 h-5" aria-hidden="true" />
@@ -1510,7 +1510,7 @@ export default function NYTARPage() {
 
         {/* Right: Mobile Toggle */}
         <button
-          className="md:hidden text-white rounded-full bg-black/40 p-2 backdrop-blur-md"
+          className="md:hidden text-white"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Toggle Menu"
         >
