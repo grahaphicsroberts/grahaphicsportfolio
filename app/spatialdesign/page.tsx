@@ -173,8 +173,11 @@ function AnnotatedScrollBlock({
 function PrototypeScrollytelling() {
   const ref = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const topRef = useRef<HTMLVideoElement>(null);
-  const botRef = useRef<HTMLVideoElement>(null);
+  // Mobile split is rendered from ONE decoded video painted into two canvases,
+  // so there's no second decoder to contend on mobile and the halves stay synced.
+  const mobileVideoRef = useRef<HTMLVideoElement>(null);
+  const topCanvasRef = useRef<HTMLCanvasElement>(null);
+  const botCanvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const inView = useInView(stageRef, { amount: 0.3 });
   const { scrollYProgress } = useScroll({
@@ -192,38 +195,57 @@ function PrototypeScrollytelling() {
     setActiveBlock(idx);
   });
 
-  // Restart the video(s) from the beginning whenever they re-enter the viewport.
-  // Desktop uses one video; mobile uses two stacked halves of the same clip.
+  // Play/restart the relevant video when the section enters view, pause when it
+  // leaves. Desktop uses one on-screen video; mobile decodes a single hidden
+  // video and paints its left/right halves into two stacked canvases.
   useEffect(() => {
-    const videos = [
-      videoRef.current,
-      topRef.current,
-      botRef.current,
-    ].filter((v): v is HTMLVideoElement => v !== null);
-    if (inView) {
-      videos.forEach((v) => {
-        v.currentTime = 0;
-        const playback = v.play();
-        if (playback) playback.catch(() => {});
-      });
-    } else {
-      videos.forEach((v) => v.pause());
-    }
-  }, [inView]);
-
-  // Keep the two mobile halves time-synced so the split frame stays aligned.
-  useEffect(() => {
-    const top = topRef.current;
-    const bot = botRef.current;
-    if (!top || !bot) return;
-    const sync = () => {
-      if (Math.abs(top.currentTime - bot.currentTime) > 0.2) {
-        bot.currentTime = top.currentTime;
-      }
+    const desktop = videoRef.current;
+    const src = mobileVideoRef.current;
+    const playFrom0 = (v: HTMLVideoElement | null) => {
+      if (!v) return;
+      v.currentTime = 0;
+      const p = v.play();
+      if (p) p.catch(() => {});
     };
-    top.addEventListener("timeupdate", sync);
-    return () => top.removeEventListener("timeupdate", sync);
-  }, []);
+
+    if (!inView) {
+      desktop?.pause();
+      src?.pause();
+      return;
+    }
+
+    playFrom0(desktop);
+    playFrom0(src);
+
+    // Paint the single decoded frame into both halves on every animation frame.
+    const topC = topCanvasRef.current;
+    const botC = botCanvasRef.current;
+    if (!src || !topC || !botC) return;
+    const topCtx = topC.getContext("2d");
+    const botCtx = botC.getContext("2d");
+    if (!topCtx || !botCtx) return;
+
+    let raf = 0;
+    const draw = () => {
+      const vw = src.videoWidth;
+      const vh = src.videoHeight;
+      if (vw && vh) {
+        const halfW = Math.floor(vw / 2);
+        if (topC.width !== halfW) {
+          topC.width = halfW;
+          topC.height = vh;
+          botC.width = halfW;
+          botC.height = vh;
+        }
+        // Top canvas = left half of the frame; bottom canvas = right half.
+        topCtx.drawImage(src, 0, 0, halfW, vh, 0, 0, halfW, vh);
+        botCtx.drawImage(src, vw - halfW, 0, halfW, vh, 0, 0, halfW, vh);
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    raf = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(raf);
+  }, [inView]);
 
   return (
     <section
@@ -267,30 +289,32 @@ function PrototypeScrollytelling() {
           <span className="mb-4 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white text-xs font-mono uppercase tracking-widest">
             First AR Prototype
           </span>
+          {/* Single decoded source (kept rendered but invisible so it keeps
+              decoding on mobile); its frames are drawn into the two canvases.
+              data-no-observe keeps the page-level video pauser from touching it. */}
+          <video
+            ref={mobileVideoRef}
+            src="/AR_FirstPrototypeDemo.mp4"
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+            data-no-observe="true"
+            className="pointer-events-none absolute h-px w-px opacity-0"
+          />
           <div className="relative h-[36vh] aspect-[8/9] mx-auto overflow-hidden rounded-t-2xl border border-b-0 border-white/10 shadow-2xl">
-            <video
-              ref={topRef}
-              src="/AR_FirstPrototypeDemo.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
+            <canvas
+              ref={topCanvasRef}
               aria-hidden="true"
-              className="absolute top-0 left-0 h-full w-[200%] max-w-none object-cover"
+              className="absolute inset-0 h-full w-full"
             />
           </div>
           <div className="relative h-[36vh] aspect-[8/9] mx-auto overflow-hidden rounded-b-2xl border border-white/10 shadow-2xl">
-            <video
-              ref={botRef}
-              src="/AR_FirstPrototypeDemo.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
+            <canvas
+              ref={botCanvasRef}
               aria-hidden="true"
-              className="absolute top-0 right-0 h-full w-[200%] max-w-none object-cover"
+              className="absolute inset-0 h-full w-full"
             />
           </div>
         </div>
@@ -1448,7 +1472,10 @@ export default function NYTARPage() {
       },
       { rootMargin: "200px 0px", threshold: 0.1 }
     );
-    videos.forEach((v) => io.observe(v));
+    // Skip videos that manage their own playback (e.g. the hidden canvas source).
+    videos
+      .filter((v) => v.dataset.noObserve !== "true")
+      .forEach((v) => io.observe(v));
     return () => io.disconnect();
   }, []);
 
