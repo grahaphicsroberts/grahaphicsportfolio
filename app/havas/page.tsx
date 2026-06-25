@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import AutoVideo from "../components/AutoVideo";
 import {
   motion,
   useScroll,
@@ -128,18 +129,13 @@ const WorkItem = ({ item }: { item: any }) => {
     >
       <div className={`relative w-full ${item.aspect}`}>
         {item.type === "video" ? (
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
+          <AutoVideo
+            src={item.src}
             className={`w-full h-full object-cover transition-all duration-700
               ${isInView ? "opacity-100 grayscale-0" : "opacity-30 grayscale"} 
               md:opacity-80 md:grayscale-0 md:group-hover:opacity-100
             `}
-          >
-            <source src={item.src} type="video/mp4" />
-          </video>
+          />
         ) : (
           <img
             src={item.src}

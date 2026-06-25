@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import AutoVideo from "../components/AutoVideo";
 import {
   motion,
   useScroll,
@@ -232,15 +233,10 @@ export default function ImmersiveWebPage() {
 
           {/* Hero Video */}
           <div className="relative aspect-[16/9] bg-black rounded-[2rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl mb-16">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
+            <AutoVideo
+              src="/snowfall-desktop.mp4"
               className="w-full h-full object-cover"
-            >
-              <source src="/snowfall-desktop.mp4" type="video/mp4" />
-            </video>
+            />
             <div className="absolute bottom-6 right-6 bg-black/60 backdrop-blur px-4 py-2 rounded-full text-xs font-mono text-white border border-white/10 z-20">
               Desktop Experience
             </div>
@@ -284,15 +280,10 @@ export default function ImmersiveWebPage() {
             </div>
             <div className="md:pt-24">
               <div className="aspect-video bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800 mb-6">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
+                <AutoVideo
+                  src="/snowfall-bts-2.mp4"
                   className="w-full h-full object-cover"
-                >
-                  <source src="/snowfall-bts-2.mp4" type="video/mp4" />
-                </video>
+                />
               </div>
               <p className="text-neutral-400 text-sm leading-relaxed">
                 <strong className="text-white block mb-1">
@@ -351,15 +342,10 @@ export default function ImmersiveWebPage() {
 
           {/* Hero Video - 16:10 Aspect Ratio */}
           <div className="relative aspect-[16/10] bg-black rounded-[2rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl mb-16">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
+            <AutoVideo
+              src="/notredame-desktop.mp4"
               className="w-full h-full object-cover"
-            >
-              <source src="/notredame-desktop.mp4" type="video/mp4" />
-            </video>
+            />
             <div className="absolute bottom-6 right-6 bg-black/60 backdrop-blur px-4 py-2 rounded-full text-xs font-mono text-white border border-white/10 z-20">
               Desktop Experience
             </div>
@@ -451,15 +437,10 @@ export default function ImmersiveWebPage() {
 
           {/* Hero Video - 16:9 Aspect Ratio */}
           <div className="relative aspect-[16/9] bg-black rounded-[2rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl mb-16">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
+            <AutoVideo
+              src="/polar-desktop.mp4"
               className="w-full h-full object-cover"
-            >
-              <source src="/polar-desktop.mp4" type="video/mp4" />
-            </video>
+            />
             <div className="absolute bottom-6 right-6 bg-black/60 backdrop-blur px-4 py-2 rounded-full text-xs font-mono text-white border border-white/10 z-20">
               Desktop Experience
             </div>

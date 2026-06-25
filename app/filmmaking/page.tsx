@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
+import AutoVideo from "../components/AutoVideo";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowLeft, Play, Glasses, Mic, Scan, Activity } from "lucide-react";
 import Link from "next/link";
@@ -166,15 +167,10 @@ export default function FilmmakingPage() {
               >
                 <div className="relative aspect-video bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800 shadow-2xl group">
                   {/* The Video */}
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
+                  <AutoVideo
+                    src={section.video}
                     className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
-                  >
-                    <source src={section.video} type="video/mp4" />
-                  </video>
+                  />
 
                   {/* Overlay Gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-50 group-hover:opacity-0 transition-opacity" />

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import AutoVideo from "../components/AutoVideo";
 import {
   motion,
   useScroll,
@@ -249,15 +250,10 @@ export default function GoogleTrendsPage() {
 
           {/* Desktop Video - AR Style Frame */}
           <div className="relative aspect-[16/8.5] bg-black rounded-[2rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl mb-24 z-10">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
+            <AutoVideo
+              src="/space-desktop.mp4"
               className="w-full h-full object-cover bg-neutral-900"
-            >
-              <source src="/space-desktop.mp4" type="video/mp4" />
-            </video>
+            />
             <div className="absolute bottom-6 right-6 bg-black/60 backdrop-blur px-4 py-2 rounded-full text-xs font-mono text-white border border-white/10 z-20">
               Desktop Experience
             </div>
@@ -376,15 +372,10 @@ export default function GoogleTrendsPage() {
 
               {/* Media Container - aspect-square - NO LABEL */}
               <div className="relative aspect-square bg-black rounded-xl overflow-hidden border border-neutral-700 shadow-2xl max-w-md mx-auto w-full">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
+                <AutoVideo
+                  src="/expressive-captions.mp4"
                   className="w-full h-full object-cover"
-                >
-                  <source src="/expressive-captions.mp4" type="video/mp4" />
-                </video>
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
               </div>
             </div>
@@ -433,15 +424,10 @@ export default function GoogleTrendsPage() {
 
           {/* Main Experience Video */}
           <div className="relative aspect-video bg-black rounded-xl overflow-hidden border border-neutral-800 shadow-2xl mb-12">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
+            <AutoVideo
+              src="/yis-experience.mp4"
               className="w-full h-full object-cover"
-            >
-              <source src="/yis-experience.mp4" type="video/mp4" />
-            </video>
+            />
             <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur px-4 py-2 rounded-full text-xs font-mono text-white border border-white/10 flex items-center gap-2">
               <Store className="w-3 h-3" /> NYC Google Store
             </div>
@@ -452,15 +438,10 @@ export default function GoogleTrendsPage() {
             {/* Item 1: Vertical Video (Takes up 4 cols, aligned height) */}
             <div className="md:col-span-4 space-y-6">
               <div className="relative h-[500px] md:h-[600px] bg-black rounded-2xl overflow-hidden border border-neutral-800 shadow-2xl">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
+                <AutoVideo
+                  src="/yis-bts.mp4"
                   className="w-full h-full object-cover"
-                >
-                  <source src="/yis-bts.mp4" type="video/mp4" />
-                </video>
+                />
               </div>
               <div>
                 <h4 className="text-white font-bold mb-2 flex items-center gap-2">
@@ -538,15 +519,10 @@ export default function GoogleTrendsPage() {
 
           {/* Hero Video - Dashboard */}
           <div className="relative aspect-[16/10] bg-black rounded-[2rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl mb-24 z-10">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
+            <AutoVideo
+              src="/trends-redesign-hero.mp4"
               className="w-full h-full object-cover"
-            >
-              <source src="/trends-redesign-hero.mp4" type="video/mp4" />
-            </video>
+            />
             <div className="absolute bottom-6 right-6 bg-black/60 backdrop-blur px-4 py-2 rounded-full text-xs font-mono text-white border border-white/10 z-20">
               New Homepage Dashboard
             </div>
@@ -588,15 +564,10 @@ export default function GoogleTrendsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             {/* UPDATED: Video instead of Image */}
             <div className="order-2 md:order-1 relative bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800">
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
+              <AutoVideo
+                src="/trends-studio.mp4"
                 className="w-full h-full object-cover"
-              >
-                <source src="/trends-studio.mp4" type="video/mp4" />
-              </video>
+              />
             </div>
             <div className="order-1 md:order-2">
               <div className="flex items-center gap-3 mb-6 text-purple-400">

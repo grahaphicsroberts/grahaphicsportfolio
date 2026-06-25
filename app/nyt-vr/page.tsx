@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import AutoVideo from "../components/AutoVideo";
 import {
   motion,
   useScroll,
@@ -457,15 +458,10 @@ export default function NYTVRPage() {
 
               {/* 2. Hero Motion Video */}
               <div className="relative aspect-video bg-black rounded-t-xl overflow-hidden border border-neutral-800 shadow-2xl mb-1">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
+                <AutoVideo
+                  src={project.video}
                   className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity duration-700"
-                >
-                  <source src={project.video} type="video/mp4" />
-                </video>
+                />
                 <div className="absolute top-4 left-4 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-mono text-white border border-white/20 flex items-center gap-2">
                   <ImageIcon className="w-3 h-3" aria-hidden="true" /> Motion Experience
                 </div>

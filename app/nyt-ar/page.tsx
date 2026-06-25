@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import AutoVideo from "../components/AutoVideo";
 import {
   motion,
   useScroll,
@@ -287,15 +288,10 @@ export default function NYTARPage() {
                 <div className="absolute top-0 w-full h-8 z-20 flex justify-center items-center pointer-events-none">
                   <div className="w-20 h-6 bg-black rounded-b-xl" />
                 </div>
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
+                <AutoVideo
+                  src="/honor-box-mobile.mp4"
                   className="w-full h-full object-cover bg-neutral-900"
-                >
-                  <source src="/honor-box-mobile.mp4" type="video/mp4" />
-                </video>
+                />
               </div>
               <div className="absolute -z-10 top-12 -right-12 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-50" />
               <div className="absolute -z-10 bottom-12 -left-12 w-64 h-64 bg-yellow-100 rounded-full blur-3xl opacity-50" />
@@ -326,15 +322,10 @@ export default function NYTARPage() {
               <div className="absolute top-0 w-full h-8 z-20 flex justify-center items-center pointer-events-none">
                 <div className="w-20 h-6 bg-black rounded-b-xl" />
               </div>
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
+              <AutoVideo
+                src="/honor-box-mobile.mp4"
                 className="w-full h-full object-cover bg-neutral-900"
-              >
-                <source src="/honor-box-mobile.mp4" type="video/mp4" />
-              </video>
+              />
             </div>
 
             {/* Background Orbs */}
@@ -414,28 +405,18 @@ export default function NYTARPage() {
                   <div className="absolute top-0 w-full h-6 z-20 flex justify-center items-center pointer-events-none">
                     <div className="w-20 h-5 bg-black rounded-b-lg" />
                   </div>
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
+                  <AutoVideo
+                    src={project.mobile}
                     className="w-full h-full object-cover bg-neutral-900"
-                  >
-                    <source src={project.mobile} type="video/mp4" />
-                  </video>
+                  />
                 </div>
 
                 {/* Desktop Frame */}
                 <div className="relative shrink-0 w-full md:w-[600px] lg:w-[800px] aspect-video bg-black rounded-[2rem] border-[8px] border-neutral-800 overflow-hidden shadow-2xl z-10">
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
+                  <AutoVideo
+                    src={project.desktop}
                     className="w-full h-full object-cover bg-neutral-900"
-                  >
-                    <source src={project.desktop} type="video/mp4" />
-                  </video>
+                  />
                 </div>
               </div>
 
@@ -504,15 +485,10 @@ export default function NYTARPage() {
           <figure className="relative">
             {/* Headset viewport chrome */}
             <div className="relative overflow-hidden rounded-[2rem] border border-indigo-400/30 bg-black shadow-2xl shadow-indigo-950/50">
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
+              <AutoVideo
+                src="/MagicLeap_Guatemala.mp4"
                 className="w-full aspect-video object-cover bg-black"
-              >
-                <source src="/MagicLeap_Guatemala.mp4" type="video/mp4" />
-              </video>
+              />
 
               {/* Top HUD status bar */}
               <div className="absolute top-0 inset-x-0 z-20 flex items-center justify-between px-5 py-3 bg-gradient-to-b from-black/70 to-transparent text-[11px] md:text-xs font-mono uppercase tracking-wider text-neutral-200 pointer-events-none">
@@ -646,19 +622,14 @@ export default function NYTARPage() {
                 <div className="absolute top-0 w-full h-5 z-20 flex justify-center items-center pointer-events-none">
                   <div className="w-16 h-4 bg-black rounded-b-lg" />
                 </div>
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
+                <AutoVideo
+                  src={project.video}
                   className={`w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-500 ${
                     project.title === "Mars Insight Lander"
                       ? "scale-[1.04]"
                       : ""
                   }`}
-                >
-                  <source src={project.video} type="video/mp4" />
-                </video>
+                />
               </div>
 
               <span className="text-sm font-mono text-neutral-500 uppercase tracking-wider">
