@@ -195,15 +195,14 @@ function PrototypeScrollytelling() {
     setActiveBlock(idx);
   });
 
-  // Play/restart the relevant video when the section enters view, pause when it
-  // leaves. Desktop uses one on-screen video; mobile decodes a single hidden
-  // video and paints its left/right halves into two stacked canvases.
+  // Play the relevant video while the section is in view, pause when it leaves.
+  // Desktop uses one on-screen video; mobile decodes a single source video and
+  // paints its left/right halves into two stacked canvases.
   useEffect(() => {
     const desktop = videoRef.current;
     const src = mobileVideoRef.current;
-    const playFrom0 = (v: HTMLVideoElement | null) => {
+    const play = (v: HTMLVideoElement | null) => {
       if (!v) return;
-      v.currentTime = 0;
       const p = v.play();
       if (p) p.catch(() => {});
     };
@@ -214,37 +213,55 @@ function PrototypeScrollytelling() {
       return;
     }
 
-    playFrom0(desktop);
-    playFrom0(src);
+    // Start from the top each time the section re-enters view.
+    if (desktop) desktop.currentTime = 0;
+    if (src) src.currentTime = 0;
+    play(desktop);
+    play(src);
+
+    // Watchdog: on mobile the source video can stall (cold-cache buffer
+    // underrun) or get auto-paused by the browser's power heuristics. Whenever
+    // that happens while we're in view, nudge it straight back to playing so
+    // the canvas feed never freezes.
+    const keepAlive = () => play(src);
+    src?.addEventListener("pause", keepAlive);
+    src?.addEventListener("waiting", keepAlive);
+    src?.addEventListener("stalled", keepAlive);
 
     // Paint the single decoded frame into both halves on every animation frame.
     const topC = topCanvasRef.current;
     const botC = botCanvasRef.current;
-    if (!src || !topC || !botC) return;
-    const topCtx = topC.getContext("2d");
-    const botCtx = botC.getContext("2d");
-    if (!topCtx || !botCtx) return;
+    const topCtx = topC?.getContext("2d");
+    const botCtx = botC?.getContext("2d");
 
     let raf = 0;
     const draw = () => {
-      const vw = src.videoWidth;
-      const vh = src.videoHeight;
-      if (vw && vh) {
-        const halfW = Math.floor(vw / 2);
-        if (topC.width !== halfW) {
-          topC.width = halfW;
-          topC.height = vh;
-          botC.width = halfW;
-          botC.height = vh;
+      if (src && topC && botC && topCtx && botCtx) {
+        const vw = src.videoWidth;
+        const vh = src.videoHeight;
+        if (vw && vh) {
+          const halfW = Math.floor(vw / 2);
+          if (topC.width !== halfW) {
+            topC.width = halfW;
+            topC.height = vh;
+            botC.width = halfW;
+            botC.height = vh;
+          }
+          // Top canvas = left half of the frame; bottom canvas = right half.
+          topCtx.drawImage(src, 0, 0, halfW, vh, 0, 0, halfW, vh);
+          botCtx.drawImage(src, vw - halfW, 0, halfW, vh, 0, 0, halfW, vh);
         }
-        // Top canvas = left half of the frame; bottom canvas = right half.
-        topCtx.drawImage(src, 0, 0, halfW, vh, 0, 0, halfW, vh);
-        botCtx.drawImage(src, vw - halfW, 0, halfW, vh, 0, 0, halfW, vh);
       }
       raf = requestAnimationFrame(draw);
     };
     raf = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      src?.removeEventListener("pause", keepAlive);
+      src?.removeEventListener("waiting", keepAlive);
+      src?.removeEventListener("stalled", keepAlive);
+    };
   }, [inView]);
 
   return (
@@ -289,21 +306,23 @@ function PrototypeScrollytelling() {
           <span className="mb-4 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white text-xs font-mono uppercase tracking-widest">
             First AR Prototype
           </span>
-          {/* Single decoded source (kept rendered but invisible so it keeps
-              decoding on mobile); its frames are drawn into the two canvases.
-              data-no-observe keeps the page-level video pauser from touching it. */}
-          <video
-            ref={mobileVideoRef}
-            src="/AR_FirstPrototypeDemo.mp4"
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            aria-hidden="true"
-            data-no-observe="true"
-            className="pointer-events-none absolute h-px w-px opacity-0"
-          />
           <div className="relative h-[36vh] aspect-[8/9] mx-auto overflow-hidden rounded-t-2xl border border-b-0 border-white/10 shadow-2xl">
+            {/* The single decoded source. preload="auto" so it's buffered before
+                the user scrolls here (avoids a cold-cache stall on first load).
+                It's rendered full-size — not 1px/opacity-0 — so mobile browsers
+                keep decoding it; the opaque canvas above hides it visually.
+                data-no-observe keeps the page-level video pauser off it. */}
+            <video
+              ref={mobileVideoRef}
+              src="/AR_FirstPrototypeDemo.mp4"
+              loop
+              muted
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+              data-no-observe="true"
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+            />
             <canvas
               ref={topCanvasRef}
               aria-hidden="true"
