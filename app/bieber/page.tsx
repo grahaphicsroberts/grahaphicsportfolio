@@ -38,7 +38,7 @@ export default function BieberCaseStudy() {
       </nav>
 
       {/* --- HERO SECTION --- */}
-      <section className="relative h-screen overflow-hidden flex items-end pb-24 px-6 md:px-24 border-b border-neutral-800">
+      <section className="relative h-screen overflow-hidden flex items-end pb-16 md:pb-24 px-6 md:px-24 border-b border-neutral-800">
         <motion.div
           style={{ scale: heroScale }}
           className="absolute inset-0 z-0"
@@ -61,7 +61,7 @@ export default function BieberCaseStudy() {
               The New York Times
             </span>
           </div>
-          <h1 className="text-6xl md:text-9xl font-bold tracking-tighter text-white mb-4">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tighter text-white mb-4">
             MAKING A HIT
           </h1>
           <p className="text-xl md:text-2xl text-neutral-400 max-w-2xl leading-relaxed">

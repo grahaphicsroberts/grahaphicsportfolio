@@ -156,7 +156,7 @@ export default function ImmersiveWebPage() {
       </AnimatePresence>
 
       {/* --- HERO SECTION --- */}
-      <section className="relative h-screen overflow-hidden flex items-end pb-24 px-6 md:px-24 border-b border-neutral-800">
+      <section className="relative h-screen overflow-hidden flex items-end pb-16 md:pb-24 px-6 md:px-24 border-b border-neutral-800">
         <motion.div
           style={{ scale: heroScale }}
           className="absolute inset-0 z-0"
@@ -178,7 +178,7 @@ export default function ImmersiveWebPage() {
               The New York Times
             </span>
           </div>
-          <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-[0.9]">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tighter text-white mb-6 leading-[0.9]">
             The Infinite <br /> Scroll
           </h1>
           <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl leading-relaxed">
