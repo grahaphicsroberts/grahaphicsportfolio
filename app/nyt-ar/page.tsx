@@ -190,10 +190,17 @@ export default function NYTARPage() {
           style={{ opacity: textOpacity }}
           className="relative z-10 max-w-5xl"
         >
-          <div className="flex flex-col md:flex-row md:items-end gap-6 mb-8">
-            <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
+            <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md w-fit">
               The New York Times
             </span>
+            <Link
+              href="/spatialdesign"
+              className="group relative inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono uppercase tracking-widest w-fit text-cyan-300 border border-cyan-400/60 bg-cyan-400/10 backdrop-blur-md shadow-[0_0_16px_rgba(34,211,238,0.55)] hover:shadow-[0_0_24px_rgba(34,211,238,0.85)] hover:bg-cyan-400 hover:text-black hover:border-cyan-300 transition-all duration-300 animate-pulse hover:animate-none"
+            >
+              <span>Spatial Design Deep Dive</span>
+              <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+            </Link>
           </div>
           <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tighter text-white mb-6 leading-[0.9]">
             Immersive Storytelling <br /> at The New York Times

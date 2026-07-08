@@ -1613,10 +1613,7 @@ export default function NYTARPage() {
         >
           <div className="flex flex-col md:flex-row md:items-end gap-6 mb-8">
             <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md">
-              Apple HI Design Team
-            </span>
-            <span className="px-3 py-1 border border-white/20 rounded-full text-xs font-mono uppercase tracking-widest bg-black/50 backdrop-blur-md">
-              Spatial Portfolio Review
+              Spatial Design Deep Dive
             </span>
           </div>
           <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tighter text-white mb-6 leading-[0.9]">
