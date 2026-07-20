@@ -54,6 +54,15 @@ const WORK_ITEMS = [
     category: "Data Visualization",
     aspect: "aspect-square",
   },
+  // --- NEW MICROSPHERE VIDEO (wide 2:1 cinematic) ---
+  {
+    id: 13,
+    type: "video",
+    src: "/Havas_microsphere.mp4",
+    title: "Microsphere Dynamics",
+    category: "Mechanism Visualization",
+    aspect: "aspect-[2/1]",
+  },
   {
     id: 11,
     type: "video",
@@ -77,6 +86,15 @@ const WORK_ITEMS = [
     title: "Clinical Trial Timeline",
     category: "Information Design",
     aspect: "aspect-[16/9]",
+  },
+  // --- NEW RADIOLIGAND THERAPY VIDEO (tall 1:2 portrait) ---
+  {
+    id: 14,
+    type: "video",
+    src: "/Havas_RLTch2.mp4",
+    title: "Radioligand Therapy",
+    category: "Statistical analysis",
+    aspect: "aspect-[1/2]",
   },
   // --- NEW PATIENT PROFILE VIZ VIDEO (4:3) ---
   {
