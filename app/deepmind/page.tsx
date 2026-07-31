@@ -10,6 +10,7 @@ import {
   FileText,
   LineChart,
   Lock,
+  Play,
   SlidersHorizontal,
   Users,
 } from "lucide-react";
@@ -1467,20 +1468,46 @@ const VisualReference1Slide = () => (
   </div>
 );
 
-// Phone-frame video. iOS is fussy: it only autoplays a video whose `muted`
-// property is set (React can miss the attribute) and it composites a
-// border-radius clip as black when the clip is on a *parent* with
-// overflow-hidden. So we (1) set muted/playsinline on the element itself and
-// retry play() on every readiness signal, and (2) put the rounding + border on
-// the <video> itself with no clipping wrapper.
+// --- Media autoplay priming ---------------------------------------------
+// iOS lets programmatic play() through much more freely once the user has
+// interacted with the page at all. We record the first gesture anywhere in the
+// deck (or the password submit) and (re)play any registered videos then, and
+// immediately for videos that mount afterwards. This means the phone videos are
+// already rolling by the time you swipe to their slide.
+let hasUserGesture = false;
+const mediaPrimers = new Set<() => void>();
+function registerMediaPrimer(fn: () => void) {
+  mediaPrimers.add(fn);
+  if (hasUserGesture) fn();
+  return () => {
+    mediaPrimers.delete(fn);
+  };
+}
+function primeMedia() {
+  if (hasUserGesture) return;
+  hasUserGesture = true;
+  mediaPrimers.forEach((fn) => fn());
+}
+
+// Phone-frame video with an iOS-safe fallback.
+// Desktop: autoplays exactly as before (the tap overlay is `md:hidden`).
+// Mobile/iOS: we still try to autoplay, but if the browser blocks it (Low
+// Power Mode, dual-video limits, etc.) the real first frame shows via `poster`
+// and a play button lets the user start it with a tap (a user gesture is never
+// blocked). Rounding/border live on the <video> itself so there's no parent
+// overflow clip (which iOS composites as black).
 const PhoneVideo = ({
   src,
+  poster,
   className,
 }: {
   src: string;
+  poster: string;
   className?: string;
 }) => {
   const ref = useRef<HTMLVideoElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
@@ -1513,24 +1540,53 @@ const PhoneVideo = ({
     v.addEventListener("canplay", tryPlay);
     v.load();
     tryPlay();
+    // Replay when the first page gesture unlocks media (or now, if it already
+    // happened before this video mounted).
+    const unregister = registerMediaPrimer(tryPlay);
     return () => {
+      unregister();
       io?.disconnect();
       v.removeEventListener("loadeddata", tryPlay);
       v.removeEventListener("canplay", tryPlay);
     };
   }, []);
+
+  const handleTap = () => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = true;
+    const p = v.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
+  };
+
   return (
-    <video
-      ref={ref}
-      className={className}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="auto"
-    >
-      <source src={src} type="video/mp4" />
-    </video>
+    <div className={`relative ${className ?? ""}`}>
+      <video
+        ref={ref}
+        poster={poster}
+        onPlaying={() => setPlaying(true)}
+        className="h-full w-full rounded-[2rem] border-[3px] border-neutral-700 bg-black object-cover"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+      >
+        <source src={src} type="video/mp4" />
+      </video>
+      {!playing && (
+        <button
+          type="button"
+          onClick={handleTap}
+          aria-label="Play video"
+          className="absolute inset-0 flex items-center justify-center rounded-[2rem] bg-black/25 transition-opacity md:hidden"
+        >
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-black shadow-lg">
+            <Play className="h-6 w-6 translate-x-[1px]" aria-hidden="true" />
+          </span>
+        </button>
+      )}
+    </div>
   );
 };
 
@@ -1559,13 +1615,20 @@ const VisualReference2Slide = () => (
         pair scales down together instead of squeezing horizontally. */}
     <div className="flex min-h-0 items-center justify-center gap-3 md:col-span-2 md:h-full md:gap-8">
       {[
-        "/Havas_Novartis_WhitePaper_Charts.mp4",
-        "/Havas_Novartis_WhitePaper_Squares.mp4",
-      ].map((src) => (
+        {
+          src: "/Havas_Novartis_WhitePaper_Charts.mp4",
+          poster: "/Havas_Novartis_WhitePaper_Charts_poster.jpg",
+        },
+        {
+          src: "/Havas_Novartis_WhitePaper_Squares.mp4",
+          poster: "/Havas_Novartis_WhitePaper_Squares_poster.jpg",
+        },
+      ].map(({ src, poster }) => (
         <PhoneVideo
           key={src}
           src={src}
-          className="aspect-[1290/2796] w-[min(38vw,18vh)] max-h-full shrink-0 rounded-[2rem] border-[3px] border-neutral-700 bg-black object-cover shadow-2xl md:h-[88%] md:w-auto"
+          poster={poster}
+          className="aspect-[1290/2796] w-[min(38vw,18vh)] max-h-full shrink-0 shadow-2xl md:h-[88%] md:w-auto"
         />
       ))}
     </div>
@@ -1788,6 +1851,20 @@ function DeepmindDeck() {
     };
   }, [next, prev]);
 
+  // The first user gesture anywhere unlocks media playback on iOS, so the phone
+  // videos are primed and already running by the time they're swiped into view.
+  useEffect(() => {
+    const onFirst = () => primeMedia();
+    window.addEventListener("pointerdown", onFirst, { passive: true });
+    window.addEventListener("touchstart", onFirst, { passive: true });
+    window.addEventListener("keydown", onFirst);
+    return () => {
+      window.removeEventListener("pointerdown", onFirst);
+      window.removeEventListener("touchstart", onFirst);
+      window.removeEventListener("keydown", onFirst);
+    };
+  }, []);
+
   const current = SLIDES[index];
 
   return (
@@ -1928,6 +2005,8 @@ export default function DeepmindPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (value.trim().toLowerCase() === PASSWORD) {
+      // Submitting counts as the unlocking gesture for iOS media autoplay.
+      primeMedia();
       window.sessionStorage.setItem(STORAGE_KEY, "1");
       setUnlocked(true);
       setError(false);
