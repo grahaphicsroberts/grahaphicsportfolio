@@ -1,4 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+
+// This route is a full-screen, viewport-locked slide deck. Pinning the scale
+// stops iOS (Safari/Chrome) from pinch-zooming and then panning the "zoomed"
+// visual viewport around, which reads as the deck being draggable / cut off.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "Grahaphics × DeepMind — Proposal",

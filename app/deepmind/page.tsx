@@ -1436,8 +1436,9 @@ const ScatterConsiderationsSlide = () => (
 );
 
 // Self-playing, muted, looping video (for silent in-deck playback).
-// Sets `muted` imperatively and calls play() so mobile Safari/Chrome reliably
-// autoplay (React can miss the muted attribute, which blocks autoplay).
+// iOS only autoplays a video that is muted *at the time play() is attempted*,
+// and React can fail to reflect the `muted` attribute. We set it synchronously
+// via a stable ref callback and retry play() once the media can play.
 const AutoVideo = ({
   src,
   className,
@@ -1445,17 +1446,21 @@ const AutoVideo = ({
   src: string;
   className?: string;
 }) => {
-  const ref = useRef<HTMLVideoElement | null>(null);
-  useEffect(() => {
-    const v = ref.current;
+  const attach = useCallback((v: HTMLVideoElement | null) => {
     if (!v) return;
     v.muted = true;
-    const p = v.play();
-    if (p && typeof p.catch === "function") p.catch(() => {});
+    v.defaultMuted = true;
+    const tryPlay = () => {
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    };
+    tryPlay();
+    v.addEventListener("loadeddata", tryPlay, { once: true });
+    v.addEventListener("canplay", tryPlay, { once: true });
   }, []);
   return (
     <video
-      ref={ref}
+      ref={attach}
       src={src}
       className={className}
       autoPlay
@@ -1867,8 +1872,9 @@ export default function DeepmindPage() {
   }, []);
 
   // Lock the document to the viewport while this page is mounted so mobile
-  // can't pan/rubber-band the whole deck around. Restored on unmount so the
-  // rest of the site scrolls normally.
+  // can't pan/rubber-band the deck around. We avoid `position: fixed` on body
+  // (it can introduce a horizontal offset on iOS); overflow + overscreen-none
+  // plus `touch-none` on the full-screen roots is enough. Restored on unmount.
   useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
@@ -1877,25 +1883,16 @@ export default function DeepmindPage() {
       htmlOverscroll: html.style.overscrollBehavior,
       bodyOverflow: body.style.overflow,
       bodyOverscroll: body.style.overscrollBehavior,
-      bodyPosition: body.style.position,
-      bodyWidth: body.style.width,
-      bodyHeight: body.style.height,
     };
     html.style.overflow = "hidden";
     html.style.overscrollBehavior = "none";
     body.style.overflow = "hidden";
     body.style.overscrollBehavior = "none";
-    body.style.position = "fixed";
-    body.style.width = "100%";
-    body.style.height = "100%";
     return () => {
       html.style.overflow = prev.htmlOverflow;
       html.style.overscrollBehavior = prev.htmlOverscroll;
       body.style.overflow = prev.bodyOverflow;
       body.style.overscrollBehavior = prev.bodyOverscroll;
-      body.style.position = prev.bodyPosition;
-      body.style.width = prev.bodyWidth;
-      body.style.height = prev.bodyHeight;
     };
   }, []);
 
@@ -1920,7 +1917,7 @@ export default function DeepmindPage() {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-hidden bg-neutral-950 font-sans text-neutral-200">
+    <div className="fixed inset-0 flex touch-none items-center justify-center overflow-hidden overscroll-none bg-neutral-950 font-sans text-neutral-200">
       {/* Ambient spiral */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.08]">
         <SpiralMark className="h-[120vh] w-[120vh]" />
