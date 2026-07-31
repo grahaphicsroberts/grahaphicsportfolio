@@ -71,6 +71,54 @@ const SpiralMark = ({ className = "" }: { className?: string }) => (
   </motion.svg>
 );
 
+// Copy that shows a short preview on mobile with a "Read more" that opens a
+// frosted overlay across the slide (so full copy reads over the visual without
+// blowing out the fixed-height layout). Desktop always shows the full copy.
+// NOTE: the parent slide must be `relative` for the overlay to anchor.
+const ExpandableCopy = ({
+  children,
+  pClassName = "",
+}: {
+  children: React.ReactNode;
+  pClassName?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const stop = (e: React.TouchEvent) => e.stopPropagation();
+  return (
+    <>
+      <div>
+        <p className={`${pClassName} line-clamp-3 md:line-clamp-none`}>
+          {children}
+        </p>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="mt-3 inline-block font-mono text-xs uppercase tracking-widest text-sky-400 transition-colors hover:text-sky-300 md:hidden"
+        >
+          Read more
+        </button>
+      </div>
+      {open && (
+        <div
+          className="absolute inset-0 z-40 flex flex-col gap-4 overflow-y-auto bg-neutral-950 px-6 pt-16 pb-28 backdrop-blur-md md:hidden"
+          onTouchStart={stop}
+          onTouchMove={stop}
+          onTouchEnd={stop}
+        >
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="self-start font-mono text-xs uppercase tracking-widest text-sky-400"
+          >
+            ✕ Show less
+          </button>
+          <p className={pClassName}>{children}</p>
+        </div>
+      )}
+    </>
+  );
+};
+
 // ---------------------------------------------------------------------------
 // SLIDES
 // ---------------------------------------------------------------------------
@@ -85,9 +133,9 @@ const TitleSlide = () => (
 
     <div className="relative z-10 flex flex-col items-center px-6 text-center">
       <SpiralMark className="mb-10 h-24 w-24" />
-      <h1 className="text-4xl font-bold tracking-tighter text-white md:text-6xl lg:text-7xl">
-        Grahaphics{" "}
-        <span className="mx-1 font-light text-neutral-500">×</span> DeepMind
+      <h1 className="text-5xl font-bold tracking-tighter text-white md:text-6xl lg:text-7xl">
+        Grahaphics <span className="mx-1 font-light text-neutral-500">×</span>
+        <br className="md:hidden" /> DeepMind
       </h1>
       <div className="mx-auto my-8 h-px w-24 bg-gradient-to-r from-transparent via-blue-500/60 to-transparent" />
       <p className="max-w-2xl text-lg font-light leading-relaxed text-neutral-400 md:text-2xl">
@@ -124,6 +172,48 @@ const STRUCTURE_STEPS = [
   },
 ];
 
+// Horizontally scrollable card strip for mobile. Supports click-and-drag
+// (mouse), trackpad/wheel (via the deck's wheel redirect), and native touch.
+// Uses proximity snapping so small nudges don't get yanked back to the start.
+const CardStrip = ({ children }: { children: React.ReactNode }) => {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const drag = useRef({ active: false, startX: 0, startLeft: 0 });
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse") return; // touch/pen use native scrolling
+    const el = ref.current;
+    if (!el) return;
+    drag.current = { active: true, startX: e.clientX, startLeft: el.scrollLeft };
+    el.setPointerCapture?.(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!drag.current.active || !ref.current) return;
+    ref.current.scrollLeft =
+      drag.current.startLeft - (e.clientX - drag.current.startX);
+  };
+  const endDrag = (e: React.PointerEvent) => {
+    if (!drag.current.active) return;
+    drag.current.active = false;
+    ref.current?.releasePointerCapture?.(e.pointerId);
+  };
+
+  return (
+    <div
+      ref={ref}
+      data-hscroll
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onPointerLeave={endDrag}
+      style={{ touchAction: "pan-x" }}
+      className="hide-scrollbar -mx-6 flex shrink-0 cursor-grab snap-x snap-proximity gap-4 overflow-x-auto px-6 pb-3 active:cursor-grabbing md:mx-0 md:cursor-default md:snap-none md:items-stretch md:overflow-visible md:px-0 md:pb-0"
+    >
+      {children}
+    </div>
+  );
+};
+
 const MicrositeStructureSlide = () => (
   <div className="flex h-full w-full flex-col justify-center bg-neutral-950 px-6 pt-12 pb-24 md:px-16">
     {/* Header / verbal explanation */}
@@ -143,13 +233,14 @@ const MicrositeStructureSlide = () => (
       </p>
     </div>
 
-    {/* Graphic representation of the sequence */}
-    <div className="flex shrink-0 flex-col items-stretch gap-4 md:flex-row md:items-stretch">
+    {/* Graphic representation of the sequence.
+        Mobile: horizontal snap-scroll. Desktop: even row with arrows. */}
+    <CardStrip>
       {STRUCTURE_STEPS.map((s, i) => {
         const Icon = s.icon;
         return (
           <React.Fragment key={s.step}>
-            <div className="flex-1 rounded-2xl border border-white/10 bg-neutral-900/40 p-5 backdrop-blur-sm md:p-6">
+            <div className="w-[74vw] shrink-0 snap-start rounded-2xl border border-white/10 bg-neutral-900/40 p-5 backdrop-blur-sm md:w-auto md:flex-1 md:p-6">
               <div className="mb-4 flex items-center justify-between">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 font-mono text-sm font-bold text-black">
                   {s.step}
@@ -164,17 +255,14 @@ const MicrositeStructureSlide = () => (
               </p>
             </div>
             {i < STRUCTURE_STEPS.length - 1 && (
-              <div className="flex shrink-0 items-center justify-center text-neutral-600">
-                <ArrowRight
-                  className="h-5 w-5 rotate-90 md:rotate-0"
-                  aria-hidden="true"
-                />
+              <div className="hidden shrink-0 items-center justify-center text-neutral-600 md:flex">
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
               </div>
             )}
           </React.Fragment>
         );
       })}
-    </div>
+    </CardStrip>
   </div>
 );
 
@@ -362,9 +450,9 @@ const GuidedInsightSlide = () => {
   }, [active]);
 
   return (
-    <div className="flex h-full w-full flex-col bg-neutral-950 md:grid md:grid-cols-5">
+    <div className="flex h-full w-full flex-col bg-neutral-950 pb-16 md:grid md:grid-cols-5 md:pb-0">
       {/* Left: sticky chart */}
-      <div className="order-1 flex flex-col justify-center gap-5 px-6 pt-8 md:col-span-2 md:h-full md:px-12 md:pt-0">
+      <div className="order-1 flex flex-1 flex-col justify-center gap-5 px-6 pt-16 md:col-span-2 md:h-full md:px-12 md:pt-0">
         <div>
           <span className="mb-2 block font-mono text-sm uppercase tracking-widest text-sky-400">
             Guided Insight Interaction
@@ -395,8 +483,9 @@ const GuidedInsightSlide = () => {
         </div>
       </div>
 
-      {/* Right: auto-scrolling text blocks (indicator stays fixed outside) */}
-      <div className="relative order-2 min-h-0 flex-1 md:col-span-3 md:h-full">
+      {/* Right: auto-scrolling text blocks. Hidden on mobile — below the
+          breakpoint the chart's animated highlights carry the idea alone. */}
+      <div className="relative order-2 hidden min-h-0 md:col-span-3 md:block md:h-full">
         <div
           ref={scrollRef}
           className="hide-scrollbar pointer-events-none h-full overflow-hidden px-6 md:px-16"
@@ -594,16 +683,16 @@ const RadarChart = () => (
 );
 
 const VisualizationMechanismSlide = () => (
-  <div className="flex h-full w-full flex-col justify-center bg-neutral-950 px-6 pt-10 pb-20 md:grid md:grid-cols-5 md:items-center md:gap-8 md:px-14 md:pt-0 md:pb-0">
+  <div className="relative flex h-full w-full flex-col justify-start bg-neutral-950 px-6 pt-16 pb-24 md:grid md:grid-cols-5 md:items-center md:justify-center md:gap-8 md:px-14 md:pt-0 md:pb-0">
     {/* Left: framing copy */}
-    <div className="flex flex-col justify-center md:col-span-2">
+    <div className="mb-6 flex flex-col justify-center md:mb-0 md:col-span-2">
       <span className="mb-2 block font-mono text-sm uppercase tracking-widest text-sky-400">
         Visualization Mechanism
       </span>
-      <h2 className="mb-5 text-3xl font-bold tracking-tighter text-white md:text-5xl">
+      <h2 className="mb-4 text-2xl font-bold tracking-tighter text-white md:mb-5 md:text-5xl">
         Proposed Visualization #1: Radar Charts
       </h2>
-      <p className="max-w-md text-base leading-relaxed text-neutral-400 md:text-lg">
+      <ExpandableCopy pClassName="max-w-md text-base leading-relaxed text-neutral-400 md:text-lg">
         Radar charts are one way to show each policy&apos;s profile across the
         full set of dimensions and sub-criteria, with overlays the reader can
         build interactively to compare policies directly. They carry real
@@ -612,7 +701,7 @@ const VisualizationMechanismSlide = () => (
         side-by-side comparison rather than showing everything at once.
         Both are manageable: ordering can follow the paper&apos;s own grouping,
         and comparison can be capped to a few policies at a time.
-      </p>
+      </ExpandableCopy>
     </div>
 
     {/* Right: recreated fingerprint chart */}
@@ -632,7 +721,7 @@ const VisualizationMechanismSlide = () => (
           </div>
         ))}
       </div>
-      <div className="w-full max-w-[560px]">
+      <div className="mx-auto w-full max-w-[400px] md:max-w-[560px]">
         <RadarChart />
       </div>
       {/* Category legend */}
@@ -763,7 +852,7 @@ const MiniRadar = ({
 );
 
 const SmallMultiplesSlide = () => (
-  <div className="flex h-full w-full flex-col bg-neutral-950 px-6 pt-10 pb-16 md:px-14 md:pt-12">
+  <div className="flex h-full w-full flex-col bg-neutral-950 px-6 pt-16 pb-24 md:px-14 md:pt-12 md:pb-16">
     <div className="mb-6 shrink-0 max-w-3xl md:mb-8">
       <span className="mb-2 block font-mono text-sm uppercase tracking-widest text-sky-400">
         Dynamic Viewing Options
@@ -777,10 +866,15 @@ const SmallMultiplesSlide = () => (
         view for scanning the full landscape at a glance.
       </p>
     </div>
-    <div className="min-h-0 flex-1 overflow-hidden">
-      <div className="grid h-full grid-cols-8 content-start gap-1.5 md:grid-cols-12 lg:[grid-template-columns:repeat(16,minmax(0,1fr))]">
+    <div className="min-h-0 flex-1 md:overflow-hidden">
+      {/* Mobile shows a representative subset (every 5th, spanning the full
+          gradient) at a comfortable size; desktop shows the full grid. */}
+      <div className="grid grid-cols-5 content-start gap-2 md:h-full md:grid-cols-12 md:gap-1.5 lg:[grid-template-columns:repeat(16,minmax(0,1fr))]">
         {SMALL_MULTIPLES.map((fp, i) => (
-          <div key={i} className="aspect-square">
+          <div
+            key={i}
+            className={`aspect-square ${i % 5 === 0 ? "" : "hidden md:block"}`}
+          >
             <MiniRadar values={fp.values} color={fp.color} />
           </div>
         ))}
@@ -1027,17 +1121,108 @@ const HeatmapChart = () => (
   </svg>
 );
 
+// Compact heatmap for mobile: a representative 6x6 subset of policies x
+// dimensions, with larger cells so it stays legible on a narrow screen.
+const HM_M_ROWS = [0, 1, 3, 6, 9, 10]; // EITC, UI, Wage Ins., UBI, UBC, Sov. AI
+const HM_M_ROW_LABELS = ["EITC", "UI", "Wage Ins.", "UBI", "UBC", "Sov. AI"];
+const HM_M_COLS = [0, 3, 4, 8, 11, 14];
+const HM_M_COL_LABELS = [
+  "Std. of Living",
+  "Econ. Part.",
+  "Ownership",
+  "Econ. Feas.",
+  "Impl. Ready",
+  "Transform",
+];
+const HM_M_ML = 84;
+const HM_M_MT = 8;
+const HM_M_CW = 52;
+const HM_M_CH = 44;
+const hmMX = (c: number) => HM_M_ML + c * HM_M_CW;
+const hmMY = (r: number) => HM_M_MT + r * HM_M_CH;
+const HM_M_BOTTOM = hmMY(HM_M_ROWS.length);
+
+const HeatmapChartMobile = () => (
+  <svg
+    viewBox="0 0 420 380"
+    className="mx-auto h-auto w-full overflow-visible"
+    aria-hidden="true"
+  >
+    {HM_M_ROWS.map((rowIdx, r) =>
+      HM_M_COLS.map((colIdx, c) => {
+        const val = HEATMAP[rowIdx].v[colIdx];
+        const dark = val >= 72;
+        return (
+          <g key={`${r}-${c}`}>
+            <rect
+              x={hmMX(c) + 1}
+              y={hmMY(r) + 1}
+              width={HM_M_CW - 2}
+              height={HM_M_CH - 2}
+              rx="3"
+              fill={heatColor(val)}
+            />
+            <text
+              x={hmMX(c) + HM_M_CW / 2}
+              y={hmMY(r) + HM_M_CH / 2 + 4}
+              textAnchor="middle"
+              fontSize="12"
+              fill={dark ? "#1c1917" : "#fde7d9"}
+            >
+              {val.toFixed(0)}
+            </text>
+          </g>
+        );
+      })
+    )}
+
+    {/* Row labels */}
+    {HM_M_ROW_LABELS.map((label, r) => (
+      <text
+        key={label}
+        x={HM_M_ML - 6}
+        y={hmMY(r) + HM_M_CH / 2 + 4}
+        textAnchor="end"
+        fontSize="11"
+        className="fill-neutral-300"
+      >
+        {label}
+      </text>
+    ))}
+
+    {/* Column labels (rotated), colored by category */}
+    {HM_M_COLS.map((colIdx, c) => {
+      const px = hmMX(c) + HM_M_CW / 2;
+      const py = HM_M_BOTTOM + 10;
+      return (
+        <text
+          key={HM_M_COL_LABELS[c]}
+          x={px}
+          y={py}
+          textAnchor="end"
+          fontSize="10"
+          fontWeight="600"
+          fill={CAT_COLORS[RADAR_AXES[colIdx].cat]}
+          transform={`rotate(-38, ${px}, ${py})`}
+        >
+          {HM_M_COL_LABELS[c]}
+        </text>
+      );
+    })}
+  </svg>
+);
+
 const AdditionalDataViewsSlide = () => (
-  <div className="flex h-full w-full flex-col bg-neutral-950 px-6 pt-10 pb-12 md:grid md:grid-cols-3 md:items-center md:gap-10 md:px-14 md:py-0">
+  <div className="relative flex h-full w-full flex-col bg-neutral-950 px-6 pt-16 pb-24 md:grid md:grid-cols-3 md:items-center md:gap-10 md:px-14 md:py-0">
     {/* Left third: headline + subcopy together */}
-    <div className="mb-6 flex flex-col justify-center md:col-span-1 md:mb-0">
+    <div className="mb-4 flex flex-col justify-center md:mb-0 md:col-span-1">
       <span className="mb-2 block font-mono text-sm uppercase tracking-widest text-sky-400">
         Visualization Mechanism
       </span>
       <h2 className="mb-4 text-2xl font-bold tracking-tighter text-white md:text-3xl lg:text-4xl">
         Proposed Visualization #2: Heat Maps
       </h2>
-      <p className="text-sm leading-relaxed text-neutral-400 md:text-base">
+      <ExpandableCopy pClassName="text-sm leading-relaxed text-neutral-400 md:text-base">
         A sorted heatmap lays every policy against every dimension at once. Rows
         for the interventions, columns for the criteria, color for the score, so
         the whole landscape is legible in a single view. Its
@@ -1048,15 +1233,20 @@ const AdditionalDataViewsSlide = () => (
         than being asserted. It trades the visual drama of a profile shape for
         density and precision, which is its own kind of appeal for a reader who
         wants to interrogate the evidence rather than be walked through it.
-      </p>
+      </ExpandableCopy>
     </div>
 
     {/* Right two-thirds: visualization, centered */}
     <div className="flex min-h-0 flex-col items-center justify-center gap-3 md:col-span-2 md:h-full">
-      <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+      {/* Mobile: compact 6x6 subset */}
+      <div className="w-full md:hidden">
+        <HeatmapChartMobile />
+      </div>
+      {/* Desktop: full heatmap */}
+      <div className="hidden min-h-0 w-full flex-1 items-center justify-center md:flex">
         <HeatmapChart />
       </div>
-      <div className="flex shrink-0 flex-wrap justify-center gap-x-6 gap-y-2">
+      <div className="hidden shrink-0 flex-wrap justify-center gap-x-6 gap-y-2 md:flex">
         {HM_CALLOUTS.map((co) => (
           <div key={co.n} className="flex items-center gap-2">
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-sky-400 font-mono text-[10px] font-bold text-sky-950">
@@ -1100,7 +1290,7 @@ const scY = (v: number) =>
 const ScatterChart = () => (
   <svg
     viewBox="0 0 1000 640"
-    className="mx-auto h-full max-h-full w-auto max-w-full overflow-visible"
+    className="mx-auto h-auto w-full overflow-visible md:h-full md:max-h-full md:w-auto md:max-w-full"
     aria-hidden="true"
   >
     {/* Plot backdrop */}
@@ -1201,6 +1391,7 @@ const ScatterChart = () => (
             fontSize="12"
             fontWeight={p.hi ? 700 : 400}
             fill={p.hi ? "#93c5fd" : "#cbd5e1"}
+            className="hidden md:block"
           >
             {p.name}
           </text>
@@ -1211,16 +1402,16 @@ const ScatterChart = () => (
 );
 
 const ScatterConsiderationsSlide = () => (
-  <div className="flex h-full w-full flex-col bg-neutral-950 px-6 pt-10 pb-12 md:grid md:grid-cols-3 md:items-center md:gap-10 md:px-14 md:py-0">
+  <div className="relative flex h-full w-full flex-col bg-neutral-950 px-6 pt-16 pb-24 md:grid md:grid-cols-3 md:items-center md:gap-10 md:px-14 md:py-0">
     {/* Left third: headline + subcopy */}
-    <div className="mb-6 flex flex-col justify-center md:col-span-1 md:mb-0">
+    <div className="mb-4 flex flex-col justify-center md:col-span-1 md:mb-0">
       <span className="mb-2 block font-mono text-sm uppercase tracking-widest text-sky-400">
         Visualization Mechanism
       </span>
       <h2 className="mb-4 text-2xl font-bold tracking-tighter text-white md:text-3xl lg:text-4xl">
         Proposed Visualization #3: Scatter Plots
       </h2>
-      <p className="text-sm leading-relaxed text-neutral-400 md:text-base">
+      <ExpandableCopy pClassName="text-sm leading-relaxed text-neutral-400 md:text-base">
         A scatter plot trades breadth for focus: it drops to two dimensions at a
         time and, in return, makes the trade-off between them visible as space.
         With transformation durability on one axis and implementation readiness
@@ -1232,7 +1423,7 @@ const ScatterConsiderationsSlide = () => (
         how the policies redistribute. It shows less at once than the matrix,
         deliberately. The point isn&apos;t to compare everything, but to
         interrogate one relationship at a time.
-      </p>
+      </ExpandableCopy>
     </div>
 
     {/* Right two-thirds: scatter, centered */}
@@ -1245,43 +1436,56 @@ const ScatterConsiderationsSlide = () => (
 );
 
 // Self-playing, muted, looping video (for silent in-deck playback).
+// Sets `muted` imperatively and calls play() so mobile Safari/Chrome reliably
+// autoplay (React can miss the muted attribute, which blocks autoplay).
 const AutoVideo = ({
   src,
   className,
 }: {
   src: string;
   className?: string;
-}) => (
-  <video
-    src={src}
-    className={className}
-    autoPlay
-    muted
-    loop
-    playsInline
-    preload="metadata"
-  />
-);
+}) => {
+  const ref = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = true;
+    const p = v.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
+  }, []);
+  return (
+    <video
+      ref={ref}
+      src={src}
+      className={className}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+    />
+  );
+};
 
 // --- Visual reference: prior work (Havas patient profiles radial) ---
 
 const VisualReference1Slide = () => (
-  <div className="flex h-full w-full flex-col bg-neutral-950 px-6 pt-10 pb-12 md:grid md:grid-cols-3 md:items-center md:gap-10 md:px-14 md:py-0">
+  <div className="relative flex h-full w-full flex-col bg-neutral-950 px-6 pt-16 pb-24 md:grid md:grid-cols-3 md:items-center md:gap-10 md:px-14 md:py-0">
     {/* Left third: framing copy */}
-    <div className="mb-6 flex flex-col justify-center md:col-span-1 md:mb-0">
+    <div className="mb-4 flex flex-col justify-center md:col-span-1 md:mb-0">
       <span className="mb-2 block font-mono text-sm uppercase tracking-widest text-sky-400">
         Prior Work
       </span>
       <h2 className="mb-4 text-3xl font-bold tracking-tighter text-white md:text-4xl lg:text-5xl">
         Visual Reference #2
       </h2>
-      <p className="max-w-md text-base leading-relaxed text-neutral-400 md:text-lg">
+      <ExpandableCopy pClassName="max-w-md text-base leading-relaxed text-neutral-400 md:text-lg">
         This is a former project of mine also featuring a radar chart approach.
         This one is different in that the radar chart represents data over time,
         in this case showing patient data before and after treatment,
         clearly visualizing a quick and lasting response. This can be a grounding
         for our aesthetic approach to the project.
-      </p>
+      </ExpandableCopy>
     </div>
 
     {/* Right two-thirds: reference image */}
@@ -1289,41 +1493,43 @@ const VisualReference1Slide = () => (
       <img
         src="/havas-work-5.jpg"
         alt="Patient profiles radial chart showing patient data before and after treatment, visualized over time."
-        className="max-h-full w-auto max-w-full rounded-2xl border border-white/10 object-contain"
+        className="h-auto max-h-[55vh] w-full max-w-full rounded-2xl border border-white/10 object-contain md:max-h-full md:w-auto"
       />
     </div>
   </div>
 );
 
 const VisualReference2Slide = () => (
-  <div className="flex h-full w-full flex-col bg-neutral-950 px-6 pt-10 pb-12 md:grid md:grid-cols-3 md:items-center md:gap-10 md:px-14 md:py-0">
+  <div className="relative flex h-full w-full flex-col bg-neutral-950 px-6 pt-16 pb-24 md:grid md:grid-cols-3 md:items-center md:gap-10 md:px-14 md:py-0">
     {/* Left third: framing copy */}
-    <div className="mb-6 flex flex-col justify-center md:col-span-1 md:mb-0">
+    <div className="mb-4 flex flex-col justify-center md:col-span-1 md:mb-0">
       <span className="mb-2 block font-mono text-sm uppercase tracking-widest text-sky-400">
         Prior Work
       </span>
       <h2 className="mb-4 text-3xl font-bold tracking-tighter text-white md:text-4xl lg:text-5xl">
         Visual Reference #1
       </h2>
-      <p className="max-w-md text-base leading-relaxed text-neutral-400 md:text-lg">
+      <ExpandableCopy pClassName="max-w-md text-base leading-relaxed text-neutral-400 md:text-lg">
         This example concerns a recent white paper I produced, and showcases how
         guided scroll can drive visualization, and highlight key takeaways. This
         can be applied in the lead-in to the visualization tool, where we would
         create a tiered experience that allows the casual user to get the key
         messages out of the visualization regardless of their interest in
         interactively digging into the data themselves.
-      </p>
+      </ExpandableCopy>
     </div>
 
-    {/* Right two-thirds: two phones side by side */}
-    <div className="flex h-[46vh] min-h-0 items-center justify-center gap-4 md:col-span-2 md:h-full md:gap-8">
+    {/* Right two-thirds: two phones side by side. On mobile they size by
+        width (capped by height via min()) and keep aspect + shrink-0 so the
+        pair scales down together instead of squeezing horizontally. */}
+    <div className="flex min-h-0 items-center justify-center gap-4 md:col-span-2 md:h-full md:gap-8">
       {[
         "/Havas_Novartis_WhitePaper_Charts.mp4",
         "/Havas_Novartis_WhitePaper_Squares.mp4",
       ].map((src) => (
         <div
           key={src}
-          className="relative aspect-[1290/2796] h-[88%] max-h-full overflow-hidden rounded-[2rem] border-[3px] border-neutral-700 bg-black shadow-2xl"
+          className="relative aspect-[1290/2796] w-[min(42vw,20vh)] max-h-full shrink-0 overflow-hidden rounded-[2rem] border-[3px] border-neutral-700 bg-black shadow-2xl md:h-[88%] md:w-auto"
         >
           <AutoVideo src={src} className="h-full w-full object-cover" />
         </div>
@@ -1335,7 +1541,7 @@ const VisualReference2Slide = () => (
 // --- Closing ---
 
 const ClosingSlide = () => (
-  <div className="relative flex h-full w-full flex-col justify-between overflow-hidden bg-neutral-950 px-6 py-14 md:px-16 md:py-20">
+  <div className="relative flex h-full w-full flex-col justify-start gap-6 overflow-hidden bg-neutral-950 px-6 pt-16 pb-24 md:justify-between md:gap-0 md:px-16 md:py-20">
     {/* Ambient spiral */}
     <div className="pointer-events-none absolute -right-24 -top-24 opacity-[0.06]">
       <SpiralMark className="h-[560px] w-[560px] blur-[1px]" />
@@ -1344,10 +1550,10 @@ const ClosingSlide = () => (
 
     {/* Top: headline + supporting sentence */}
     <div className="relative z-10 max-w-4xl">
-      <h2 className="text-4xl font-bold tracking-tighter text-white md:text-6xl lg:text-7xl">
+      <h2 className="text-3xl font-bold tracking-tighter text-white sm:text-4xl md:text-6xl lg:text-7xl">
         A starting point for a conversation.
       </h2>
-      <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-neutral-300 md:text-2xl">
+      <p className="mt-4 max-w-2xl text-base font-light leading-relaxed text-neutral-300 md:mt-6 md:text-2xl">
         What you&apos;ve seen is an early interpretation of the paper draft, one
         reading of how the ideas might take shape. The real form of the microsite
         is something best defined in collaboration once we get started.
@@ -1483,6 +1689,18 @@ function DeepmindDeck() {
   // Wheel
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
+      // Let a horizontally-scrollable region (e.g. the mobile card strip on
+      // slide 2) consume the gesture instead of paginating the deck.
+      const hs = (e.target as HTMLElement | null)?.closest?.(
+        "[data-hscroll]"
+      ) as HTMLElement | null;
+      if (hs && hs.scrollWidth > hs.clientWidth + 1) {
+        const delta =
+          Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        hs.scrollLeft += delta;
+        e.preventDefault();
+        return;
+      }
       e.preventDefault();
       if (lockRef.current) return;
       if (Math.abs(e.deltaY) < 12) return;
