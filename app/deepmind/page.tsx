@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import SiteAutoVideo from "../components/AutoVideo";
 
 // ---------------------------------------------------------------------------
 // CONFIG
@@ -1435,43 +1436,6 @@ const ScatterConsiderationsSlide = () => (
   </div>
 );
 
-// Self-playing, muted, looping video (for silent in-deck playback).
-// iOS only autoplays a video that is muted *at the time play() is attempted*,
-// and React can fail to reflect the `muted` attribute. We set it synchronously
-// via a stable ref callback and retry play() once the media can play.
-const AutoVideo = ({
-  src,
-  className,
-}: {
-  src: string;
-  className?: string;
-}) => {
-  const attach = useCallback((v: HTMLVideoElement | null) => {
-    if (!v) return;
-    v.muted = true;
-    v.defaultMuted = true;
-    const tryPlay = () => {
-      const p = v.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
-    };
-    tryPlay();
-    v.addEventListener("loadeddata", tryPlay, { once: true });
-    v.addEventListener("canplay", tryPlay, { once: true });
-  }, []);
-  return (
-    <video
-      ref={attach}
-      src={src}
-      className={className}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="auto"
-    />
-  );
-};
-
 // --- Visual reference: prior work (Havas patient profiles radial) ---
 
 const VisualReference1Slide = () => (
@@ -1534,9 +1498,13 @@ const VisualReference2Slide = () => (
       ].map((src) => (
         <div
           key={src}
-          className="relative aspect-[1290/2796] w-[min(38vw,18vh)] max-h-full shrink-0 overflow-hidden rounded-[2rem] border-[3px] border-neutral-700 bg-black shadow-2xl md:h-[88%] md:w-auto"
+          className="relative aspect-[1290/2796] w-[min(38vw,18vh)] max-h-full shrink-0 transform-gpu isolate overflow-hidden rounded-[2rem] border-[3px] border-neutral-700 bg-black shadow-2xl md:h-[88%] md:w-auto"
         >
-          <AutoVideo src={src} className="h-full w-full object-cover" />
+          <SiteAutoVideo
+            src={src}
+            autoPlay
+            className="h-full w-full object-cover"
+          />
         </div>
       ))}
     </div>
