@@ -1522,14 +1522,14 @@ const VisualReference2Slide = () => (
     {/* Right two-thirds: two phones side by side. On mobile they size by
         width (capped by height via min()) and keep aspect + shrink-0 so the
         pair scales down together instead of squeezing horizontally. */}
-    <div className="flex min-h-0 items-center justify-center gap-4 md:col-span-2 md:h-full md:gap-8">
+    <div className="flex min-h-0 items-center justify-center gap-3 md:col-span-2 md:h-full md:gap-8">
       {[
         "/Havas_Novartis_WhitePaper_Charts.mp4",
         "/Havas_Novartis_WhitePaper_Squares.mp4",
       ].map((src) => (
         <div
           key={src}
-          className="relative aspect-[1290/2796] w-[min(42vw,20vh)] max-h-full shrink-0 overflow-hidden rounded-[2rem] border-[3px] border-neutral-700 bg-black shadow-2xl md:h-[88%] md:w-auto"
+          className="relative aspect-[1290/2796] w-[min(38vw,18vh)] max-h-full shrink-0 overflow-hidden rounded-[2rem] border-[3px] border-neutral-700 bg-black shadow-2xl md:h-[88%] md:w-auto"
         >
           <AutoVideo src={src} className="h-full w-full object-cover" />
         </div>
