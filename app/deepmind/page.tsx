@@ -1757,7 +1757,7 @@ function DeepmindDeck() {
   const current = SLIDES[index];
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-neutral-950 font-sans text-neutral-200 selection:bg-white selection:text-black">
+    <div className="fixed inset-0 touch-none overflow-hidden overscroll-none bg-neutral-950 font-sans text-neutral-200 selection:bg-white selection:text-black">
       {/* Exit to site */}
       <Link
         href="/"
@@ -1864,6 +1864,39 @@ export default function DeepmindPage() {
       setUnlocked(true);
     }
     setChecked(true);
+  }, []);
+
+  // Lock the document to the viewport while this page is mounted so mobile
+  // can't pan/rubber-band the whole deck around. Restored on unmount so the
+  // rest of the site scrolls normally.
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prev = {
+      htmlOverflow: html.style.overflow,
+      htmlOverscroll: html.style.overscrollBehavior,
+      bodyOverflow: body.style.overflow,
+      bodyOverscroll: body.style.overscrollBehavior,
+      bodyPosition: body.style.position,
+      bodyWidth: body.style.width,
+      bodyHeight: body.style.height,
+    };
+    html.style.overflow = "hidden";
+    html.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+    body.style.position = "fixed";
+    body.style.width = "100%";
+    body.style.height = "100%";
+    return () => {
+      html.style.overflow = prev.htmlOverflow;
+      html.style.overscrollBehavior = prev.htmlOverscroll;
+      body.style.overflow = prev.bodyOverflow;
+      body.style.overscrollBehavior = prev.bodyOverscroll;
+      body.style.position = prev.bodyPosition;
+      body.style.width = prev.bodyWidth;
+      body.style.height = prev.bodyHeight;
+    };
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
