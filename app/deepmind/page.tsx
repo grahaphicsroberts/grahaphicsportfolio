@@ -1804,9 +1804,16 @@ function DeepmindDeck() {
       if (hs && hs.scrollWidth > hs.clientWidth + 1) {
         const delta =
           Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-        hs.scrollLeft += delta;
-        e.preventDefault();
-        return;
+        const maxScroll = hs.scrollWidth - hs.clientWidth;
+        const atStart = hs.scrollLeft <= 0;
+        const atEnd = hs.scrollLeft >= maxScroll - 1;
+        // Only trap the wheel while the strip can still move in the requested
+        // direction; at either edge let the deck paginate normally.
+        if (!((delta < 0 && atStart) || (delta > 0 && atEnd))) {
+          hs.scrollLeft += delta;
+          e.preventDefault();
+          return;
+        }
       }
       e.preventDefault();
       if (lockRef.current) return;
