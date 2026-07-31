@@ -1574,6 +1574,16 @@ const PhoneVideo = ({
       >
         <source src={src} type="video/mp4" />
       </video>
+      {/* Poster stays painted (as its own layer) until real playback starts,
+          so the frame never drops to black if decode/autoplay stalls. */}
+      {!playing && (
+        <img
+          src={poster}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full rounded-[2rem] border-[3px] border-neutral-700 object-cover"
+        />
+      )}
       {!playing && (
         <button
           type="button"
