@@ -14,7 +14,6 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import SiteAutoVideo from "../components/AutoVideo";
 
 // ---------------------------------------------------------------------------
 // CONFIG
@@ -1468,6 +1467,73 @@ const VisualReference1Slide = () => (
   </div>
 );
 
+// Phone-frame video. iOS is fussy: it only autoplays a video whose `muted`
+// property is set (React can miss the attribute) and it composites a
+// border-radius clip as black when the clip is on a *parent* with
+// overflow-hidden. So we (1) set muted/playsinline on the element itself and
+// retry play() on every readiness signal, and (2) put the rounding + border on
+// the <video> itself with no clipping wrapper.
+const PhoneVideo = ({
+  src,
+  className,
+}: {
+  src: string;
+  className?: string;
+}) => {
+  const ref = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.playsInline = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("webkit-playsinline", "");
+    let tries = 0;
+    const tryPlay = () => {
+      const p = v.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          if (tries++ < 15) window.setTimeout(tryPlay, 300);
+        });
+      }
+    };
+    const io =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(
+            ([e]) => {
+              if (e.isIntersecting) tryPlay();
+            },
+            { threshold: 0.05 }
+          )
+        : null;
+    io?.observe(v);
+    v.addEventListener("loadeddata", tryPlay);
+    v.addEventListener("canplay", tryPlay);
+    v.load();
+    tryPlay();
+    return () => {
+      io?.disconnect();
+      v.removeEventListener("loadeddata", tryPlay);
+      v.removeEventListener("canplay", tryPlay);
+    };
+  }, []);
+  return (
+    <video
+      ref={ref}
+      className={className}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+    >
+      <source src={src} type="video/mp4" />
+    </video>
+  );
+};
+
 const VisualReference2Slide = () => (
   <div className="relative flex h-full w-full flex-col bg-neutral-950 px-6 pt-16 pb-24 md:grid md:grid-cols-3 md:items-center md:gap-10 md:px-14 md:py-0">
     {/* Left third: framing copy */}
@@ -1496,16 +1562,11 @@ const VisualReference2Slide = () => (
         "/Havas_Novartis_WhitePaper_Charts.mp4",
         "/Havas_Novartis_WhitePaper_Squares.mp4",
       ].map((src) => (
-        <div
+        <PhoneVideo
           key={src}
-          className="relative aspect-[1290/2796] w-[min(38vw,18vh)] max-h-full shrink-0 transform-gpu isolate overflow-hidden rounded-[2rem] border-[3px] border-neutral-700 bg-black shadow-2xl md:h-[88%] md:w-auto"
-        >
-          <SiteAutoVideo
-            src={src}
-            autoPlay
-            className="h-full w-full object-cover"
-          />
-        </div>
+          src={src}
+          className="aspect-[1290/2796] w-[min(38vw,18vh)] max-h-full shrink-0 rounded-[2rem] border-[3px] border-neutral-700 bg-black object-cover shadow-2xl md:h-[88%] md:w-auto"
+        />
       ))}
     </div>
   </div>
