@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown, ChevronUp, Trophy } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Lock, Trophy } from "lucide-react";
 import Link from "next/link";
 import AutoVideo from "../components/AutoVideo";
 
@@ -872,6 +872,469 @@ const ContinuedExperimentsSlide = () => (
   </div>
 );
 
+const GoogleCoverSlide = () => (
+  <div className="relative flex h-full w-full items-end overflow-hidden">
+    <img
+      src="/google-hero.jpg"
+      alt="Google — Visualizing the World's Curiosity"
+      className="absolute inset-0 z-0 h-full w-full object-cover opacity-60"
+    />
+    <div className="absolute inset-0 z-10 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-neutral-950/10" />
+    <div className="relative z-20 max-w-4xl px-6 pb-20 md:px-24 md:pb-28">
+      <span className="mb-4 block font-mono text-sm uppercase tracking-widest text-white/70">
+        Google Brand Studio
+      </span>
+      <h2 className="mb-8 text-5xl font-bold leading-[0.95] tracking-tighter text-white md:text-7xl lg:text-8xl">
+        Visualizing the <br /> World&apos;s Curiosity
+      </h2>
+      <p className="max-w-2xl text-lg font-light leading-relaxed text-neutral-300 md:text-2xl">
+        As Digital Design Lead, I worked to turn billions of search queries into
+        human stories&mdash;spanning responsive web experiences, product
+        concepts, and immersive installations in Google&apos;s first retail
+        store.
+      </p>
+    </div>
+  </div>
+);
+
+const SpaceToBelongSlide = () => (
+  <div className="flex h-full w-full flex-col bg-neutral-950 md:grid md:grid-cols-5">
+    {/* Text column */}
+    <div className="order-2 flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-8 md:order-1 md:col-span-2 md:h-full md:px-16">
+      <div className="mb-4 font-mono text-sm uppercase tracking-widest text-blue-500">
+        Digital Product &middot; Google Trends
+      </div>
+      <h2 className="mb-3 text-4xl font-bold tracking-tighter text-white md:text-6xl">
+        Space to Belong
+      </h2>
+      <p className="mb-6 text-lg text-neutral-400">
+        The global search for community
+      </p>
+      <p className="mb-6 leading-relaxed text-neutral-400 md:text-lg">
+        For many, finding a safe space is a challenge. We used Trends data to
+        visualize that search&mdash;mapping queries from &ldquo;LGBT friendly
+        cities&rdquo; to &ldquo;transgender safe spaces&rdquo; into a responsive
+        experience built on photography and short audio interviews with the
+        owners and patrons of those spaces.
+      </p>
+      <AwardTags
+        awards={[{ label: "Anthem Award: Gold Winner", highlight: true }]}
+      />
+    </div>
+
+    {/* Imagery column — single 16:9 experience, centered and uncropped */}
+    <div className="order-1 flex h-[40vh] items-center justify-center p-4 md:order-2 md:col-span-3 md:h-full md:p-6">
+      <div className="relative aspect-video w-full max-w-[min(100%,160vh)] overflow-hidden rounded-xl border border-neutral-800 bg-black shadow-2xl">
+        <AutoVideo
+          src="/space-desktop.mp4"
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute bottom-3 right-3 rounded-full border border-white/10 bg-black/60 px-3 py-1 font-mono text-[10px] text-white backdrop-blur">
+          Desktop Experience
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const ExpressiveCaptionsSlide = () => (
+  <div className="flex h-full w-full flex-col bg-neutral-950 md:grid md:grid-cols-2">
+    {/* Text column */}
+    <div className="order-2 flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-8 md:order-1 md:h-full md:px-16">
+      <div className="mb-4 font-mono text-sm uppercase tracking-widest text-yellow-400">
+        Innovation Spotlight &middot; Accessibility
+      </div>
+      <h2 className="mb-5 text-4xl font-bold tracking-tighter text-white md:text-6xl">
+        Expressive Captions
+      </h2>
+      <p className="mb-6 font-serif text-2xl italic leading-tight text-yellow-400 md:text-3xl">
+        &ldquo;What if captions could emote?&rdquo;
+      </p>
+      <p className="mb-6 leading-relaxed text-neutral-400 md:text-lg">
+        Born from the accessibility work on Space to Belong, this project pushed
+        past captions as transcription and asked what they could carry of the
+        voice itself.
+      </p>
+      <p className="mb-8 leading-relaxed text-neutral-400 md:text-lg">
+        After more than 100 hours of interviews with type experts and machine
+        learning engineers, we developed a system where captions visualize the
+        volume, pitch, and intonation of speech. Championed by Google&apos;s
+        Head of Accessibility, it launched on Android in 2025.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        {["Shipped on Android, 2025", "Variable Type", "ML + Design"].map(
+          (tag) => (
+            <span
+              key={tag}
+              className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neutral-300"
+            >
+              {tag}
+            </span>
+          )
+        )}
+      </div>
+    </div>
+
+    {/* Media column — square format, sized off the viewport height */}
+    <div className="order-1 flex h-[40vh] items-center justify-center p-4 md:order-2 md:h-full md:p-10">
+      <div className="relative aspect-square w-full max-w-[min(100%,68vh)] overflow-hidden rounded-2xl border border-neutral-800 bg-black shadow-2xl">
+        <AutoVideo
+          src="/expressive-captions.mp4"
+          className="h-full w-full object-cover"
+        />
+      </div>
+    </div>
+  </div>
+);
+
+const TrendsRedesignSlide = () => (
+  <div className="flex h-full w-full flex-col bg-neutral-950 md:grid md:grid-cols-5">
+    {/* Text column */}
+    <div className="order-2 flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-8 md:order-1 md:col-span-2 md:h-full md:px-16">
+      <div className="mb-4 font-mono text-sm uppercase tracking-widest text-purple-400">
+        Product Innovation
+      </div>
+      <h2 className="mb-5 text-4xl font-bold leading-[1.05] tracking-tighter text-white md:text-5xl lg:text-6xl">
+        Reimagining <br /> Google Trends
+      </h2>
+      <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-purple-500/30 bg-purple-900/20 px-3 py-1 font-mono text-xs uppercase tracking-wide text-purple-400">
+        Strategic Concept
+      </div>
+      <p className="mb-6 leading-relaxed text-neutral-400 md:text-lg">
+        Trends was built for researchers, but the data showed a significant
+        share of people arriving out of pure curiosity. This redesign aimed to
+        pivot the platform from a &ldquo;pull&rdquo; utility into a
+        &ldquo;push&rdquo; media destination that surfaces culture as it
+        happens.
+      </p>
+      <p className="mb-6 leading-relaxed text-neutral-400 md:text-lg">
+        We atomized the data into{" "}
+        <strong className="text-white">Snippets</strong>&mdash;portable,
+        shareable cards that each tell a single data story and can live anywhere
+        readers already are.
+      </p>
+      <p className="leading-relaxed text-neutral-400 md:text-lg">
+        <strong className="text-white">Trends Studio</strong> was designed to
+        scale that ecosystem, letting journalists, partners, and creators build
+        verified visualizations on live Google data without a data science
+        degree.
+      </p>
+    </div>
+
+    {/* Imagery column */}
+    <div className="order-1 flex h-[40vh] flex-col gap-4 p-4 md:order-2 md:col-span-3 md:h-full md:p-6">
+      {/* Hero dashboard */}
+      <div className="relative min-h-0 flex-[2] overflow-hidden rounded-xl border border-neutral-800 bg-black">
+        <AutoVideo
+          src="/trends-redesign-hero.mp4"
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute bottom-3 right-3 rounded-full border border-white/10 bg-black/60 px-3 py-1 font-mono text-[10px] text-white backdrop-blur">
+          New Homepage Dashboard
+        </div>
+      </div>
+      {/* Supporting concepts */}
+      <div className="grid min-h-0 flex-[1] grid-cols-2 gap-4">
+        <div className="relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
+          <img
+            src="/trends-snippets.jpg"
+            alt="Google Trends Snippets interface"
+            className="h-full w-full object-cover opacity-80"
+          />
+          <div className="absolute bottom-2 left-2 rounded-full border border-white/10 bg-black/60 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-white/80 backdrop-blur">
+            Snippets
+          </div>
+        </div>
+        <div className="relative overflow-hidden rounded-xl border border-neutral-800 bg-black">
+          <AutoVideo
+            src="/trends-studio.mp4"
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute bottom-2 left-2 rounded-full border border-white/10 bg-black/60 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-white/80 backdrop-blur">
+            Trends Studio
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const GoogleRetailSlide = () => (
+  <div className="flex h-full w-full flex-col bg-neutral-950 md:grid md:grid-cols-5">
+    {/* Text column */}
+    <div className="order-2 flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-8 md:order-1 md:col-span-2 md:h-full md:px-16">
+      <div className="mb-4 font-mono text-sm uppercase tracking-widest text-orange-500">
+        Experiential Design &middot; Retail
+      </div>
+      <h2 className="mb-3 text-4xl font-bold tracking-tighter text-white md:text-6xl">
+        Year in Search
+      </h2>
+      <p className="mb-6 text-lg text-neutral-400">
+        The Imagination Space &middot; NYC
+      </p>
+      <p className="mb-6 leading-relaxed text-neutral-400 md:text-lg">
+        In 2021, Google opened its first brick-and-mortar store in Chelsea, with
+        a dedicated experience space at its center. I led the first
+        out-of-home version of the annual{" "}
+        <strong className="text-white">Year in Search</strong> series&mdash;an
+        interactive installation where visitors used voice control to explore the
+        searches that defined the year.
+      </p>
+      <p className="leading-relaxed text-neutral-400 md:text-lg">
+        The work reached from data visualization into fabrication: the interface
+        had to pull in passersby from across the room while rewarding someone
+        standing directly in front of it, and the room&apos;s floor-to-ceiling
+        LED tubes were driven by the same data as the screens.
+      </p>
+    </div>
+
+    {/* Imagery column — single 16:9 experience, centered and uncropped */}
+    <div className="order-1 flex h-[40vh] items-center justify-center p-4 md:order-2 md:col-span-3 md:h-full md:p-6">
+      <div className="relative aspect-video w-full max-w-[min(100%,160vh)] overflow-hidden rounded-xl border border-neutral-800 bg-black shadow-2xl">
+        <AutoVideo
+          src="/yis-experience.mp4"
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute bottom-3 left-3 rounded-full border border-white/10 bg-black/60 px-3 py-1 font-mono text-[10px] text-white backdrop-blur">
+          NYC Google Store
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const HavasCoverSlide = () => (
+  <div className="relative flex h-full w-full items-end overflow-hidden">
+    <img
+      src="/havas-hero.jpg"
+      alt="Havas — The Art of Health Data"
+      className="absolute inset-0 z-0 h-full w-full object-cover opacity-60"
+    />
+    <div className="absolute inset-0 z-10 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-neutral-950/10" />
+    <div className="relative z-20 max-w-4xl px-6 pb-20 md:px-24 md:pb-28">
+      <span className="mb-4 block font-mono text-sm uppercase tracking-widest text-white/70">
+        Havas Health &amp; You
+      </span>
+      <h2 className="mb-8 text-5xl font-bold leading-[0.95] tracking-tighter text-white md:text-7xl lg:text-8xl">
+        The Art of <br /> Health Data
+      </h2>
+      <p className="max-w-2xl text-lg font-light leading-relaxed text-neutral-300 md:text-2xl">
+        As EVP of Global Information Design, I built a new practice from the
+        ground up&mdash;working at the intersection of biology, technology, and
+        human understanding to make critical health data legible.
+      </p>
+    </div>
+  </div>
+);
+
+// The explorations grid, carried over from the Havas work page. Aspect ratios
+// are preserved so the masonry keeps its original rhythm.
+const HAVAS_WORK: { src: string; type: "video" | "image"; aspect: string }[] = [
+  { src: "/havas-work-1.mp4", type: "video", aspect: "aspect-[16/9]" },
+  { src: "/havas-work-2.mp4", type: "video", aspect: "aspect-[3/4]" },
+  { src: "/havas-work-3.mp4", type: "video", aspect: "aspect-square" },
+  { src: "/havas-work-4.mp4", type: "video", aspect: "aspect-[16/9]" },
+  { src: "/havas-work-5.jpg", type: "image", aspect: "aspect-square" },
+  { src: "/Havas_microsphere.mp4", type: "video", aspect: "aspect-[2/1]" },
+  { src: "/FlareViz.mp4", type: "video", aspect: "aspect-square" },
+  { src: "/havas-work-6.mp4", type: "video", aspect: "aspect-[4/3]" },
+  { src: "/havas-work-7.mp4", type: "video", aspect: "aspect-[16/9]" },
+  { src: "/Havas_RLTch2.mp4", type: "video", aspect: "aspect-[1/2]" },
+  { src: "/PatientProfileViz.mp4", type: "video", aspect: "aspect-[4/3]" },
+  { src: "/havas-work-8.mp4", type: "video", aspect: "aspect-[9/16]" },
+  { src: "/havas-work-9.mp4", type: "video", aspect: "aspect-[5/3]" },
+  { src: "/havas-work-10.mp4", type: "video", aspect: "aspect-[9/8]" },
+];
+
+// Keeps the plane's edge from ever showing: the perspective tilt pulls the far
+// edge inward, so the drift stops just short of a true edge-to-frame alignment.
+const PLANE_EDGE_OVERLAP = 56;
+
+const HavasExplorationsSlide = () => {
+  const gridRef = useRef<HTMLDivElement>(null);
+  // Half of however far the grid overflows the viewport. The drift runs from
+  // +amplitude (top of the grid in frame) to -amplitude (bottom in frame).
+  const [amplitude, setAmplitude] = useState(0);
+
+  useEffect(() => {
+    const measure = () => {
+      const height = gridRef.current?.offsetHeight ?? 0;
+      const overflow = height - window.innerHeight;
+      setAmplitude(Math.max(0, overflow / 2 - PLANE_EDGE_OVERLAP));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  return (
+    <div className="relative flex h-full w-full items-center overflow-hidden bg-neutral-950">
+      {/* The grid sits on a plane that wanders through a slow set of tilt
+          keyframes, while a faster drift pans from the top of the grid to the
+          bottom and back so every project comes into view. */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center [perspective:1800px]">
+        <motion.div
+          initial={{ rotateX: 12, rotateY: -7, rotateZ: -1.5 }}
+          animate={{
+            rotateX: [12, 8.5, 13, 9.5, 12],
+            rotateY: [-7, 3, -2, 6.5, -7],
+            rotateZ: [-1.5, 0.4, 1.4, -0.6, -1.5],
+          }}
+          transition={{
+            duration: 120,
+            times: [0, 0.28, 0.5, 0.76, 1],
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="w-[112%] shrink-0 [transform-style:preserve-3d]"
+        >
+          <motion.div
+            animate={{ y: [amplitude, -amplitude] }}
+            transition={{
+              duration: 34,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            }}
+            className="[transform-style:preserve-3d]"
+          >
+            <div ref={gridRef} className="columns-4 gap-4">
+              {HAVAS_WORK.map((item) => (
+                <div
+                  key={item.src}
+                  className={`mb-4 w-full break-inside-avoid overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 ${item.aspect}`}
+                >
+                  {item.type === "video" ? (
+                    <AutoVideo
+                      src={item.src}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={item.src}
+                      alt=""
+                      aria-hidden="true"
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Subtle dim behind the copy side only, so the work stays full strength */}
+      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-r from-black/60 via-black/10 to-transparent" />
+
+      {/* Copy, in the frosted treatment used in the NYT section */}
+      <div className="relative z-20 w-full px-6 md:px-16">
+        <div className="max-w-xl rounded-2xl border border-white/15 bg-neutral-950/40 p-8 shadow-2xl shadow-black/40 backdrop-blur-2xl md:p-12">
+          <span className="mb-4 block font-mono text-sm uppercase tracking-widest text-cyan-400">
+            Havas &middot; A Global Practice
+          </span>
+          <h2 className="mb-6 text-4xl font-bold tracking-tighter text-white md:text-6xl">
+            Explorations
+          </h2>
+          <p className="text-lg font-light leading-relaxed text-neutral-300 md:text-xl">
+            Prototypes, motion studies, and design concepts produced across
+            pharma, biotech, and patient experience&mdash;pressure-testing how
+            complex clinical data can be made clear.
+          </p>
+          <div className="mt-8 flex items-center gap-2 font-mono text-xs text-neutral-400">
+            <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span>
+              Much of this work is confidential. Data has been blinded or
+              abstracted.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const HavasPrototypeSlide = () => {
+  // The prototype is live, so it has to be opted into: while it's inert the
+  // deck still receives wheel and key events for navigation.
+  const [live, setLive] = useState(false);
+
+  return (
+    <div className="flex h-full w-full flex-col bg-neutral-950 md:grid md:grid-cols-5">
+      {/* Text column */}
+      <div className="order-2 flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-8 md:order-1 md:col-span-2 md:h-full md:px-16">
+        <div className="mb-4 font-mono text-sm uppercase tracking-widest text-blue-400">
+          Craft &middot; Live in the Browser
+        </div>
+        <h2 className="mb-6 text-4xl font-bold leading-[1.05] tracking-tighter text-white md:text-5xl lg:text-6xl">
+          Prototyping <br /> in Code
+        </h2>
+        <p className="mb-6 leading-relaxed text-neutral-400 md:text-lg">
+          True art direction requires moving beyond static comps. By prototyping
+          directly in code, we can pressure-test visual systems, motion
+          behavior, and interaction against real data before full engineering
+          begins.
+        </p>
+        <p className="mb-8 leading-relaxed text-neutral-400 md:text-lg">
+          This one is running live: a particle swarm structures itself into a
+          data grid, splits into a 25/75 comparison, then assembles into human
+          lung anatomy.
+        </p>
+        <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3">
+          <span className="text-blue-400">&rarr;</span>
+          <p className="text-sm text-blue-200">
+            {live
+              ? "You have control: drag to rotate, click to advance phases."
+              : "Click the frame to take control, then release it to keep moving."}
+          </p>
+        </div>
+      </div>
+
+      {/* Live prototype. Extra bottom padding keeps the frame clear of the
+          dot nav, which is centered along the bottom of the deck. */}
+      <div className="order-1 h-[40vh] p-4 md:order-2 md:col-span-3 md:h-full md:p-6 md:pb-28">
+        <div className="group relative h-full w-full overflow-hidden rounded-2xl border-4 border-neutral-800 bg-black shadow-2xl">
+          <iframe
+            src="/prototypes/weightofair/index.html"
+            title="Interactive 3D prototype: a particle swarm that assembles health data into a structured grid, splits it into a 25/75 comparison, and forms human lung anatomy"
+            aria-label="Interactive 3D data visualization prototype. Click to advance through phases: a particle swarm structures into a data grid, splits into a 25/75 comparison, then assembles into lung anatomy. Drag to rotate the view."
+            sandbox="allow-scripts allow-same-origin"
+            className={`h-full w-full border-none ${
+              live ? "" : "pointer-events-none"
+            }`}
+          />
+
+          <div className="pointer-events-none absolute left-6 top-6 flex items-center gap-2 rounded-full bg-blue-600/90 px-3 py-1 font-mono text-xs uppercase tracking-widest text-white backdrop-blur">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
+            Live Interactive Demo
+          </div>
+
+          {live ? (
+            <button
+              type="button"
+              onClick={() => setLive(false)}
+              className="absolute left-1/2 top-6 -translate-x-1/2 rounded-full border border-white/20 bg-black/70 px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-white backdrop-blur transition-colors hover:bg-white hover:text-black"
+            >
+              Release control
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setLive(true)}
+              className="absolute inset-0 flex items-end justify-center pb-8 transition-colors hover:bg-white/[0.03]"
+              aria-label="Take control of the live prototype"
+            >
+              <span className="rounded-full border border-white/20 bg-black/70 px-4 py-2 font-mono text-xs uppercase tracking-widest text-white opacity-0 backdrop-blur transition-opacity group-hover:opacity-100">
+                Click to interact
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ---------------------------------------------------------------------------
 // SLIDE REGISTRY
 // ---------------------------------------------------------------------------
@@ -1053,10 +1516,63 @@ const SLIDES: { id: string; label: string; node: React.ReactNode }[] = [
     label: "More Experiments",
     node: <ContinuedExperimentsSlide />,
   },
+  { id: "google-cover", label: "Google", node: <GoogleCoverSlide /> },
+  {
+    id: "space-to-belong",
+    label: "Space to Belong",
+    node: <SpaceToBelongSlide />,
+  },
+  {
+    id: "expressive-captions",
+    label: "Expressive Captions",
+    node: <ExpressiveCaptionsSlide />,
+  },
+  {
+    id: "trends-redesign",
+    label: "Google Trends",
+    node: <TrendsRedesignSlide />,
+  },
+  { id: "google-retail", label: "Retail", node: <GoogleRetailSlide /> },
+  { id: "havas-cover", label: "Havas", node: <HavasCoverSlide /> },
+  {
+    id: "havas-explorations",
+    label: "Explorations",
+    node: <HavasExplorationsSlide />,
+  },
+  {
+    id: "havas-prototype",
+    label: "Code Prototyping",
+    node: <HavasPrototypeSlide />,
+  },
 ];
 
 const TOTAL = SLIDES.length;
 const TRANSITION_MS = 750;
+
+// The deck reads as a series of movements. The dot nav clusters to match, so a
+// long run of slides stays scannable. Keys are the slide that opens each one.
+const SECTION_STARTS: Record<string, string> = {
+  intro: "Profile",
+  "the-work": "The Work",
+  "nyt-cover": "NYT",
+  "google-cover": "Google",
+  "havas-cover": "Havas",
+};
+
+const SECTION_GROUPS = SLIDES.reduce<
+  { name: string; items: { index: number; id: string; label: string }[] }[]
+>((groups, slide, index) => {
+  const name = SECTION_STARTS[slide.id];
+  if (name || groups.length === 0) {
+    groups.push({ name: name ?? "", items: [] });
+  }
+  groups[groups.length - 1].items.push({
+    index,
+    id: slide.id,
+    label: slide.label,
+  });
+  return groups;
+}, []);
 
 // Vertical slide transition — each advance frames a new slide.
 const variants = {
@@ -1161,6 +1677,10 @@ export default function MesaPresentation() {
   }, [next, prev]);
 
   const current = SLIDES[index];
+  const currentSection =
+    SECTION_GROUPS.find((group) =>
+      group.items.some((item) => item.index === index)
+    )?.name ?? "";
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-neutral-950 font-sans text-neutral-200 selection:bg-white selection:text-black">
@@ -1220,29 +1740,52 @@ export default function MesaPresentation() {
 
       {/* --- DOT NAV --- */}
       <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2">
-        <div className="flex items-center gap-3 rounded-full border border-white/10 bg-black/40 px-5 py-3 backdrop-blur-md">
-          {SLIDES.map((slide, i) => {
-            const active = i === index;
+        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-5 py-3 backdrop-blur-md">
+          {SECTION_GROUPS.map((group, gi) => {
+            const inSection = group.items.some((item) => item.index === index);
             return (
-              <button
-                key={slide.id}
-                onClick={() => goTo(i)}
-                aria-label={`Go to ${slide.label}`}
-                aria-current={active ? "true" : undefined}
-                title={slide.label}
-                className="group relative flex items-center"
-              >
-                <span
-                  className={`block h-2 rounded-full transition-all duration-500 ${
-                    active
-                      ? "w-8 bg-white"
-                      : "w-2 bg-neutral-600 group-hover:bg-neutral-400"
-                  }`}
-                />
-              </button>
+              <React.Fragment key={group.name}>
+                {gi > 0 && (
+                  <span
+                    className="mx-1.5 h-3 w-px bg-white/20"
+                    aria-hidden="true"
+                  />
+                )}
+                <div
+                  role="group"
+                  aria-label={group.name}
+                  className="flex items-center gap-2"
+                >
+                  {group.items.map((item) => {
+                    const active = item.index === index;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => goTo(item.index)}
+                        aria-label={`Go to ${group.name}: ${item.label}`}
+                        aria-current={active ? "true" : undefined}
+                        title={`${group.name} — ${item.label}`}
+                        className="group relative flex items-center"
+                      >
+                        <span
+                          className={`block h-2 rounded-full transition-all duration-500 ${
+                            active
+                              ? "w-8 bg-white"
+                              : `w-2 group-hover:bg-neutral-300 ${
+                                  inSection ? "bg-neutral-500" : "bg-neutral-700"
+                                }`
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </React.Fragment>
             );
           })}
           <span className="ml-2 hidden font-mono text-xs uppercase tracking-widest text-neutral-400 sm:block">
+            <span className="text-neutral-500">{currentSection}</span>
+            <span className="mx-1.5 text-neutral-700">/</span>
             {current.label}
           </span>
         </div>
