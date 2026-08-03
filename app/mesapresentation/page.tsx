@@ -2,7 +2,15 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown, ChevronUp, Lock, Trophy } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronUp,
+  Lock,
+  Maximize2,
+  Minimize2,
+  Trophy,
+} from "lucide-react";
 import Link from "next/link";
 import AutoVideo from "../components/AutoVideo";
 
@@ -691,29 +699,17 @@ const AntarcticaSlide = () => (
 
 const SpatialHackathonSlide = () => (
   <div className="flex h-full w-full flex-col items-center justify-center bg-neutral-950 px-6 pt-10 pb-28 md:px-16 md:pt-12 md:pb-28">
-    {/* Header */}
-    <div className="mb-5 w-full max-w-5xl shrink-0 md:mb-6">
-      <div className="mb-3 font-mono text-sm uppercase tracking-widest text-emerald-400">
-        Spatial Design &middot; Hackathon Breakthrough
+    {/* Header. Copy sits beside the headline rather than below the video, which
+        hands the remaining height to the demo. */}
+    <div className="mb-5 grid w-full max-w-6xl shrink-0 gap-4 md:mb-6 md:grid-cols-2 md:items-end md:gap-12">
+      <div>
+        <div className="mb-3 font-mono text-sm uppercase tracking-widest text-emerald-400">
+          Spatial Design &middot; Hackathon Breakthrough
+        </div>
+        <h2 className="text-4xl font-bold leading-[1.05] tracking-tighter text-white md:text-5xl">
+          Designing the Article as a Window
+        </h2>
       </div>
-      <h2 className="text-4xl font-bold leading-[1.05] tracking-tighter text-white md:text-5xl lg:text-6xl">
-        Designing the Article as a Window
-      </h2>
-    </div>
-
-    {/* AR demo — full frame, never cropped (split-screen video) */}
-    <div className="relative flex min-h-0 w-full max-w-5xl flex-1 items-center justify-center overflow-hidden rounded-xl border border-neutral-800 bg-black">
-      <AutoVideo
-        src="/AR_FirstPrototypeDemo.mp4"
-        className="h-full w-full object-contain"
-      />
-      <div className="absolute left-1/2 top-4 -translate-x-1/2 rounded-full border border-white/10 bg-black/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-white backdrop-blur-md">
-        First AR Prototype &middot; Met Galleries
-      </div>
-    </div>
-
-    {/* Copy + outcome */}
-    <div className="mt-5 grid w-full max-w-5xl shrink-0 gap-4 md:mt-6 md:grid-cols-2 md:items-center md:gap-8">
       <p className="leading-relaxed text-neutral-400 md:text-lg">
         During a hackathon, we reimagined an arts article about the Met&apos;s
         galleries around an emerging idea: the camera as a storytelling surface.
@@ -722,12 +718,19 @@ const SpatialHackathonSlide = () => (
         reality to let readers look <em>through</em> the screen and into the
         story.
       </p>
-      <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
-        <span className="text-emerald-400">&rarr;</span>
-        <p className="text-sm font-medium text-emerald-200 md:text-base">
-          The breakthrough that launched two years of spatial design
-          exploration.
-        </p>
+    </div>
+
+    {/* AR demo. The frame matches the 16:9 source exactly so the split screen
+        is never cropped and no letterboxing is visible inside the border. */}
+    <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+      <div className="relative aspect-video max-h-full w-full max-w-[min(100%,116vh)] overflow-hidden rounded-xl border border-neutral-800 bg-black">
+        <AutoVideo
+          src="/AR_FirstPrototypeDemo.mp4"
+          className="h-full w-full object-contain"
+        />
+        <div className="absolute left-1/2 top-4 -translate-x-1/2 rounded-full border border-white/10 bg-black/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-white backdrop-blur-md">
+          First AR Prototype &middot; Met Galleries
+        </div>
       </div>
     </div>
   </div>
@@ -877,9 +880,9 @@ const GoogleCoverSlide = () => (
     <img
       src="/google-hero.jpg"
       alt="Google — Visualizing the World's Curiosity"
-      className="absolute inset-0 z-0 h-full w-full object-cover opacity-60"
+      className="absolute inset-0 z-0 h-full w-full object-cover object-bottom"
     />
-    <div className="absolute inset-0 z-10 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-neutral-950/10" />
+    <div className="absolute inset-0 z-10 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-neutral-950/5" />
     <div className="relative z-20 max-w-4xl px-6 pb-20 md:px-24 md:pb-28">
       <span className="mb-4 block font-mono text-sm uppercase tracking-widest text-white/70">
         Google Brand Studio
@@ -989,12 +992,13 @@ const ExpressiveCaptionsSlide = () => (
 
 const TrendsRedesignSlide = () => (
   <div className="flex h-full w-full flex-col bg-neutral-950 md:grid md:grid-cols-5">
-    {/* Text column */}
-    <div className="order-2 flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-8 md:order-1 md:col-span-2 md:h-full md:px-16">
+    {/* Text column. This one carries the most copy in the deck, so it gets
+        extra bottom padding to stay clear of the dot nav. */}
+    <div className="order-2 flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-8 md:order-1 md:col-span-2 md:h-full md:px-16 md:pb-28">
       <div className="mb-4 font-mono text-sm uppercase tracking-widest text-purple-400">
         Product Innovation
       </div>
-      <h2 className="mb-5 text-4xl font-bold leading-[1.05] tracking-tighter text-white md:text-5xl lg:text-6xl">
+      <h2 className="mb-5 text-4xl font-bold leading-[1.05] tracking-tighter text-white md:text-5xl">
         Reimagining <br /> Google Trends
       </h2>
       <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-purple-500/30 bg-purple-900/20 px-3 py-1 font-mono text-xs uppercase tracking-wide text-purple-400">
@@ -1108,9 +1112,9 @@ const HavasCoverSlide = () => (
     <img
       src="/havas-hero.jpg"
       alt="Havas — The Art of Health Data"
-      className="absolute inset-0 z-0 h-full w-full object-cover opacity-60"
+      className="absolute inset-0 z-0 h-full w-full object-cover saturate-150 brightness-110"
     />
-    <div className="absolute inset-0 z-10 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-neutral-950/10" />
+    <div className="absolute inset-0 z-10 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-neutral-950/5" />
     <div className="relative z-20 max-w-4xl px-6 pb-20 md:px-24 md:pb-28">
       <span className="mb-4 block font-mono text-sm uppercase tracking-widest text-white/70">
         Havas Health &amp; You
@@ -1254,6 +1258,34 @@ const HavasExplorationsSlide = () => {
   );
 };
 
+const HavasDevicePrototypeSlide = () => (
+  <div className="flex h-full w-full flex-col items-center justify-center bg-neutral-950 px-6 pt-10 pb-28 md:px-16 md:pt-12 md:pb-28">
+    {/* Header stays a single compact block, and its width matches the frame
+        below so the headline sits flush with the video's left edge. */}
+    <div className="mb-5 w-full max-w-[min(100%,128vh)] shrink-0 md:mb-6">
+      <div className="mb-3 font-mono text-sm uppercase tracking-widest text-cyan-400">
+        Havas &middot; Device UX
+      </div>
+      <h2 className="text-4xl font-bold leading-[1.05] tracking-tighter text-white md:text-5xl">
+        Medical Technology Prototyping
+      </h2>
+    </div>
+
+    {/* Frame matches the 1372x720 source exactly, so nothing is cropped. */}
+    <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+      <div className="relative aspect-[1372/720] max-h-full w-full max-w-[min(100%,128vh)] overflow-hidden rounded-xl border border-neutral-800 bg-black shadow-2xl">
+        <AutoVideo
+          src="/Havas_LUPsyringe_dark.mp4"
+          className="h-full w-full object-contain"
+        />
+        <div className="absolute right-4 top-4 rounded-full border border-white/10 bg-black/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-white backdrop-blur-md">
+          Working Prototype &middot; Dynamic 3D
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const HavasPrototypeSlide = () => {
   // The prototype is live, so it has to be opted into: while it's inert the
   // deck still receives wheel and key events for navigation.
@@ -1321,7 +1353,7 @@ const HavasPrototypeSlide = () => {
             <button
               type="button"
               onClick={() => setLive(true)}
-              className="absolute inset-0 flex items-end justify-center pb-8 transition-colors hover:bg-white/[0.03]"
+              className="absolute inset-0 flex items-center justify-center transition-colors hover:bg-white/[0.03]"
               aria-label="Take control of the live prototype"
             >
               <span className="rounded-full border border-white/20 bg-black/70 px-4 py-2 font-mono text-xs uppercase tracking-widest text-white opacity-0 backdrop-blur transition-opacity group-hover:opacity-100">
@@ -1334,6 +1366,24 @@ const HavasPrototypeSlide = () => {
     </div>
   );
 };
+
+// Bookends the deck with the same treatment as the opening "The Work" slide.
+const ThankYouSlide = () => (
+  <div className="flex h-full w-full flex-col items-center justify-center bg-black px-6 pb-24 text-center">
+    <h2 className="text-6xl font-bold tracking-tighter text-white md:text-8xl lg:text-9xl">
+      Thank You
+    </h2>
+    <div className="mt-8 flex items-center gap-4 md:gap-6">
+      <span className="hidden h-px w-16 bg-gradient-to-r from-transparent via-blue-500/40 to-blue-500 md:block" />
+      <span className="h-1.5 w-1.5 rotate-45 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+      <p className="font-mono text-sm uppercase tracking-[0.25em] text-neutral-300 md:text-base">
+        Graham Roberts &middot; grahaphics.com
+      </p>
+      <span className="h-1.5 w-1.5 rotate-45 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+      <span className="hidden h-px w-16 bg-gradient-to-l from-transparent via-blue-500/40 to-blue-500 md:block" />
+    </div>
+  </div>
+);
 
 // ---------------------------------------------------------------------------
 // SLIDE REGISTRY
@@ -1419,11 +1469,6 @@ const SLIDES: { id: string; label: string; node: React.ReactNode }[] = [
           I led projects from <em>Snow Fall</em>&mdash;a Pulitzer
           Prize-winning exploration of digital storytelling&mdash;to NYT VR and
           bringing Augmented Reality to the core news app.
-        </p>
-        <p className="border-l-2 border-blue-500 pl-4 text-base text-neutral-400">
-          My work <em>Why Notre Dame Was a Tinderbox</em> was acquired by the{" "}
-          <strong className="text-white">Museum of Modern Art (MoMA)</strong>{" "}
-          for its permanent collection.
         </p>
       </SplitSlide>
     ),
@@ -1544,6 +1589,12 @@ const SLIDES: { id: string; label: string; node: React.ReactNode }[] = [
     label: "Code Prototyping",
     node: <HavasPrototypeSlide />,
   },
+  {
+    id: "havas-device-prototype",
+    label: "Medical Tech Prototyping",
+    node: <HavasDevicePrototypeSlide />,
+  },
+  { id: "thank-you", label: "Thank You", node: <ThankYouSlide /> },
 ];
 
 const TOTAL = SLIDES.length;
@@ -1557,6 +1608,7 @@ const SECTION_STARTS: Record<string, string> = {
   "nyt-cover": "NYT",
   "google-cover": "Google",
   "havas-cover": "Havas",
+  "thank-you": "Close",
 };
 
 const SECTION_GROUPS = SLIDES.reduce<
@@ -1676,6 +1728,30 @@ export default function MesaPresentation() {
     };
   }, [next, prev]);
 
+  // Full screen for presenting. Tracked via the event rather than the click so
+  // it stays correct when the Escape key or a shortcut is used instead.
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      // Blur so a later space or enter advances the deck instead of re-firing
+      // this button.
+      e.currentTarget.blur();
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      } else {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    },
+    []
+  );
+
   const current = SLIDES[index];
   const currentSection =
     SECTION_GROUPS.find((group) =>
@@ -1693,10 +1769,27 @@ export default function MesaPresentation() {
         <span className="font-bold tracking-tight">EXIT</span>
       </Link>
 
-      {/* Slide counter */}
-      <div className="fixed right-6 top-6 z-50 font-mono text-sm tracking-widest text-white mix-blend-difference">
-        {String(index + 1).padStart(2, "0")}
-        <span className="text-neutral-500"> / {String(TOTAL).padStart(2, "0")}</span>
+      {/* Full screen toggle + slide counter */}
+      <div className="fixed right-6 top-6 z-50 flex items-center gap-4 text-white mix-blend-difference">
+        <button
+          onClick={toggleFullscreen}
+          aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+          title={isFullscreen ? "Exit full screen" : "Present full screen"}
+          className="transition-opacity hover:opacity-60"
+        >
+          {isFullscreen ? (
+            <Minimize2 className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <Maximize2 className="h-4 w-4" aria-hidden="true" />
+          )}
+        </button>
+        <div className="font-mono text-sm tracking-widest">
+          {String(index + 1).padStart(2, "0")}
+          <span className="text-neutral-500">
+            {" "}
+            / {String(TOTAL).padStart(2, "0")}
+          </span>
+        </div>
       </div>
 
       {/* Slides */}
