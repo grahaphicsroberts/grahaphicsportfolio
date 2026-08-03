@@ -74,7 +74,7 @@ const IntroSlide = () => (
       <img
         src="/graham-headshotbw.jpg"
         alt="Graham Roberts"
-        className="h-full w-full object-cover grayscale transition-all duration-1000 ease-out group-hover:grayscale-0"
+        className="h-full w-full object-cover opacity-50 grayscale transition-all duration-1000 ease-out group-hover:grayscale-0"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent md:hidden" />
     </div>
