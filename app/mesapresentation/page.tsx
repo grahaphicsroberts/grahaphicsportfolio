@@ -286,9 +286,11 @@ const SnowFallSlide = () => (
     <div className="order-1 flex h-[40vh] flex-col gap-4 p-4 md:order-2 md:col-span-3 md:h-full md:p-6">
       {/* Hero desktop experience */}
       <div className="relative min-h-0 flex-[2] overflow-hidden rounded-xl border border-neutral-800 bg-black">
+        {/* Scaled from the top edge to clip the white strip baked into the
+            bottom of the source capture. */}
         <AutoVideo
           src="/snowfall-desktop.mp4"
-          className="h-full w-full object-cover"
+          className="h-full w-full origin-top scale-[1.04] object-cover"
         />
         <div className="absolute bottom-3 right-3 rounded-full border border-white/10 bg-black/60 px-3 py-1 font-mono text-[10px] text-white backdrop-blur">
           Desktop Experience
