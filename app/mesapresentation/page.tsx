@@ -1146,10 +1146,9 @@ const HavasDiseaseEducationSlide = () => (
         same as the ones that came before.
       </p>
       <p className="leading-relaxed text-neutral-400 md:text-lg">
-        A piece like this gives a figure somewhere to live. Placing the data
-        inside the biology it describes turns an abstract percentage into
-        something closer to an experience&mdash;which is what makes it
-        memorable.
+        Shaping the data into the concepts it describes turns an abstract
+        percentage into something closer to an experience&mdash;and that is what
+        makes it memorable.
       </p>
     </div>
 
