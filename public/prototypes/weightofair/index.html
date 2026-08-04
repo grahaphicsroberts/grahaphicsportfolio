@@ -168,6 +168,15 @@
             document.getElementById('overlay-text').innerText = PHASE_PROMPTS[currentState];
         }
 
+        function advanceState() {
+            currentState = (currentState + 1) % 4;
+            targets.shape = currentState >= 1 ? 1 : 0;
+            targets.color = currentState >= 2 ? 1 : 0;
+            targets.split = currentState === 2 ? 1 : 0;
+            targets.lung  = currentState === 3 ? 1 : 0;
+            updatePrompt();
+        }
+
         function isMobileViewport() {
             return window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches;
         }
@@ -210,14 +219,19 @@
             
             // THRESHOLD: Ignore taps that were really orbit drags (higher on touch screens).
             if (dragDistance < getClickThreshold()) {
-                currentState = (currentState + 1) % 4;
-                targets.shape = currentState >= 1 ? 1 : 0;
-                targets.color = currentState >= 2 ? 1 : 0;
-                targets.split = currentState === 2 ? 1 : 0;
-                targets.lung  = currentState === 3 ? 1 : 0;
-                updatePrompt();
+                advanceState();
             }
         });
+
+        // Autoplay (?autoplay=3000) cycles the phases on a timer instead of by
+        // click, for embeds where the demo runs as a decorative loop. The click
+        // prompt and drag hint are hidden since there's nothing to act on.
+        const autoplayMs = Number(new URLSearchParams(location.search).get('autoplay')) || 0;
+        if (autoplayMs > 0) {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('rotate-hint').style.display = 'none';
+            setInterval(advanceState, autoplayMs);
+        }
 
         // --- 4. GEOMETRY ---
         const gridSize = 20, spacing = 1.2, count = Math.pow(gridSize, 3);

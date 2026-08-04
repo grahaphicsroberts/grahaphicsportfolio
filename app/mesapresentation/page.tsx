@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   ChevronDown,
   ChevronUp,
-  Lock,
   Maximize2,
   Minimize2,
   Trophy,
@@ -56,25 +55,25 @@ const IntroSlide = () => (
   <div className="grid h-full w-full grid-cols-1 md:grid-cols-2">
     {/* Left: Typography & Intro */}
     <div className="order-2 flex flex-col justify-center bg-neutral-950 px-6 py-10 md:order-1 md:px-24">
-      <span className="mb-4 block font-mono text-sm uppercase tracking-widest text-blue-500">
-        Profile &amp; Biography
-      </span>
       <h1 className="mb-6 text-5xl font-bold leading-[0.9] tracking-tighter text-white md:mb-8 md:text-7xl lg:text-8xl">
         GRAHAM <br /> ROBERTS
       </h1>
       <div className="mb-6 h-1 w-24 bg-neutral-800 md:mb-8" />
       <p className="max-w-md text-lg font-light leading-relaxed text-neutral-400 md:text-2xl">
-        Senior Design Leader operating at the frontier of AI, information
-        design, and digital storytelling.
+        Information Designer and Creative Director
       </p>
     </div>
 
-    {/* Right: The Portrait */}
-    <div className="group relative order-1 h-[40vh] overflow-hidden border-neutral-800 md:order-2 md:h-full md:border-l">
-      <img
-        src="/graham-headshotbw.jpg"
-        alt="Graham Roberts"
-        className="h-full w-full object-cover opacity-50 grayscale transition-all duration-1000 ease-out group-hover:grayscale-0"
+    {/* Right: The live prototype, cycling its phases on a timer. Pointer events
+        are off so the deck keeps wheel and keyboard navigation on this slide. */}
+    <div className="relative order-1 h-[40vh] overflow-hidden border-neutral-800 bg-black md:order-2 md:h-full md:border-l">
+      <iframe
+        src="/prototypes/weightofair/index.html?autoplay=4000"
+        title="Interactive 3D prototype: a particle swarm assembles into a structured data grid, splits into a 25/75 comparison, and forms human lung anatomy"
+        aria-label="Looping 3D data visualization: a particle swarm structures into a grid, splits into a 25/75 comparison, then assembles into lung anatomy."
+        sandbox="allow-scripts allow-same-origin"
+        tabIndex={-1}
+        className="pointer-events-none h-full w-full border-none"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent md:hidden" />
     </div>
@@ -84,9 +83,6 @@ const IntroSlide = () => (
 const PhilosophySlide = () => (
   <div className="flex h-full w-full items-center justify-center bg-neutral-950 px-6">
     <div className="mx-auto max-w-4xl text-center">
-      <span className="mb-8 block font-mono text-sm uppercase tracking-widest text-neutral-500">
-        The Philosophy
-      </span>
       <blockquote className="mb-10 font-serif text-3xl italic leading-tight text-white md:text-5xl">
         &ldquo;Information design is a very human place, where we strive to
         understand the world around us, and to share that understanding in ever
@@ -185,6 +181,30 @@ const BerkeleySlide = () => (
         California with my partner Jessica, our son Roman, and our bulldog
         Ralphie.&rdquo;
       </p>
+    </div>
+  </div>
+);
+
+// Full bleed rather than a split, since the photo is busy and crops far less at
+// the full frame. The frosted panel keeps the copy legible over it.
+const WombHouseSlide = () => (
+  <div className="relative flex h-full w-full items-end overflow-hidden">
+    <img
+      src="/wombhouse.jpg"
+      alt="A packed reading at Womb House Books in Oakland"
+      className="absolute inset-0 z-0 h-full w-full object-cover"
+    />
+    <div className="absolute inset-0 z-10 bg-gradient-to-tr from-black/75 via-black/25 to-transparent" />
+    {/* Bottom padding keeps the card clear of the dot nav */}
+    <div className="relative z-20 flex w-full px-6 pb-28 md:px-16">
+      <div className="rounded-2xl border border-white/15 bg-neutral-950/40 p-8 shadow-2xl shadow-black/40 backdrop-blur-2xl md:p-10">
+        <span className="mb-4 block font-mono text-sm uppercase tracking-widest text-rose-400">
+          Life Outside the Work
+        </span>
+        <h2 className="text-4xl font-bold tracking-tighter text-white md:text-6xl">
+          Womb House Books
+        </h2>
+      </div>
     </div>
   </div>
 );
@@ -304,7 +324,6 @@ type MusicProjectProps = {
   subtitle: string;
   title: string;
   video: string;
-  images: string[];
   awards: Award[];
   accent: string;
 };
@@ -313,14 +332,13 @@ const MusicProject = ({
   subtitle,
   title,
   video,
-  images,
   awards,
   accent,
 }: MusicProjectProps) => (
-  <div className="flex min-h-0 flex-col">
-    {/* Hero motion video */}
-    <div className="relative min-h-0 flex-[3] overflow-hidden rounded-xl border border-neutral-800 bg-black">
-      <AutoVideo src={video} className="h-full w-full object-cover" />
+  <div className="flex min-h-0 flex-col justify-center">
+    {/* Frame matches the 16:9 source so the motion work is never cropped */}
+    <div className="relative aspect-video max-h-full w-full overflow-hidden rounded-xl border border-neutral-800 bg-black">
+      <AutoVideo src={video} className="h-full w-full object-contain" />
     </div>
     {/* Label + awards (awards right-aligned, stacked directly below video) */}
     <div className="mt-4 flex shrink-0 items-start justify-between gap-4">
@@ -334,32 +352,17 @@ const MusicProject = ({
       </div>
       <AwardTags awards={awards} vertical />
     </div>
-    {/* Behind-the-scenes stills */}
-    <div className="mt-4 grid min-h-0 flex-[1] grid-cols-2 gap-3">
-      {images.map((img) => (
-        <div
-          key={img}
-          className="relative overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900"
-        >
-          <img
-            src={img}
-            alt={`${title} behind the scenes`}
-            className="h-full w-full object-cover opacity-80"
-          />
-        </div>
-      ))}
-    </div>
   </div>
 );
 
 const ExplainingMusicSlide = () => (
-  <div className="flex h-full w-full flex-col bg-neutral-950 px-6 py-10 md:px-16 md:py-14">
+  <div className="flex h-full w-full flex-col bg-neutral-950 px-6 pt-10 pb-24 md:px-16 md:pt-14">
     {/* Header */}
-    <div className="mb-6 max-w-4xl shrink-0 md:mb-10">
+    <div className="mb-6 max-w-4xl shrink-0 md:mb-8">
       <span className="mb-3 block font-mono text-sm uppercase tracking-widest text-violet-400">
         Demystifying Music
       </span>
-      <h2 className="mb-4 text-4xl font-bold tracking-tighter text-white md:text-6xl">
+      <h2 className="mb-4 text-4xl font-bold tracking-tighter text-white md:text-5xl">
         Explaining Music
       </h2>
       <p className="max-w-3xl text-base leading-relaxed text-neutral-400 md:text-xl">
@@ -376,7 +379,6 @@ const ExplainingMusicSlide = () => (
         subtitle="Bieber, Skrillex & Diplo"
         title="Make a Hit"
         video="/bieber-motion.mp4"
-        images={["/bieber-1.jpg", "/bieber-2.jpg"]}
         awards={[
           { label: "Edward R. Murrow Award" },
           { label: "Malofiej: Gold Medal" },
@@ -387,7 +389,6 @@ const ExplainingMusicSlide = () => (
         subtitle="Kronos Quartet"
         title="Inside the Quartet"
         video="/quartet-motion.mp4"
-        images={["/quartet-1.jpg", "/quartet-2.jpg"]}
         awards={[
           { label: "News & Doc Emmy Nomination" },
           { label: "SND: Best of Digital Design" },
@@ -1131,6 +1132,39 @@ const HavasCoverSlide = () => (
   </div>
 );
 
+const HavasDiseaseEducationSlide = () => (
+  <div className="flex h-full w-full flex-col bg-neutral-950 md:grid md:grid-cols-5">
+    {/* Text column */}
+    <div className="order-2 flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-8 md:order-1 md:col-span-2 md:h-full md:px-16 md:pb-28">
+      <h2 className="mb-6 text-4xl font-bold leading-[1.05] tracking-tighter text-white md:text-5xl lg:text-6xl">
+        Disease State <br /> Education
+      </h2>
+      <p className="mb-6 leading-relaxed text-neutral-400 md:text-lg">
+        Physicians are inundated with percentages and statistics. Efficacy
+        rates, survival figures, risk reductions&mdash;seen in that volume, the
+        numbers start to blur together, and the ones that should matter land the
+        same as the ones that came before.
+      </p>
+      <p className="leading-relaxed text-neutral-400 md:text-lg">
+        A piece like this gives a figure somewhere to live. Placing the data
+        inside the biology it describes turns an abstract percentage into
+        something closer to an experience&mdash;which is what makes it
+        memorable.
+      </p>
+    </div>
+
+    {/* Media column — frame matches the 1280x720 source, so nothing is cropped */}
+    <div className="order-1 flex h-[40vh] items-center justify-center p-4 md:order-2 md:col-span-3 md:h-full md:p-6 md:pb-28">
+      <div className="relative aspect-video w-full max-w-[min(100%,150vh)] overflow-hidden rounded-xl border border-neutral-800 bg-black shadow-2xl">
+        <AutoVideo
+          src="/Havas_DSEclip.mp4"
+          className="h-full w-full object-cover"
+        />
+      </div>
+    </div>
+  </div>
+);
+
 // The explorations grid, carried over from the Havas work page. Aspect ratios
 // are preserved so the masonry keeps its original rhythm.
 const HAVAS_WORK: { src: string; type: "video" | "image"; aspect: string }[] = [
@@ -1150,22 +1184,41 @@ const HAVAS_WORK: { src: string; type: "video" | "image"; aspect: string }[] = [
   { src: "/havas-work-10.mp4", type: "video", aspect: "aspect-[9/8]" },
 ];
 
-// Keeps the plane's edge from ever showing: the perspective tilt pulls the far
-// edge inward, so the drift stops just short of a true edge-to-frame alignment.
-const PLANE_EDGE_OVERLAP = 56;
+// Scroll pace for the explorations grid, in pixels per second.
+const EXPLORATIONS_SCROLL_SPEED = 18;
+
+const ExplorationsGrid = () => (
+  <div className="columns-4 gap-4">
+    {HAVAS_WORK.map((item) => (
+      <div
+        key={item.src}
+        className={`mb-4 w-full break-inside-avoid overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 ${item.aspect}`}
+      >
+        {item.type === "video" ? (
+          <AutoVideo src={item.src} className="h-full w-full object-cover" />
+        ) : (
+          <img
+            src={item.src}
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full object-cover"
+          />
+        )}
+      </div>
+    ))}
+  </div>
+);
 
 const HavasExplorationsSlide = () => {
-  const gridRef = useRef<HTMLDivElement>(null);
-  // Half of however far the grid overflows the viewport. The drift runs from
-  // +amplitude (top of the grid in frame) to -amplitude (bottom in frame).
-  const [amplitude, setAmplitude] = useState(0);
+  const blockRef = useRef<HTMLDivElement>(null);
+  // The grid is rendered twice and travels the height of exactly one copy per
+  // cycle, so the second copy lands where the first began and the loop is
+  // seamless. Measuring the wrapper makes the travel match the layout even if
+  // the masonry balances differently at another window size.
+  const [blockHeight, setBlockHeight] = useState(0);
 
   useEffect(() => {
-    const measure = () => {
-      const height = gridRef.current?.offsetHeight ?? 0;
-      const overflow = height - window.innerHeight;
-      setAmplitude(Math.max(0, overflow / 2 - PLANE_EDGE_OVERLAP));
-    };
+    const measure = () => setBlockHeight(blockRef.current?.offsetHeight ?? 0);
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
@@ -1173,58 +1226,23 @@ const HavasExplorationsSlide = () => {
 
   return (
     <div className="relative flex h-full w-full items-center overflow-hidden bg-neutral-950">
-      {/* The grid sits on a plane that wanders through a slow set of tilt
-          keyframes, while a faster drift pans from the top of the grid to the
-          bottom and back so every project comes into view. */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center [perspective:1800px]">
+      {/* Flat, edge to edge, scrolling up continuously and repeating. */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <motion.div
-          initial={{ rotateX: 12, rotateY: -7, rotateZ: -1.5 }}
-          animate={{
-            rotateX: [12, 8.5, 13, 9.5, 12],
-            rotateY: [-7, 3, -2, 6.5, -7],
-            rotateZ: [-1.5, 0.4, 1.4, -0.6, -1.5],
-          }}
+          animate={{ y: blockHeight ? [0, -blockHeight] : 0 }}
           transition={{
-            duration: 120,
-            times: [0, 0.28, 0.5, 0.76, 1],
+            duration: Math.max(1, blockHeight / EXPLORATIONS_SCROLL_SPEED),
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: "linear",
           }}
-          className="w-[112%] shrink-0 [transform-style:preserve-3d]"
+          className="w-full"
         >
-          <motion.div
-            animate={{ y: [amplitude, -amplitude] }}
-            transition={{
-              duration: 34,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut",
-            }}
-            className="[transform-style:preserve-3d]"
-          >
-            <div ref={gridRef} className="columns-4 gap-4">
-              {HAVAS_WORK.map((item) => (
-                <div
-                  key={item.src}
-                  className={`mb-4 w-full break-inside-avoid overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 ${item.aspect}`}
-                >
-                  {item.type === "video" ? (
-                    <AutoVideo
-                      src={item.src}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={item.src}
-                      alt=""
-                      aria-hidden="true"
-                      className="h-full w-full object-cover"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          <div ref={blockRef}>
+            <ExplorationsGrid />
+          </div>
+          <div aria-hidden="true">
+            <ExplorationsGrid />
+          </div>
         </motion.div>
       </div>
 
@@ -1233,7 +1251,7 @@ const HavasExplorationsSlide = () => {
 
       {/* Copy, in the frosted treatment used in the NYT section */}
       <div className="relative z-20 w-full px-6 md:px-16">
-        <div className="max-w-xl rounded-2xl border border-white/15 bg-neutral-950/40 p-8 shadow-2xl shadow-black/40 backdrop-blur-2xl md:p-12">
+        <div className="max-w-xl rounded-2xl border border-white/10 bg-neutral-950/20 p-8 shadow-2xl shadow-black/40 backdrop-blur-xl md:p-12">
           <span className="mb-4 block font-mono text-sm uppercase tracking-widest text-cyan-400">
             Havas &middot; A Global Practice
           </span>
@@ -1245,13 +1263,6 @@ const HavasExplorationsSlide = () => {
             pharma, biotech, and patient experience&mdash;pressure-testing how
             complex clinical data can be made clear.
           </p>
-          <div className="mt-8 flex items-center gap-2 font-mono text-xs text-neutral-400">
-            <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            <span>
-              Much of this work is confidential. Data has been blinded or
-              abstracted.
-            </span>
-          </div>
         </div>
       </div>
     </div>
@@ -1285,87 +1296,6 @@ const HavasDevicePrototypeSlide = () => (
     </div>
   </div>
 );
-
-const HavasPrototypeSlide = () => {
-  // The prototype is live, so it has to be opted into: while it's inert the
-  // deck still receives wheel and key events for navigation.
-  const [live, setLive] = useState(false);
-
-  return (
-    <div className="flex h-full w-full flex-col bg-neutral-950 md:grid md:grid-cols-5">
-      {/* Text column */}
-      <div className="order-2 flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-8 md:order-1 md:col-span-2 md:h-full md:px-16">
-        <div className="mb-4 font-mono text-sm uppercase tracking-widest text-blue-400">
-          Craft &middot; Live in the Browser
-        </div>
-        <h2 className="mb-6 text-4xl font-bold leading-[1.05] tracking-tighter text-white md:text-5xl lg:text-6xl">
-          Prototyping <br /> in Code
-        </h2>
-        <p className="mb-6 leading-relaxed text-neutral-400 md:text-lg">
-          True art direction requires moving beyond static comps. By prototyping
-          directly in code, we can pressure-test visual systems, motion
-          behavior, and interaction against real data before full engineering
-          begins.
-        </p>
-        <p className="mb-8 leading-relaxed text-neutral-400 md:text-lg">
-          This one is running live: a particle swarm structures itself into a
-          data grid, splits into a 25/75 comparison, then assembles into human
-          lung anatomy.
-        </p>
-        <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3">
-          <span className="text-blue-400">&rarr;</span>
-          <p className="text-sm text-blue-200">
-            {live
-              ? "You have control: drag to rotate, click to advance phases."
-              : "Click the frame to take control, then release it to keep moving."}
-          </p>
-        </div>
-      </div>
-
-      {/* Live prototype. Extra bottom padding keeps the frame clear of the
-          dot nav, which is centered along the bottom of the deck. */}
-      <div className="order-1 h-[40vh] p-4 md:order-2 md:col-span-3 md:h-full md:p-6 md:pb-28">
-        <div className="group relative h-full w-full overflow-hidden rounded-2xl border-4 border-neutral-800 bg-black shadow-2xl">
-          <iframe
-            src="/prototypes/weightofair/index.html"
-            title="Interactive 3D prototype: a particle swarm that assembles health data into a structured grid, splits it into a 25/75 comparison, and forms human lung anatomy"
-            aria-label="Interactive 3D data visualization prototype. Click to advance through phases: a particle swarm structures into a data grid, splits into a 25/75 comparison, then assembles into lung anatomy. Drag to rotate the view."
-            sandbox="allow-scripts allow-same-origin"
-            className={`h-full w-full border-none ${
-              live ? "" : "pointer-events-none"
-            }`}
-          />
-
-          <div className="pointer-events-none absolute left-6 top-6 flex items-center gap-2 rounded-full bg-blue-600/90 px-3 py-1 font-mono text-xs uppercase tracking-widest text-white backdrop-blur">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
-            Live Interactive Demo
-          </div>
-
-          {live ? (
-            <button
-              type="button"
-              onClick={() => setLive(false)}
-              className="absolute left-1/2 top-6 -translate-x-1/2 rounded-full border border-white/20 bg-black/70 px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-white backdrop-blur transition-colors hover:bg-white hover:text-black"
-            >
-              Release control
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setLive(true)}
-              className="absolute inset-0 flex items-center justify-center transition-colors hover:bg-white/[0.03]"
-              aria-label="Take control of the live prototype"
-            >
-              <span className="rounded-full border border-white/20 bg-black/70 px-4 py-2 font-mono text-xs uppercase tracking-widest text-white opacity-0 backdrop-blur transition-opacity group-hover:opacity-100">
-                Click to interact
-              </span>
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Bookends the deck with the same treatment as the opening "The Work" slide.
 const ThankYouSlide = () => (
@@ -1474,6 +1404,7 @@ const SLIDES: { id: string; label: string; node: React.ReactNode }[] = [
     ),
   },
   { id: "berkeley", label: "Berkeley", node: <BerkeleySlide /> },
+  { id: "womb-house", label: "Womb House Books", node: <WombHouseSlide /> },
   { id: "the-work", label: "The Work", node: <TheWorkSlide /> },
   { id: "nyt-cover", label: "NYT", node: <NytCoverSlide /> },
   { id: "snow-fall", label: "Snow Fall", node: <SnowFallSlide /> },
@@ -1580,14 +1511,14 @@ const SLIDES: { id: string; label: string; node: React.ReactNode }[] = [
   { id: "google-retail", label: "Retail", node: <GoogleRetailSlide /> },
   { id: "havas-cover", label: "Havas", node: <HavasCoverSlide /> },
   {
+    id: "havas-disease-education",
+    label: "Disease State Education",
+    node: <HavasDiseaseEducationSlide />,
+  },
+  {
     id: "havas-explorations",
     label: "Explorations",
     node: <HavasExplorationsSlide />,
-  },
-  {
-    id: "havas-prototype",
-    label: "Code Prototyping",
-    node: <HavasPrototypeSlide />,
   },
   {
     id: "havas-device-prototype",
