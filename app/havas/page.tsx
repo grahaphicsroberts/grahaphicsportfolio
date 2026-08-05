@@ -333,7 +333,7 @@ export default function HavasPage() {
             </span>
           </div>
           <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tighter text-white mb-6 leading-[0.9]">
-            The Art of <br /> Health Data
+            The Art of <br /> Complex Data
           </h1>
           <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl leading-relaxed">
             Built a global information design practice. Exploring the
@@ -359,7 +359,8 @@ export default function HavasPage() {
                 Focus Areas
               </h3>
               <p className="text-lg text-white">
-                Pharma, Biotech, AI, Patient Experience
+                AI-Forward Product Strategy, Data Visualization, Patient
+                Experience, Scalable UX Systems
               </p>
             </div>
           </div>
@@ -367,15 +368,25 @@ export default function HavasPage() {
           <div className="md:col-span-8">
             <div className="prose prose-invert prose-lg text-neutral-300 leading-relaxed">
               <p className="text-2xl text-white font-medium mb-8 leading-tight">
-                Health data is often complex, opaque, and clinical. Our mission
-                is to make it human, accessible, and actionable.
+                Health data is inherently complex, opaque, and clinical. My
+                mandate was to make it deeply human, accessible, and actionable
+                at a global scale.
               </p>
               <p className="mb-6">
-                I led a specialized design practice within Havas that helped the
-                world&apos;s leading healthcare companies visualize the
-                invisible. From pitch decks to patient tools, we used high-end
-                visual effects, 3D animation, and interactive design to show
-                clients the &quot;art of the possible.&quot;
+                As EVP of Global Information Design, I built and directed a
+                multidisciplinary practice that helped the world&apos;s leading
+                healthcare organizations define their future-state digital
+                experiences. Rather than relying on traditional playbooks, we
+                operationalized emerging technologies&mdash;from LLMs to spatial
+                UI&mdash;to translate dense datasets into highly personalized,
+                intuitive product ecosystems.
+              </p>
+              <p className="mb-6">
+                By establishing scalable UX frameworks and high-fidelity
+                interactive prototypes, we bridged the gap between complex
+                science and user accessibility, driving strategic alignment for
+                C-suite stakeholders and proving the &quot;art of the
+                possible.&quot;
               </p>
               <div className="flex items-center gap-2 text-sm font-mono text-neutral-500 mt-8">
                 <Lock className="w-4 h-4" aria-hidden="true" />
@@ -396,11 +407,12 @@ export default function HavasPage() {
           {/* Header */}
           <div className="mb-24 px-4">
             <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Explorations
+              Strategic Prototypes &amp; UX Frameworks
             </h2>
             <p className="text-xl text-neutral-400 max-w-2xl">
-              A curated collection of prototypes, motion studies, and design
-              concepts exploring the future of health interfaces.
+              A curated collection of interactive models, architectural systems,
+              and high-fidelity concepts defining the future of personalized
+              interfaces.
             </p>
           </div>
 

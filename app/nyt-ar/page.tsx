@@ -206,8 +206,8 @@ export default function NYTARPage() {
             Immersive Storytelling <br /> at The New York Times
           </h1>
           <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl leading-relaxed">
-            Groundbreaking new approaches to visual storytelling through
-            augmented reality and 3D web features.
+            Groundbreaking approaches to visual storytelling through scalable
+            augmented reality and 3D web frameworks.
           </p>
         </motion.div>
       </section>
@@ -234,23 +234,26 @@ export default function NYTARPage() {
               <h3 className="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2">
                 Timeline
               </h3>
-              <p className="text-lg text-white">Concept to Launch: 6 Months</p>
+              <p className="text-lg text-white">Concept to Launch in 6 Months</p>
             </div>
           </div>
 
           <div className="md:col-span-8">
             <div className="prose prose-invert prose-lg text-neutral-300 leading-relaxed">
               <p className="text-2xl text-white font-medium mb-8 leading-tight">
-                As director of immersive storytelling at The New York Times, I
-                led a multi-year effort to bring AR to the NYT apps, and produce
-                dozens of AR and 3D web features.
+                As Director of Immersive Storytelling, I founded and led a
+                specialized, multidisciplinary practice to build The New York
+                Times&apos; Augmented Reality (AR) program from the ground up.
               </p>
               <p className="mb-6">
-                The immersive storytelling team was founded and led by me, and
-                this project went from concept to launch in just 6 months. It
-                involved leading a massive project team of over 50 product
-                designers, engineers, visual designers, journalists, and
-                marketers to define a new grammar for news.
+                Operating in entirely uncharted territory, I directed a highly
+                matrixed team of over 50 product designers, engineers, visual
+                designers, journalists, and marketers to launch a net-new
+                digital ecosystem in just six months. We didn&apos;t just ship
+                standalone features; we defined the overarching UX architecture
+                and a completely new interaction grammar for news, delivering
+                dozens of highly accessible 3D and AR experiences to a massive
+                global audience.
               </p>
             </div>
           </div>

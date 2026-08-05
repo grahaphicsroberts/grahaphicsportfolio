@@ -163,8 +163,9 @@ export default function GoogleTrendsPage() {
             Visualizing the <br /> World&apos;s Curiosity
           </h1>
           <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl leading-relaxed">
-            Leading digital and experiential design for Google Trends. Turning
-            billions of search queries into human stories.
+            Leading a global portfolio of digital and experiential design
+            centered around Google Trends, transforming billions of search
+            queries into cohesive, multi-platform human stories.
           </p>
         </motion.div>
       </section>
@@ -177,14 +178,17 @@ export default function GoogleTrendsPage() {
               <h3 className="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2">
                 Role
               </h3>
-              <p className="text-lg text-white">Digital Design Lead</p>
+              <p className="text-lg text-white">
+                Senior Creative Lead | Digital Design Lead
+              </p>
             </div>
             <div>
               <h3 className="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2">
                 Focus Areas
               </h3>
               <p className="text-lg text-white">
-                Data Visualization, Web Apps, Experiential Retail
+                Global Experience Design (XD), Data-Driven Discovery, Data
+                Visualization, Experiential Environments
               </p>
             </div>
           </div>
@@ -196,11 +200,20 @@ export default function GoogleTrendsPage() {
                 reflection.
               </p>
               <p className="mb-6">
-                As Digital Design Lead for the Google Brand Studio, I worked to
-                transform the raw utility of Google Trends into emotional,
-                narrative-driven experiences. This involved spanning the digital
-                and physical worlds—from responsive web applications to
-                immersive installations at the Google Store.
+                As Digital Design Lead, I partnered closely with cross-functional
+                engineering and product teams to build a cohesive,
+                narrative-driven ecosystem around the cultural phenomenon of
+                Google search behavior. Rather than focusing on a single product
+                interface, I defined the overarching experience design strategy
+                that brought this massive dataset to life across a broad
+                spectrum of touchpoints.
+              </p>
+              <p className="mb-6">
+                By establishing scalable discovery frameworks and experiential
+                environments, we translated billions of queries into highly
+                personalized, intuitive experiences—spanning everything from
+                global web platforms to physical, interactive installations at
+                the Google Store.
               </p>
             </div>
           </div>
