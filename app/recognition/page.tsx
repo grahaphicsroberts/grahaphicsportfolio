@@ -599,6 +599,9 @@ export default function AwardsPage() {
           <Link href="/#work" className="hover:opacity-50 transition-opacity">
             Work
           </Link>
+          <Link href="/studio" className="hover:opacity-50 transition-opacity">
+            Studio
+          </Link>
           <Link href="/recognition" className="opacity-100">
             Recognition
           </Link>
@@ -647,6 +650,13 @@ export default function AwardsPage() {
               onClick={() => setIsMenuOpen(false)}
             >
               Work
+            </Link>
+            <Link
+              href="/studio"
+              className="text-3xl font-bold text-white hover:text-neutral-500 transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Studio
             </Link>
             <Link
               href="/recognition"

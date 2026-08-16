@@ -162,41 +162,25 @@ export default function Hero() {
 
           {/* RIGHT COLUMN: MANIFESTO & CTA */}
           <div className="max-w-xl pb-2 lg:pb-4">
-            {/* Availability, stated up front: the site has to read as an active
-                practice, not only as a body of past work. */}
-            <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 backdrop-blur">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-              </span>
-              <span className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-emerald-300">
-                Taking on select engagements for 2026
-              </span>
-            </div>
-
             <p className="text-lg md:text-xl xl:text-2xl text-neutral-300 font-light leading-relaxed mb-8">
-              Graham Roberts is a design leader exploring how AI and emerging
-              technologies can advance human-computer interaction. Through{" "}
-              <strong className="font-normal text-white">Grahaphics</strong>, his
-              independent practice, he helps teams make genuinely complex
-              information clear.
+              Graham Roberts is a multidisciplinary design leader exploring how AI and emerging technologies can advance human-computer interaction.
             </p>
 
             <div className="flex flex-wrap items-center gap-6 md:gap-8">
+              <Link
+                href="#work"
+                onClick={scrollToWork}
+                className="group inline-flex items-center gap-3 border-b border-white pb-1 text-white hover:text-neutral-300 hover:border-neutral-300 transition-colors uppercase tracking-widest text-xs md:text-sm font-mono"
+              >
+                <span>View Selected Works</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
               <Link
                 href="/studio"
                 className="group inline-flex items-center gap-3 border-b border-white pb-1 text-white hover:text-neutral-300 hover:border-neutral-300 transition-colors uppercase tracking-widest text-xs md:text-sm font-mono"
               >
                 <span>Work With Me</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-
-              <Link
-                href="#work"
-                onClick={scrollToWork}
-                className="group inline-flex items-center gap-3 border-b border-transparent pb-1 text-neutral-400 hover:text-white hover:border-neutral-500 transition-colors uppercase tracking-widest text-xs md:text-sm font-mono"
-              >
-                <span>View Selected Works</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>

@@ -2,33 +2,48 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { ArrowLeft, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function Navbar() {
+export default function Navbar({
+  backToHome = false,
+}: {
+  backToHome?: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 mix-blend-difference text-white">
-        <Link
-          href="/"
-          className="font-bold tracking-tight text-xl"
-          onClick={() => setIsOpen(false)}
-        >
-          GRAHAM ROBERTS
-        </Link>
+        {backToHome ? (
+          <Link
+            href="/"
+            className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+            onClick={() => setIsOpen(false)}
+          >
+            <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+            <span className="font-bold tracking-tight">HOME</span>
+          </Link>
+        ) : (
+          <Link
+            href="/"
+            className="font-bold tracking-tight text-xl"
+            onClick={() => setIsOpen(false)}
+          >
+            GRAHAM ROBERTS
+          </Link>
+        )}
 
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-6 text-sm font-medium">
-          <Link href="/studio" className="hover:opacity-50 transition-opacity">
-            Studio
+          <Link href="/about" className="hover:opacity-50 transition-opacity">
+            About
           </Link>
           <Link href="/#work" className="hover:opacity-50 transition-opacity">
             Work
           </Link>
-          <Link href="/about" className="hover:opacity-50 transition-opacity">
-            About
+          <Link href="/studio" className="hover:opacity-50 transition-opacity">
+            Studio
           </Link>
           <Link
             href="/recognition"
@@ -69,11 +84,11 @@ export default function Navbar() {
             className="fixed inset-0 bg-neutral-950 z-40 flex flex-col items-center justify-center space-y-8 md:hidden"
           >
             <Link
-              href="/studio"
+              href="/about"
               className="text-3xl font-bold text-white hover:text-neutral-500 transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              Studio
+              About
             </Link>
             <Link
               href="/#work"
@@ -83,11 +98,11 @@ export default function Navbar() {
               Work
             </Link>
             <Link
-              href="/about"
+              href="/studio"
               className="text-3xl font-bold text-white hover:text-neutral-500 transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              About
+              Studio
             </Link>
             <Link
               href="/recognition"

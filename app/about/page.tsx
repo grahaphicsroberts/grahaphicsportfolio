@@ -50,6 +50,9 @@ export default function AboutMagazine() {
           <Link href="/#work" className="hover:opacity-50 transition-opacity">
             Work
           </Link>
+          <Link href="/studio" className="hover:opacity-50 transition-opacity">
+            Studio
+          </Link>
           <Link
             href="/recognition"
             className="hover:opacity-50 transition-opacity"
@@ -103,6 +106,13 @@ export default function AboutMagazine() {
               Work
             </Link>
             <Link
+              href="/studio"
+              className="text-3xl font-bold text-white hover:text-neutral-500 transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Studio
+            </Link>
+            <Link
               href="/recognition"
               className="text-3xl font-bold text-white hover:text-neutral-500 transition-colors"
               onClick={() => setIsMenuOpen(false)}
@@ -153,58 +163,6 @@ export default function AboutMagazine() {
         </div>
       </header>
 
-      {/* --- NOW: THE PRACTICE --- */}
-      {/* The biography below runs chronologically, so it needs a present tense
-          in front of it. Availability wording matches /studio and the footer. */}
-      <section className="border-b border-neutral-800 bg-neutral-900/30 px-6 py-24 md:px-24">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12">
-          <div className="md:col-span-4">
-            <h3 className="text-sm font-mono text-neutral-500 uppercase tracking-widest sticky top-32">
-              Now
-            </h3>
-          </div>
-
-          <div className="md:col-span-8">
-            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-              </span>
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-emerald-300">
-                Taking on select engagements for 2026
-              </span>
-            </div>
-
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-white mb-6">
-              I run Grahaphics.
-            </h2>
-
-            <p className="text-lg md:text-xl text-neutral-300 leading-relaxed mb-6">
-              Grahaphics is my independent practice. I work with teams whose
-              subject matter is genuinely hard&mdash;clinical data, scientific
-              research, technical products&mdash;as an advisor, a strategist,
-              and, when it is useful, the person who builds the prototype.
-            </p>
-            <p className="text-neutral-400 leading-relaxed mb-10">
-              It is the same work I have been doing for twenty years inside The
-              New York Times, Google, and Havas. The story below is how I got
-              here.
-            </p>
-
-            <Link
-              href="/studio"
-              className="group inline-flex items-center gap-3 border-b border-white pb-1 text-white hover:text-neutral-300 hover:border-neutral-300 transition-colors font-mono text-xs uppercase tracking-widest"
-            >
-              How we can work together
-              <ArrowRight
-                className="w-4 h-4 group-hover:translate-x-1 transition-transform"
-                aria-hidden="true"
-              />
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* --- PHILOSOPHY SECTION --- */}
       <section className="py-32 px-6 border-b border-neutral-900">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12">
@@ -233,6 +191,26 @@ export default function AboutMagazine() {
               . In every role, my goal has been to guide organizations through 
               technological shifts—from the rise of mobile formats to the integration of generative AI—elevating the standard for how complex information is communicated to global audiences.
             </p>
+
+            {/* Present tense, set apart from the biography by weight and rule
+                rather than by its own section. */}
+            <div className="mt-12 border-l-2 border-blue-500 pl-6 not-prose">
+              <p className="text-xl md:text-2xl font-light text-white leading-snug">
+                Currently I run{" "}
+                <span className="font-medium">Grahaphics</span>, an independent
+                design and consulting studio.
+              </p>
+              <Link
+                href="/studio"
+                className="group mt-5 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400 hover:text-white transition-colors"
+              >
+                How we can work together
+                <ArrowRight
+                  className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                  aria-hidden="true"
+                />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
