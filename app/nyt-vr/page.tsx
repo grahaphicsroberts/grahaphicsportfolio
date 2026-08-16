@@ -65,6 +65,12 @@ const HIGHLIGHTS = [
     btsStory:
       "We collaborated directly with the New Horizons team at NASA to obtain the raw altimetry data from the flyby, and used this to create accurate renderings of what it would be like to stand on the planets' surface. I also composed a custom operatic soundtrack for the project called The Pluto Chorale. Four opera singers performed the piece at Dubway Studios in NYC around ambisonic microphones, allowing the sound to move with the viewer as they observed the alien environments.",
     images: ["/pluto-1.jpg", "/pluto-2.jpg"],
+    festival: {
+      image: "/PlutoTribeca.jpeg",
+      alt: "Visitors seated in swivel chairs wearing VR headsets inside the NYT VR installation for Seeking Pluto's Frigid Heart at the Tribeca Film Festival",
+      title: "Tribeca Film Festival",
+      copy: "The film was an Official Selection at the Tribeca Film Festival, one of the first major festivals to program virtual reality as a form in its own right. We designed an experiential space for it: a darkened room of swiveling chairs that let each viewer turn freely through the full 360° field, with the Plutonian surface projected across the surrounding walls.",
+    },
   },
   {
     anchorId: "apollo", // Added anchor ID
@@ -81,8 +87,19 @@ const HIGHLIGHTS = [
       "SND Best of Digital Design: Gold Medal",
     ],
     btsStory:
-      "For the 50th anniversary of the Apollo 11 moon landing, we created a new, spatial way to understand the iconic photography taken by Buzz Aldrin and Neil Armstrong on that day in 1969. Referencing maps that identified where every photograph was taken, we were able to give readers the ability to see the photographs from the moon in a new light, reconstructing their relationships to one another spatially and offering a new understanding of the images.",
-    images: ["/moon-1.jpg", "/moon-2.jpg"],
+      "Referencing maps that identified where every photograph was taken, we rebuilt the Apollo 11 photography in space, so readers could understand how the iconic frames related to one another on the lunar surface. For the 50th anniversary, we brought that experience into the room at One Giant Leap, a live New York Times stage event. We built a companion installation for the audience: a circular lunar surface set inside a starfield, where guests put on headsets and walked among the photographs Armstrong and Aldrin shot in 1969 as part of the evening.",
+    images: [
+      "/OneGiantLeap_stage.jpeg",
+      "/AnonMoon.jpeg",
+      "/JessMoon.jpg",
+      "/moon-1.jpg",
+    ],
+    imageAlts: [
+      "The One Giant Leap cast on stage at the New York Times event, taking a bow in front of a full house",
+      "A visitor in a VR headset standing on the printed lunar surface inside the starfield installation",
+      "A guest exploring the Apollo 11 experience in VR, guided by a member of the team",
+      "A visitor walking the surface of the moon in a headset, controllers in hand",
+    ],
   },
 ];
 
@@ -497,24 +514,87 @@ export default function NYTVRPage() {
                     </p>
                   </div>
 
-                  {/* Right: The Evidence (Static Images) */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="aspect-square bg-neutral-800 rounded-lg overflow-hidden relative group">
-                      <img
-                        src={project.images[0]}
-                        alt="BTS Detail 1"
-                        className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500"
-                      />
+                  {/* Right: The Evidence (Static Images). With more than two,
+                      the first is the establishing shot and the rest run
+                      beneath it at their portrait ratio. */}
+                  {project.images.length > 2 ? (
+                    <div className="space-y-4">
+                      <div className="aspect-[3/2] bg-neutral-800 rounded-lg overflow-hidden relative group">
+                        <img
+                          src={project.images[0]}
+                          alt={project.imageAlts?.[0] ?? "Behind the scenes"}
+                          className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500"
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        {project.images.slice(1).map((image, iIndex) => (
+                          <div
+                            key={image}
+                            className="aspect-[3/4] bg-neutral-800 rounded-lg overflow-hidden relative group"
+                          >
+                            <img
+                              src={image}
+                              alt={
+                                project.imageAlts?.[iIndex + 1] ??
+                                "Behind the scenes"
+                              }
+                              className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="aspect-square bg-neutral-800 rounded-lg overflow-hidden relative group">
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="aspect-square bg-neutral-800 rounded-lg overflow-hidden relative group">
+                        <img
+                          src={project.images[0]}
+                          alt="BTS Detail 1"
+                          className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                        />
+                      </div>
+                      <div className="aspect-square bg-neutral-800 rounded-lg overflow-hidden relative group">
+                        <img
+                          src={project.images[1]}
+                          alt="BTS Detail 2"
+                          className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Festival premiere. Mirrors the block above — media on the
+                    left this time — so the panel reads as two beats. */}
+                {project.festival && (
+                  <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center border-t border-neutral-800 pt-12">
+                    <div className="relative aspect-[2404/2118] bg-neutral-800 rounded-lg overflow-hidden border border-neutral-800 group">
                       <img
-                        src={project.images[1]}
-                        alt="BTS Detail 2"
-                        className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                        src={project.festival.image}
+                        alt={project.festival.alt}
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
                       />
+                      <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest text-white border border-white/10">
+                        The Experiential Space
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-3 mb-6 text-yellow-500">
+                        <Award className="w-5 h-5" aria-hidden="true" />
+                        <h4 className="font-mono text-sm uppercase tracking-widest">
+                          Official Selection
+                        </h4>
+                      </div>
+                      <h5 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight">
+                        {project.festival.title}
+                      </h5>
+                      <p className="text-lg text-neutral-300 leading-relaxed">
+                        {project.festival.copy}
+                      </p>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           ))}
