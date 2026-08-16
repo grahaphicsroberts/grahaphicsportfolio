@@ -21,11 +21,14 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-6 text-sm font-medium">
-          <Link href="/about" className="hover:opacity-50 transition-opacity">
-            About
+          <Link href="/studio" className="hover:opacity-50 transition-opacity">
+            Studio
           </Link>
           <Link href="/#work" className="hover:opacity-50 transition-opacity">
             Work
+          </Link>
+          <Link href="/about" className="hover:opacity-50 transition-opacity">
+            About
           </Link>
           <Link
             href="/recognition"
@@ -66,11 +69,11 @@ export default function Navbar() {
             className="fixed inset-0 bg-neutral-950 z-40 flex flex-col items-center justify-center space-y-8 md:hidden"
           >
             <Link
-              href="/about"
+              href="/studio"
               className="text-3xl font-bold text-white hover:text-neutral-500 transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              About
+              Studio
             </Link>
             <Link
               href="/#work"
@@ -78,6 +81,13 @@ export default function Navbar() {
               onClick={() => setIsOpen(false)}
             >
               Work
+            </Link>
+            <Link
+              href="/about"
+              className="text-3xl font-bold text-white hover:text-neutral-500 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              About
             </Link>
             <Link
               href="/recognition"

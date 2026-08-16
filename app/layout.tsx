@@ -14,11 +14,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Graham Roberts | Storyteller & Design Leader",
+    default: "Graham Roberts | Design Leader & Founder of Grahaphics",
     template: "%s | Graham Roberts",
   },
   description:
-    "Graham Roberts is a storyteller and design leader specializing in information design, data visualization, and immersive experiences.",
+    "Graham Roberts is a design leader specializing in information design, data visualization, and immersive experiences. Through Grahaphics, his independent practice, he helps teams make complex information clear.",
 };
 
 export default function RootLayout({
