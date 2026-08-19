@@ -11,12 +11,12 @@ import {
   ArrowRight,
   Mail,
   Linkedin,
-  Twitter,
   MapPin,
   Menu,
   X,
 } from "lucide-react";
 import Link from "next/link";
+import XIcon from "../components/XIcon";
 
 export default function AboutMagazine() {
   const targetRef = useRef(null);
@@ -399,16 +399,16 @@ export default function AboutMagazine() {
             </a>
 
             <a
-              href="https://twitter.com/grahaphics"
+              href="https://x.com/grahaphics"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex flex-col items-center gap-4 p-8 rounded-lg hover:bg-neutral-900 transition-colors"
             >
               <div className="p-4 bg-neutral-900 rounded-full group-hover:bg-white group-hover:text-black transition-colors border border-neutral-800">
-                <Twitter className="w-5 h-5" aria-hidden="true" />
+                <XIcon className="w-4 h-4" />
               </div>
               <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest">
-                Twitter
+                X
               </span>
             </a>
           </div>

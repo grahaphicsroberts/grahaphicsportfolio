@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Mail, Linkedin, Twitter } from "lucide-react";
+import { Mail, Linkedin } from "lucide-react";
+import XIcon from "./XIcon";
 
 export default function Footer() {
   return (
@@ -28,15 +29,19 @@ export default function Footer() {
           </a>
           <a
             href="https://www.linkedin.com/in/grahaphics/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 hover:underline"
           >
             <Linkedin className="w-5 h-5" aria-hidden="true" /> LinkedIn
           </a>
           <a
-            href="https://twitter.com/grahaphics"
+            href="https://x.com/grahaphics"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 hover:underline"
           >
-            <Twitter className="w-5 h-5" aria-hidden="true" /> Twitter / X
+            <XIcon className="w-4 h-4" /> X
           </a>
         </div>
         <p className="mt-24 text-sm text-neutral-500">
