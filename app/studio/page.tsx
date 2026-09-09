@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, MapPin } from "lucide-react";
 import Navbar from "../components/Navbar";
 
@@ -71,10 +71,120 @@ const SECTORS = [
   "Education & research",
 ];
 
+// ---------------------------------------------------------------------------
+// BRANDS THE WORK HAS BEEN BUILT FOR
+// The heights are optical, not uniform: a wide wordmark set to the same height
+// as a compact one reads as much larger, so each is tuned to sit evenly in the
+// row rather than measure the same.
+// ---------------------------------------------------------------------------
+
+const BRANDS = [
+  { name: "The New York Times", src: "/logos/nyt.svg", height: "h-[17px]" },
+  { name: "Google", src: "/logos/google.svg", height: "h-[21px]" },
+  {
+    name: "Kimberly-Clark",
+    src: "/logos/kimberly-clark.svg",
+    height: "h-[16px]",
+  },
+  { name: "Novartis", src: "/logos/novartis.svg", height: "h-[18px]" },
+  { name: "Merck", src: "/logos/merck.svg", height: "h-[21px]" },
+  { name: "Genentech", src: "/logos/genentech.svg", height: "h-[16px]" },
+  { name: "Sanofi", src: "/logos/sanofi.svg", height: "h-[21px]" },
+  { name: "Pfizer", src: "/logos/pfizer.svg", height: "h-[26px]" },
+  { name: "Amgen", src: "/logos/amgen.svg", height: "h-[20px]" },
+  { name: "Guardant Health", src: "/logos/guardant.svg", height: "h-[19px]" },
+  {
+    name: "Johnson & Johnson",
+    src: "/logos/johnson-and-johnson.svg",
+    height: "h-[14px]",
+  },
+  { name: "AbbVie", src: "/logos/abbvie.svg", height: "h-[19px]" },
+  // The Bayer cross is square where the rest are wordmarks, so it needs extra
+  // height to carry the same visual weight in the row.
+  { name: "Bayer", src: "/logos/bayer.svg", height: "h-[30px]" },
+  { name: "Regeneron", src: "/logos/regeneron.svg", height: "h-[15px]" },
+];
+
 const reveal = {
   initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.3 },
+};
+
+// Seconds for a row to travel its own width. Slow enough to read a logo as it
+// passes rather than register a moving band.
+const MARQUEE_DURATION = 26;
+
+const BrandLogo = ({
+  brand,
+  decorative = false,
+}: {
+  brand: (typeof BRANDS)[number];
+  decorative?: boolean;
+}) => (
+  <img
+    src={brand.src}
+    alt={decorative ? "" : brand.name}
+    aria-hidden={decorative || undefined}
+    // brightness-0 flattens each logo to a silhouette and invert turns it
+    // white, so fourteen different palettes read as one.
+    className={`w-auto shrink-0 opacity-55 brightness-0 invert transition-opacity duration-300 hover:opacity-100 ${brand.height}`}
+  />
+);
+
+// Phone layout: two short rows that drift past each other, so fourteen logos
+// cost about 90px of height instead of seven stacked rows.
+const MarqueeRow = ({
+  brands,
+  reverse = false,
+}: {
+  brands: typeof BRANDS;
+  reverse?: boolean;
+}) => {
+  const reduceMotion = useReducedMotion();
+
+  // Nothing should move for someone who asked for stillness, so the row
+  // becomes a swipeable strip instead of losing the logos off-screen.
+  if (reduceMotion) {
+    return (
+      <div className="flex items-center gap-x-10 overflow-x-auto px-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {brands.map((brand) => (
+          <BrandLogo key={brand.src} brand={brand} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden">
+      <motion.div
+        className="flex w-max"
+        animate={{ x: reverse ? ["-50%", "0%"] : ["0%", "-50%"] }}
+        transition={{
+          duration: MARQUEE_DURATION,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      >
+        {/* Two identical groups, each carrying its own trailing gap, so the
+            halfway point of the track lines up exactly with the start. */}
+        {[false, true].map((duplicate) => (
+          <div
+            key={String(duplicate)}
+            className="flex shrink-0 items-center gap-x-10 pr-10"
+          >
+            {brands.map((brand) => (
+              <BrandLogo
+                key={brand.src}
+                brand={brand}
+                decorative={duplicate}
+              />
+            ))}
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
 };
 
 export default function StudioPage() {
@@ -137,6 +247,27 @@ export default function StudioPage() {
           </div>
         </motion.div>
       </header>
+
+      {/* --- BRANDS --- */}
+      <section className="border-b border-neutral-800 py-12 md:px-24">
+        <motion.div
+          {...reveal}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.6 }}
+          className="mx-auto max-w-6xl"
+        >
+          <div className="flex flex-col gap-y-6 md:hidden">
+            <MarqueeRow brands={BRANDS.slice(0, 7)} />
+            <MarqueeRow brands={BRANDS.slice(7)} reverse />
+          </div>
+
+          <div className="hidden flex-wrap items-center gap-x-12 gap-y-7 md:flex">
+            {BRANDS.map((brand) => (
+              <BrandLogo key={brand.src} brand={brand} />
+            ))}
+          </div>
+        </motion.div>
+      </section>
 
       {/* --- WHAT I'M HIRED FOR --- */}
       <section className="border-b border-neutral-800 px-6 py-32 md:px-24">
