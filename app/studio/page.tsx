@@ -194,14 +194,6 @@ export default function StudioPage() {
 
       {/* --- HERO --- */}
       <header className="relative flex min-h-[92vh] items-center overflow-hidden border-b border-neutral-800 px-6 pt-32 pb-20 md:px-24">
-        <img
-          src="/Deepmind_radial_wireframe.png"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover opacity-[0.13]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/70 to-neutral-950/40" />
-
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
