@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, MapPin } from "lucide-react";
 import Navbar from "../components/Navbar";
+import DotField from "../components/DotField";
 
 // ---------------------------------------------------------------------------
 // WHAT THE STUDIO IS HIRED FOR
@@ -194,6 +195,8 @@ export default function StudioPage() {
 
       {/* --- HERO --- */}
       <header className="relative flex min-h-[92vh] items-center overflow-hidden border-b border-neutral-800 px-6 pt-32 pb-20 md:px-24">
+        <DotField />
+
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
