@@ -18,7 +18,7 @@ const SERVICES = [
   },
   {
     title: "AI-forward product & experience strategy",
-    copy: "Where generative and spatial technology genuinely improves a product, and where it is theater. I have spent the last several years operationalizing this rather than demoing it.",
+    copy: "Where generative and spatial technology earns its place in a product, and where it doesn't. I pioneered spatial design approaches early and have spent the years since putting them into production rather than into demos.",
   },
   {
     title: "Strategy sprints",
