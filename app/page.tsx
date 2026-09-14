@@ -7,10 +7,13 @@ import SelectedWorks from "./components/SelectedWorks";
 import Awards from "./components/Awards";
 import Speaking from "./components/Speaking";
 import Footer from "./components/Footer";
+import { PersonSchema } from "./components/StructuredData";
 
 export default function Portfolio() {
   return (
     <div className="bg-neutral-950 text-neutral-100 min-h-screen font-sans selection:bg-white selection:text-black">
+      <PersonSchema />
+
       {/* Navigation Component */}
       <Navbar />
 

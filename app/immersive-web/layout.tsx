@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "Immersive Web — Immersive Storytelling & Information Design",
   description:
     "A decade of immersive web storytelling at The New York Times: information design, interactive graphics, and narrative experiences that reshaped digital journalism.",
+  alternates: { canonical: "/immersive-web" },
 };
 
 export default function ImmersiveWebLayout({
