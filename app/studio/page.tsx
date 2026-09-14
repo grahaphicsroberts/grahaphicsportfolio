@@ -13,6 +13,10 @@ import DotField from "../components/DotField";
 
 const SERVICES = [
   {
+    title: "Data visualization & information design",
+    copy: "Production-grade explanatory graphics, charts, and 3D visualization for dense, technical subject matter that has to stay accurate while becoming legible.",
+  },
+  {
     title: "Advisory & design leadership counsel",
     copy: "Ongoing counsel for leaders building or scaling a design practice: how to shape the org, who to hire, what standards to hold, and the calls that are hard to make from inside.",
   },
@@ -27,10 +31,6 @@ const SERVICES = [
   {
     title: "Prototype builds",
     copy: "Working code, not comps. Interactive prototypes that pressure-test a visual system, an interaction, or a dataset before engineering commits to building it.",
-  },
-  {
-    title: "Data visualization & information design",
-    copy: "Production-grade explanatory graphics, charts, and 3D visualization for dense, technical subject matter that has to stay accurate while becoming legible.",
   },
   {
     title: "Fractional design leadership",
