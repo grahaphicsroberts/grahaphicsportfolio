@@ -22,7 +22,7 @@ export default function Footer() {
         </p>
         <div className="flex flex-wrap gap-8 text-lg font-medium">
           <a
-            href="mailto:grahaphics@gmail.com"
+            href="mailto:graham@grahaphics.com"
             className="flex items-center gap-2 hover:underline"
           >
             <Mail className="w-5 h-5" aria-hidden="true" /> Email

@@ -373,7 +373,7 @@ export default function AboutMagazine() {
 
           <div className="grid grid-cols-3 gap-4">
             <a
-              href="mailto:grahaphics@gmail.com"
+              href="mailto:graham@grahaphics.com"
               className="group flex flex-col items-center gap-4 p-8 rounded-lg hover:bg-neutral-900 transition-colors"
             >
               <div className="p-4 bg-neutral-900 rounded-full group-hover:bg-white group-hover:text-black transition-colors border border-neutral-800">

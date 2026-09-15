@@ -220,7 +220,7 @@ export default function StudioPage() {
 
           <div className="flex flex-wrap items-center gap-4">
             <a
-              href="mailto:grahaphics@gmail.com?subject=Project%20inquiry"
+              href="mailto:graham@grahaphics.com?subject=Project%20inquiry"
               className="group inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] text-black transition-colors hover:bg-neutral-300"
             >
               Start a conversation
@@ -369,10 +369,10 @@ export default function StudioPage() {
 
           <div className="mt-12 flex flex-wrap items-center gap-4">
             <a
-              href="mailto:grahaphics@gmail.com?subject=Project%20inquiry"
+              href="mailto:graham@grahaphics.com?subject=Project%20inquiry"
               className="group inline-flex items-center gap-3 rounded-full bg-black px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] text-white transition-colors hover:bg-neutral-700"
             >
-              grahaphics@gmail.com
+              graham@grahaphics.com
               <ArrowRight
                 className="h-4 w-4 transition-transform group-hover:translate-x-1"
                 aria-hidden="true"

@@ -80,7 +80,7 @@ export function StudioSchema() {
         image: `${SITE_URL}/opengraph-image.jpg`,
         description:
           "The independent practice of Graham Roberts: advisory, strategy sprints, working prototypes, and data visualization for teams with complex information to communicate.",
-        email: "grahaphics@gmail.com",
+        email: "graham@grahaphics.com",
         founder: { "@type": "Person", name: "Graham Roberts", url: SITE_URL },
         address: {
           "@type": "PostalAddress",
