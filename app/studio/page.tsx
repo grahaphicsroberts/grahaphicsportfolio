@@ -203,15 +203,6 @@ export default function StudioPage() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="relative z-10 max-w-4xl"
         >
-          {/* The line below already says Grahaphics, so the mark is decorative
-              as far as a screen reader is concerned. */}
-          <img
-            src="/logos/grahaphics-mark.png"
-            alt=""
-            aria-hidden="true"
-            className="mb-5 h-32 w-auto md:h-44"
-          />
-
           <span className="mb-6 block font-mono text-sm uppercase tracking-[0.25em] text-blue-500">
             Grahaphics &middot; The Studio
           </span>
