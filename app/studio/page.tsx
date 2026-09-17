@@ -212,9 +212,9 @@ export default function StudioPage() {
           </h1>
 
           <p className="mb-12 max-w-2xl text-xl font-light leading-relaxed text-neutral-300 md:text-2xl">
-            Grahaphics is the independent practice of Graham Roberts. I work
-            with teams across disciplines to transform complex data and concepts
-            into clear and compelling stories and experiences.
+            Grahaphics is the independent practice of Graham Roberts.
+            <br />I work with teams across disciplines to transform complex data
+            and concepts into clear and compelling stories and experiences.
           </p>
 
           <div className="flex flex-wrap items-center gap-4">
