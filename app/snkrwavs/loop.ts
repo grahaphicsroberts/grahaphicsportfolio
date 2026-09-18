@@ -51,6 +51,21 @@ export type Loop = {
   notes: Note[];
 };
 
+// A part with no pitch in it: a thump that lands on the same beats of every
+// bar it plays. There is nothing for it to turn, so it is drawn as a pulse in
+// the middle of the rings rather than as a ring of its own.
+export type Pulse = {
+  id: string;
+  label: string;
+  // Where it lands inside a bar, in beats from the downbeat.
+  hits: number[];
+  // The song bars it plays through, each one from its bar up to but not
+  // including the next. A part can drop out and come back.
+  spans: { from: number; to: number }[];
+  // Bars it takes to come up to full strength when it first arrives.
+  fadeIn: number;
+};
+
 // The piece the loops are heard in. The clock belongs to the song rather than
 // to any one loop, which is what lets loops of different lengths turn at their
 // own rate against the same bar count.
@@ -60,6 +75,7 @@ export type Song = {
   // How long it is, counting from bar one. It comes back around a bar later.
   bars: number;
   loops: Loop[];
+  pulses: Pulse[];
 };
 
 export const beatSeconds = (song: Song) => 60 / song.bpm;
@@ -121,6 +137,55 @@ export const loopPresence = (song: Song, loop: Loop, beats: number) => {
     (beats - entrance(song, loop)) / POP,
     (exit(song, loop) - beats) / POP,
   );
+};
+
+// How long a thump takes to fall away to nothing, in beats. Longer than the
+// tighter gaps in a pattern like the kick's, so the paired hits run into each
+// other and only the wider gaps go fully dark. A hit landing on one still
+// falling just starts it over.
+const THUMP_FALL = 0.9;
+
+// Whether a pulse is playing at all, and how far up its fade it has come.
+const pulseStrength = (song: Song, pulse: Pulse, beats: number) => {
+  const playing = pulse.spans.some(
+    (span) =>
+      beats >= (span.from - 1) * song.beatsPerBar &&
+      beats < (span.to - 1) * song.beatsPerBar,
+  );
+  if (!playing) return 0;
+
+  const arrival = (pulse.spans[0].from - 1) * song.beatsPerBar;
+  const fade = pulse.fadeIn * song.beatsPerBar;
+
+  return fade > 0 ? Math.min(1, (beats - arrival) / fade) : 1;
+};
+
+// How long ago the last thump landed, in beats, wrapping back into the bar
+// before when the bar has only just turned over.
+const sinceHit = (song: Song, pulse: Pulse, beats: number) => {
+  const inBar = ((beats % song.beatsPerBar) + song.beatsPerBar) % song.beatsPerBar;
+
+  return pulse.hits.reduce((closest, hit) => {
+    const gap = inBar - hit;
+
+    return Math.min(closest, gap >= 0 ? gap : gap + song.beatsPerBar);
+  }, Infinity);
+};
+
+// How hard the pulse is ringing: struck at one, gone by the time the next one
+// lands, and nothing at all outside the bars it plays.
+export const pulseAt = (song: Song, pulse: Pulse, beats: number) => {
+  const strength = pulseStrength(song, pulse, beats);
+  if (strength <= 0) return 0;
+
+  const since = sinceHit(song, pulse, beats);
+  if (since >= THUMP_FALL) return 0;
+
+  // Squared, so it drops away and then tapers into the dark rather than
+  // sliding down at an even rate.
+  const left = 1 - since / THUMP_FALL;
+
+  return strength * left * left;
 };
 
 // The riff, sixteenths the whole way through. Each bar is an eight-note figure
@@ -205,12 +270,27 @@ const HARPSICHORD: Loop = {
   notes: RIFF,
 };
 
+// The low kick: a boom-bap thump on the one, the two-and, the three and the
+// four-and of every bar. It holds the floor from the top of the song, drops
+// out for the twenty-one bars from 60, and comes back at 81 to see it out.
+const LOW_KICK: Pulse = {
+  id: "low-kick",
+  label: "Low kick",
+  hits: [0, 1.5, 2, 3.5],
+  spans: [
+    { from: 1, to: 60 },
+    { from: 81, to: 116 },
+  ],
+  fadeIn: 4,
+};
+
 export const SNKRWAVS_SONG: Song = {
   bpm: 94,
   beatsPerBar: 4,
   // The piece ends on bar 115, so it comes back around on 116.
   bars: 115,
   loops: [HARPSICHORD],
+  pulses: [LOW_KICK],
 };
 
 for (const loop of SNKRWAVS_SONG.loops) {

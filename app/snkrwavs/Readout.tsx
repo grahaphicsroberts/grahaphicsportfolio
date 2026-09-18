@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { type Song, barBeat, songAt } from "./loop";
 
-// Where the song is, in the terms a musician would use, sitting inside the
-// rings. It counts the song rather than any one loop, since the loops come and
-// go against it. It runs its own frame loop and only re-renders when the beat
-// changes, so the page around it never re-renders while the transport runs.
+// Where the song is, in the terms a musician would use. It counts the song
+// rather than any one loop, since the loops come and go against it. It runs
+// its own frame loop and only re-renders when the beat changes, so the page
+// around it never re-renders while the transport runs.
 export default function Readout({
   song,
   elapsed,
@@ -32,15 +32,13 @@ export default function Readout({
   }, [song, elapsed]);
 
   return (
-    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1">
-      <span className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-neutral-500">
-        Bar
-      </span>
-      <span className="font-mono text-4xl tabular-nums text-white md:text-5xl">
+    <p className="font-mono text-sm uppercase tracking-[0.3em] text-neutral-300">
+      <span className="text-neutral-600">bar </span>
+      <span className="tabular-nums">
         {at.bar}
         <span className="text-neutral-600">.</span>
         {at.beat}
       </span>
-    </div>
+    </p>
   );
 }

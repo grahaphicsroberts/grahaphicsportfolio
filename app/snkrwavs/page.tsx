@@ -5,6 +5,7 @@ import { useReducedMotion } from "framer-motion";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import LoopRing from "./LoopRing";
 import Readout from "./Readout";
+import Thump from "./Thump";
 import { SNKRWAVS_SONG as SONG, loopSeconds, songSeconds } from "./loop";
 import { useTransport } from "./useTransport";
 
@@ -38,17 +39,26 @@ export default function SnkrwavsPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between gap-8 bg-black px-6 py-6 text-white">
-      <header className="w-full">
+      <header className="flex w-full items-baseline justify-between gap-6">
         <h1 className="font-mono text-sm uppercase tracking-[0.3em] text-neutral-300">
           snkrwavs
         </h1>
+
+        <Readout song={SONG} elapsed={elapsed} />
       </header>
 
-      <div className="relative aspect-square w-full max-w-[min(92vw,calc(100vh-15rem))]">
+      {/* The rings turn around the parts that have pitch; the parts that do
+          not beat in the middle of them. The reserve is what the header and
+          the controls under it take, so it grows by a line for every part
+          listed down there. */}
+      <div className="relative aspect-square w-full max-w-[min(92vw,calc(100vh-16rem))]">
         {SONG.loops.map((loop) => (
           <LoopRing key={loop.id} song={SONG} loop={loop} elapsed={elapsed} />
         ))}
-        <Readout song={SONG} elapsed={elapsed} />
+
+        {SONG.pulses.map((pulse) => (
+          <Thump key={pulse.id} song={SONG} pulse={pulse} elapsed={elapsed} />
+        ))}
       </div>
 
       <footer className="flex w-full flex-col items-center gap-5">
@@ -89,6 +99,19 @@ export default function SnkrwavsPage() {
             >
               {loop.label} &middot; bars {loop.from}&ndash;{loop.to} &middot; one
               turn every {loopSeconds(SONG, loop).toFixed(1)}s
+            </p>
+          ))}
+
+          {SONG.pulses.map((pulse) => (
+            <p
+              key={pulse.id}
+              className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-neutral-700"
+            >
+              {pulse.label} &middot; bars{" "}
+              {pulse.spans
+                .map((span) => `${span.from}\u2013${span.to}`)
+                .join(", ")}{" "}
+              &middot; {pulse.hits.length} to the bar
             </p>
           ))}
         </div>
