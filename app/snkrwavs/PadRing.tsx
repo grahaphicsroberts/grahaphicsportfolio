@@ -223,7 +223,7 @@ export default function PadRing({
     <canvas
       ref={canvasRef}
       role="img"
-      aria-label={`${pad.label}: a ${pad.bars}-bar pattern for ${pad.voices.join(", ").toLowerCase()}, drawn as a ring of ${pad.steps} steps to the bar, from bar ${pad.from} to bar ${pad.to} of the song, less the bars the mix mutes`}
+      aria-label={`${pad.label}: a ${pad.bars}-bar pattern for ${pad.voices.join(", ").toLowerCase()}, drawn as a ring of ${pad.steps} steps to the bar, from bar ${pad.from} to bar ${pad.to} of the song${pad.gaps ? ", less the bars the mix mutes" : ""}`}
       className="absolute inset-0 h-full w-full"
     />
   );

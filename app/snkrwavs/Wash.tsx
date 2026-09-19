@@ -96,8 +96,9 @@ export default function Wash({
       {/* Every other part says what it is through the label on its drawing.
           This one has no drawing to label, so it says it here. */}
       <p className="sr-only">
-        {part.label}: {part.chords.length} chords struck in turn and left to
-        ring, from bar {part.from} to bar {part.to} of the song. It has no ring
+        {part.label}: {part.chords.length} strikes on{" "}
+        {new Set(part.chords.map((chord) => chord.root)).size} chords, each left
+        to ring, from bar {part.from} to bar {part.to} of the song. It has no ring
         of its own: the whole screen takes the colour of whichever chord is
         sounding and pulses {part.tremolo} times a bar with its tremolo.
       </p>

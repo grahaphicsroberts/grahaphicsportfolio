@@ -237,7 +237,7 @@ export default function LoopRing({
 
         // Numbers are placed rather than rotated into position, so they stay
         // upright as the ring turns.
-        if (!rolls) {
+        if (!rolls && loop.numbers !== false) {
           ctx.fillStyle = LABEL_COLOR;
           ctx.fillText(
             String(bar + 1),

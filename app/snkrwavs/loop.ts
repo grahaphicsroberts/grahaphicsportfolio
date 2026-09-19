@@ -1,4 +1,5 @@
 import { BASS_NOTES } from "./bass";
+import { DROP_HITS } from "./dropBeat";
 import { END_SOLO_NOTES } from "./endSolo";
 
 // One note on the staff.
@@ -79,6 +80,12 @@ export type Loop = Part & {
   // notes are still written from the part's own downbeat; they just carry on
   // past the end of a turn instead of starting again.
   rolls?: boolean;
+  // Whether its bars are numbered outside the staff. They are worth the room
+  // they take on a loop, where the same numbers come round every pass and are
+  // how you read where in the loop you are. On a part that passes once they
+  // are just a count, and the band they reserve is better spent on a part
+  // that has nowhere else to go.
+  numbers?: boolean;
   notes: Note[];
 };
 
@@ -338,11 +345,16 @@ export const pulseAt = (song: Song, pulse: Pulse, beats: number) => {
   return strength * left * left;
 };
 
-// How fast a struck chord gives up its level, as a share of the room it has
-// before the next one. A string is loudest the instant it is hit and most of
-// that is gone well inside a bar, which is why a chord held over two bars
-// still reads as one strike and not as a long note.
-const RING = 0.42;
+// How steeply a struck chord gives up its light. This is a curve, not a
+// recording: full brightness exactly on the downbeat it is struck on, nothing
+// at all by the moment the next one is struck, and steeper at the front than a
+// straight line would be, since that is where a struck string loses most of
+// what it has. The tremolo steps it down in between, so what you see is a run
+// of pulses each dimmer than the last.
+const FALL = 3;
+
+const fade = (through: number) =>
+  (Math.exp(-FALL * through) - Math.exp(-FALL)) / (1 - Math.exp(-FALL));
 
 // Which chord is sounding and how much of it is left: the colour the screen
 // takes, and how far it has fallen since it was struck. Null when the part is
@@ -368,7 +380,7 @@ export const chordAt = (song: Song, part: Chords, beats: number) => {
 
   return {
     chord: struck,
-    strength: presence * Math.exp(-since / (struck.length * RING)),
+    strength: presence * fade(Math.min(1, since / struck.length)),
   };
 };
 
@@ -592,8 +604,8 @@ const COUNTERPOINT_MELODY: Loop = {
 
 // The organ solo that ends the piece. It is not a loop: one long turn, coming
 // in at bar 81 and playing to the last bar, which is slow enough that the ring
-// barely seems to move. It takes the outermost place, which the harpsichord
-// left empty at bar 45 and does not come back for.
+// barely seems to move. It takes the outermost ring of all, outside even the
+// drop beat: it is the last part to arrive, so it is the last band out.
 //
 // Written an octave below where it sounds. The playing climbs to C7, and at
 // pitch that would hang half the solo off the top of the staff on ledger
@@ -604,9 +616,13 @@ const END_SOLO: Loop = {
   id: "end-solo",
   label: "End solo",
   bars: 34,
-  radius: 0.389,
+  radius: 0.443,
   from: 81,
   to: 115,
+  // Its bar numbers are given up: they would sit outside the staff, which out
+  // here is off the edge of the canvas. No loss — thirty-four numbers that
+  // never come round again were the least useful thing on the page.
+  numbers: false,
   notes: END_SOLO_NOTES.map(([at, pitch, length]) => ({
     at,
     length,
@@ -712,25 +728,63 @@ const HIGH_HATS: Pad = {
   hits: HATS.map(([at, lane, force]) => ({ at, lane, force })),
 };
 
+// The drop beat: a whole kit on a four-bar turn, in at bar 61 and playing to
+// the end. It takes the band the harpsichord left empty at bar 45, where from
+// bar 61 to 80 it is the outermost thing turning. The solo arrives outside it
+// at 81, which is the order the two of them arrive in.
+//
+// The two toms share a lane. They play four hits in the fill at the end of the
+// turn, hi then low, and a lane each would have cost more room than the band
+// has. The rest keep theirs: the pedal hat carries the eighths the pattern
+// runs on, the crash marks the top of every turn, and the kick keeps a pattern
+// of its own, nothing like the one the boom bap plays, which is how you can
+// tell the two apart when both are going after bar 81.
+const DROP_BEAT: Pad = {
+  id: "drop-beat",
+  label: "Drop beat",
+  bars: 4,
+  radius: 0.364,
+  steps: 16,
+  // Innermost out, body to air, the same order the hats are read in.
+  voices: ["Kick", "Toms", "Snare", "Pedal hat", "Crash"],
+  from: 61,
+  to: 115,
+  // Read off the master, which drops the kit for two bars where the MIDI keeps
+  // playing it. It is out for 71 and 72 and back at the top of 73, where the
+  // crash marks the turn.
+  gaps: [{ from: 71, to: 73 }],
+  hits: DROP_HITS.map(([at, lane, force]) => ({ at, lane, force })),
+};
+
 // The guitar, read off the master rather than out of a file, since it was
-// played rather than programmed and there is no file of it. Three chords on a
-// four-bar turn — the first held for two bars, the other two for one each —
-// struck twelve times over from bar 13 to the top of bar 61, which is where
-// the tremolo stops showing up in the recording. The chords were found by
-// fingerprinting the harmony of every bar it plays and matching each against
-// the first three, which sorted all forty-eight of them without a stray; the
-// roots came out of the partials each chord has that the other two do not.
+// played rather than programmed and there is no file of it. An eight-bar turn
+// of five strikes on three chords, from bar 13 to the end of the piece: two
+// bars, two bars, two bars, a bar, a bar, with the third strike the first chord
+// again and the fourth the second.
+//
+// The roots were read from the harmony at each strike, averaged over the turns
+// after bar 45 where the harpsichord has stopped and nothing else is sitting on
+// top of the guitar's own octave. They come out as a descent — Bb, then Ab,
+// then G at the turn — which the rainbow the staffs read pitch by happens to
+// draw as a descent of its own, blue to green to yellow.
+//
+// Past bar 60 the tremolo stops showing up in that measurement, but it is
+// playing: by then there is a whole kit and an organ over it, and what is left
+// of a tremolo guitar underneath is not something a band of the spectrum will
+// hand back. The part is drawn to the end because that is where it goes.
 const GUITAR: Chords = {
   id: "guitar",
   label: "Guitar",
-  bars: 4,
+  bars: 8,
   from: 13,
-  to: 61,
+  to: 115,
   tremolo: 16,
   chords: [
     { at: 0, length: 8, root: "Bb2" },
-    { at: 8, length: 4, root: "Eb3" },
-    { at: 12, length: 4, root: "G2" },
+    { at: 8, length: 8, root: "Ab2" },
+    { at: 16, length: 8, root: "Bb2" },
+    { at: 24, length: 4, root: "Ab2" },
+    { at: 28, length: 4, root: "G2" },
   ],
 };
 
@@ -748,7 +802,7 @@ export const SNKRWAVS_SONG: Song = {
   bars: 114,
   fadeOutFrom: 97,
   loops: [HARPSICHORD, LEAD_MELODY, COUNTERPOINT_MELODY, END_SOLO, BASS],
-  pads: [HIGH_HATS],
+  pads: [HIGH_HATS, DROP_BEAT],
   pulses: [LOW_KICK],
   chords: [GUITAR],
 };
@@ -756,7 +810,9 @@ export const SNKRWAVS_SONG: Song = {
 // A loop has to come out even: if its span is not a whole number of turns it
 // would be cut off mid-pass, which is a mistake in the writing down rather
 // than something to draw. A rolling part is under no such obligation, since
-// its ring is a window on the song and can stop anywhere.
+// its ring is a window on the song and can stop anywhere, and neither is a
+// part still going when the master runs out: there the mix cuts the pass off,
+// and the drop beat is two bars into its fourteenth when it does.
 for (const part of [
   ...SNKRWAVS_SONG.loops,
   ...SNKRWAVS_SONG.pads,
@@ -764,8 +820,9 @@ for (const part of [
 ]) {
   const played = part.to - part.from;
   const rolls = "rolls" in part && part.rolls === true;
+  const cut = part.to > SNKRWAVS_SONG.bars;
 
-  if (!rolls && played % part.bars !== 0) {
+  if (!rolls && !cut && played % part.bars !== 0) {
     throw new Error(
       `${part.id} runs ${played} bars, which is not a whole number of its ${part.bars}-bar turn`,
     );
