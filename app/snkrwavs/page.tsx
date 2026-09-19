@@ -1,24 +1,26 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useReducedMotion } from "framer-motion";
+import React, { useEffect, useRef } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import LoopRing from "./LoopRing";
+import PadRing from "./PadRing";
 import Readout from "./Readout";
+import Scrubber from "./Scrubber";
 import Thump from "./Thump";
-import { SNKRWAVS_SONG as SONG, loopSeconds, songSeconds } from "./loop";
+import Wash from "./Wash";
+import { SNKRWAVS_SONG as SONG, songSeconds } from "./loop";
 import { useTransport } from "./useTransport";
 
 const clock = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, "0")}`;
 
 export default function SnkrwavsPage() {
-  const reduceMotion = useReducedMotion();
-  // Starts turning on its own, unless the visitor has asked for stillness, in
-  // which case it waits to be played.
-  const { running, elapsed, toggle, rewind } = useTransport(
-    reduceMotion === false,
-  );
+  // Nothing turns until the music is playing, and nothing plays until it is
+  // asked for: a page cannot start its own sound, and a ring turning silently
+  // would only have to jump into line once the sound caught up with it.
+  const player = useRef<HTMLAudioElement>(null);
+  const { running, elapsed, toggle, rewind, seek, duration } =
+    useTransport(player);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -39,6 +41,14 @@ export default function SnkrwavsPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between gap-8 bg-black px-6 py-6 text-white">
+      <audio ref={player} src={SONG.audio} preload="auto" className="hidden" />
+
+      {/* A part with no ring: it lights the whole page instead, so it sits
+          outside the space the rings are given. */}
+      {SONG.chords.map((part) => (
+        <Wash key={part.id} song={SONG} part={part} elapsed={elapsed} />
+      ))}
+
       <header className="flex w-full items-baseline justify-between gap-6">
         <h1 className="font-mono text-sm uppercase tracking-[0.3em] text-neutral-300">
           snkrwavs
@@ -48,12 +58,17 @@ export default function SnkrwavsPage() {
       </header>
 
       {/* The rings turn around the parts that have pitch; the parts that do
-          not beat in the middle of them. The reserve is what the header and
-          the controls under it take, so it grows by a line for every part
-          listed down there. */}
-      <div className="relative aspect-square w-full max-w-[min(92vw,calc(100vh-16rem))]">
+          not beat in the middle of them. This takes whatever height the
+          header and the controls leave it, and the drawing squares itself off
+          inside that, so listing another part costs the rings a little room
+          rather than pushing the page off the screen. */}
+      <div className="relative flex min-h-0 w-full flex-1 items-center justify-center">
         {SONG.loops.map((loop) => (
           <LoopRing key={loop.id} song={SONG} loop={loop} elapsed={elapsed} />
+        ))}
+
+        {SONG.pads.map((pad) => (
+          <PadRing key={pad.id} song={SONG} pad={pad} elapsed={elapsed} />
         ))}
 
         {SONG.pulses.map((pulse) => (
@@ -86,35 +101,23 @@ export default function SnkrwavsPage() {
           </button>
         </div>
 
-        <div className="flex flex-col items-center gap-1 text-center">
-          <p className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-neutral-500">
-            {SONG.bpm} bpm &middot; {SONG.beatsPerBar}/4 &middot; {SONG.bars}{" "}
-            bars &middot; {clock(songSeconds(SONG))}
-          </p>
+        <Scrubber
+          song={SONG}
+          elapsed={elapsed}
+          duration={duration}
+          seek={seek}
+        />
 
-          {SONG.loops.map((loop) => (
-            <p
-              key={loop.id}
-              className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-neutral-700"
-            >
-              {loop.label} &middot; bars {loop.from}&ndash;{loop.to} &middot; one
-              turn every {loopSeconds(SONG, loop).toFixed(1)}s
-            </p>
-          ))}
-
-          {SONG.pulses.map((pulse) => (
-            <p
-              key={pulse.id}
-              className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-neutral-700"
-            >
-              {pulse.label} &middot; bars{" "}
-              {pulse.spans
-                .map((span) => `${span.from}\u2013${span.to}`)
-                .join(", ")}{" "}
-              &middot; {pulse.hits.length} to the bar
-            </p>
-          ))}
-        </div>
+        {/* What the piece is, and nothing about the parts: they are what the
+            drawing is for, and every line written about them down here comes
+            straight out of the height it gets to turn in. Once a part can be
+            soloed by clicking its ring, whatever needs saying about it can be
+            said where it is being pointed at. */}
+        <p className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-neutral-500">
+          {SONG.bpm} bpm &middot; {SONG.beatsPerBar}/4 &middot; {SONG.bars} bars
+          &middot; {clock(songSeconds(SONG))} &middot; fades from bar{" "}
+          {SONG.fadeOutFrom}
+        </p>
       </footer>
     </main>
   );
