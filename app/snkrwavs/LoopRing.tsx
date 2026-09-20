@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { density } from "./canvas";
 import {
   type Loop,
   type Song,
@@ -114,7 +115,7 @@ export default function LoopRing({
       width = rect.width;
       height = rect.height;
 
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = density();
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

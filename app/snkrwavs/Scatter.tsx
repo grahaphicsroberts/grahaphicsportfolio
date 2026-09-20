@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { density } from "./canvas";
 import { type Flurry, type Song, flurryAt, songAt, songFade } from "./loop";
 
 // The wood block, drawn as sparks rather than as anything that turns. Every
@@ -61,7 +62,7 @@ export default function Scatter({
       width = rect.width;
       height = rect.height;
 
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = density();
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

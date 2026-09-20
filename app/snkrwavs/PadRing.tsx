@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { density } from "./canvas";
 import { STRIKE, strike, warming } from "./palette";
 import { LANE } from "./rings";
 import {
@@ -97,7 +98,7 @@ export default function PadRing({
       width = rect.width;
       height = rect.height;
 
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = density();
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
