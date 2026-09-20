@@ -13,7 +13,8 @@ import {
   songAt,
   songFade,
 } from "./loop";
-import { pitchColour } from "./palette";
+import { pitchColour, warming } from "./palette";
+import { STAFF_GAP } from "./rings";
 
 // The loop drawn as a staff bent into a circle: five lines, bar lines crossing
 // them, and one turn of the ring for one pass of the loop. Top centre is now.
@@ -21,14 +22,10 @@ import { pitchColour } from "./palette";
 const TAU = Math.PI * 2;
 
 // Everything is a fraction of the shorter side of the canvas, so the ring holds
-// its proportions from a phone to a wide display.
-// A staff is a staff whatever ring it is drawn on: the lines sit the same
-// distance apart on all of them, so only the radius changes as loops nest.
-// Since the staff no longer shrinks to make room, this is also what decides
-// how many rings the drawing can hold: each one costs a band of about nine
-// gaps, so a finer staff is what buys room for another part.
-const STAFF_GAP = 0.0105;
-
+// its proportions from a phone to a wide display. The staff gap itself is kept
+// with the rest of the ring geometry, since a ring that can be clicked has to be
+// measurable from outside the component that draws it.
+//
 // Everything else is measured in staff gaps, which keeps the ticks, numbers
 // and playhead in proportion to the notation rather than to the canvas.
 const BEAT_TICK = 1.05; // length of a beat tick, outside the staff
@@ -61,11 +58,21 @@ const NOTE_ONSET = 0.13; // seconds that swell takes to settle
 const NOTE_GLOW = 2.6; // gaps of glow it carries while it sounds
 const NOTE_BLAZE = 4.5; // and at the strike
 
-const STAFF_COLOR = "rgba(255, 255, 255, 0.34)";
-const BAR_COLOR = "rgba(255, 255, 255, 0.5)";
-const DOWNBEAT_COLOR = "rgba(255, 255, 255, 0.92)";
-const BEAT_COLOR = "rgba(255, 255, 255, 0.22)";
-const LABEL_COLOR = "rgba(255, 255, 255, 0.4)";
+// The paper, which is white until this is the part being heard on its own and
+// then warms. Kept as weights rather than colours for that reason: what changes
+// when a ring is soloed is the hue of everything the music is written on, not how
+// heavily one line is drawn against another.
+//
+// The warming is a colour and nothing else. A glow behind these lines read well
+// and cost ten times as much to draw as the lines themselves — a canvas blur is
+// paid per stroke, and a ring is a hundred-odd strokes of bar lines and ticks,
+// which is a frame's whole budget for one ring of the eight.
+const STAFF_INK = 0.34;
+const BAR_INK = 0.5;
+const DOWNBEAT_INK = 0.92;
+const BEAT_INK = 0.22;
+const LABEL_INK = 0.4;
+
 const NOTE_COLOR = "rgba(255, 255, 255, 0.5)";
 const PLAYHEAD_COLOR = "#3b82f6";
 
@@ -73,10 +80,18 @@ export default function LoopRing({
   song,
   loop,
   elapsed,
+  focus,
+  warmth,
 }: {
   song: Song;
   loop: Loop;
   elapsed: () => number;
+  // How brightly this part is drawn just now: all of it, unless another part is
+  // being heard on its own.
+  focus: (id: string) => number;
+  // And how warm, which is the same question the other way round: none of it,
+  // unless this is the part being heard on its own.
+  warmth: (id: string) => number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -91,6 +106,7 @@ export default function LoopRing({
     let drawnPhase: number | null = -1;
     let drawnPresence = -1;
     let drawnFade = -1;
+    let drawnWarm = -1;
     let frame = 0;
 
     const layout = () => {
@@ -118,6 +134,7 @@ export default function LoopRing({
       cursor: number,
       presence: number,
       fade: number,
+      warm: number,
     ) => {
       const cx = width / 2;
       const cy = height / 2;
@@ -174,10 +191,19 @@ export default function LoopRing({
       const first = edge * turn + spent;
       const last = (edge + 1) * turn - spent;
 
+      // The paper, warm while this is the part being heard on its own. Mixed
+      // once here rather than per line: a ring draws its bar lines and ticks by
+      // the hundred, and they are all written in the same ink.
+      const staffInk = warming(warm, STAFF_INK);
+      const barInk = warming(warm, BAR_INK);
+      const downbeatInk = warming(warm, DOWNBEAT_INK);
+      const beatInk = warming(warm, BEAT_INK);
+      const labelInk = warming(warm, LABEL_INK);
+
       // The five lines. As circles they carry no sense of rotation themselves:
       // the bar lines and, later, the notes are what turn.
       ctx.lineWidth = 1;
-      ctx.strokeStyle = STAFF_COLOR;
+      ctx.strokeStyle = staffInk;
       for (let line = -2; line <= 2; line++) {
         ctx.beginPath();
         ctx.arc(
@@ -205,7 +231,7 @@ export default function LoopRing({
       // them, and without its numbers: it is the innermost thing on the
       // drawing and has no room outside itself to put them in.
       if (!rolls) {
-        ctx.strokeStyle = BEAT_COLOR;
+        ctx.strokeStyle = beatInk;
         for (let beat = 0; beat < turn; beat++) {
           if (beat % song.beatsPerBar === 0) continue;
           radial(angleAt(beat / turn), outer, outer + gap * BEAT_TICK);
@@ -232,7 +258,7 @@ export default function LoopRing({
         // the downbeat's only heavier. A second stroke in here would read as a
         // bar line sitting inside the last bar.
         ctx.lineWidth = downbeat ? 2 : 1;
-        ctx.strokeStyle = downbeat ? DOWNBEAT_COLOR : BAR_COLOR;
+        ctx.strokeStyle = downbeat ? downbeatInk : barInk;
         radial(angle, inner, outer);
 
         // The double line that marks the seam of the loop lives outside the
@@ -248,7 +274,7 @@ export default function LoopRing({
         // Numbers are placed rather than rotated into position, so they stay
         // upright as the ring turns.
         if (!rolls && loop.numbers !== false) {
-          ctx.fillStyle = LABEL_COLOR;
+          ctx.fillStyle = labelInk;
           ctx.fillText(
             String(bar + 1),
             cx + Math.cos(angle) * labelRadius,
@@ -316,7 +342,7 @@ export default function LoopRing({
         // tells a B below the staff from the C above it.
         if (note.step < -1 || note.step > 9) {
           const outward = note.step > 9;
-          ctx.strokeStyle = STAFF_COLOR;
+          ctx.strokeStyle = staffInk;
           ctx.lineWidth = 1;
 
           for (
@@ -389,19 +415,25 @@ export default function LoopRing({
       const phase = partPhase(song, loop, beats);
       const cursor = partCursor(song, loop, beats);
       const presence = partPresence(song, loop, beats);
-      const fade = songFade(song, beats);
+      // The hand on the mix, and the other part being listened to on its own:
+      // both of them take this ring's brightness down without touching anything
+      // else about it, so they arrive here as one number.
+      const fade = songFade(song, beats) * focus(loop.id);
+      const warm = warmth(loop.id);
 
       // Paused, or between frames on a fast display, there is nothing new to
       // draw and the ring costs nothing.
       if (
         phase !== drawnPhase ||
         presence !== drawnPresence ||
-        fade !== drawnFade
+        fade !== drawnFade ||
+        warm !== drawnWarm
       ) {
-        render(phase, cursor, presence, fade);
+        render(phase, cursor, presence, fade, warm);
         drawnPhase = phase;
         drawnPresence = presence;
         drawnFade = fade;
+        drawnWarm = warm;
       }
       frame = requestAnimationFrame(draw);
     };
@@ -416,7 +448,7 @@ export default function LoopRing({
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [song, loop, elapsed]);
+  }, [song, loop, elapsed, focus, warmth]);
 
   return (
     <canvas

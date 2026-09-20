@@ -19,10 +19,12 @@ export default function Thump({
   song,
   pulse,
   elapsed,
+  focus,
 }: {
   song: Song;
   pulse: Pulse;
   elapsed: () => number;
+  focus: (id: string) => number;
 }) {
   const fieldRef = useRef<HTMLDivElement>(null);
   const coinRef = useRef<HTMLDivElement>(null);
@@ -48,7 +50,8 @@ export default function Thump({
 
     const tick = () => {
       const beats = songAt(song, elapsed());
-      const hit = pulseAt(song, pulse, beats) * songFade(song, beats);
+      const hit =
+        pulseAt(song, pulse, beats) * songFade(song, beats) * focus(pulse.id);
 
       // Paused, or between frames, there is nothing new to write.
       if (Math.abs(hit - drawn) > 0.002) {
@@ -70,7 +73,7 @@ export default function Thump({
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [song, pulse, elapsed]);
+  }, [song, pulse, elapsed, focus]);
 
   return (
     <div

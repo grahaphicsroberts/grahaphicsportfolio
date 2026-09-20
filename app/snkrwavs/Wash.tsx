@@ -35,10 +35,12 @@ export default function Wash({
   song,
   part,
   elapsed,
+  focus,
 }: {
   song: Song;
   part: Chords;
   elapsed: () => number;
+  focus: (id: string) => number;
 }) {
   const washRef = useRef<HTMLDivElement>(null);
 
@@ -65,7 +67,11 @@ export default function Wash({
         : 1 - DEPTH + DEPTH * tremoloAt(song, part, beats);
 
       const level = sounding
-        ? sounding.strength * breath * songFade(song, beats) * PEAK
+        ? sounding.strength *
+          breath *
+          songFade(song, beats) *
+          focus(part.id) *
+          PEAK
         : 0;
 
       if (sounding) {
@@ -89,7 +95,7 @@ export default function Wash({
     frame = requestAnimationFrame(tick);
 
     return () => cancelAnimationFrame(frame);
-  }, [song, part, elapsed]);
+  }, [song, part, elapsed, focus]);
 
   return (
     <>

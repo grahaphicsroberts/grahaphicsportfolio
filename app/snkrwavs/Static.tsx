@@ -37,10 +37,12 @@ export default function Static({
   song,
   part,
   elapsed,
+  focus,
 }: {
   song: Song;
   part: Noise;
   elapsed: () => number;
+  focus: (id: string) => number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -121,7 +123,8 @@ export default function Static({
       // Its own fader climbs to the last bar, but the fade on the whole mix
       // from bar 97 takes it down along with everything else, and what is drawn
       // is what is heard.
-      const level = noiseAt(song, part, beats) * songFade(song, beats);
+      const level =
+        noiseAt(song, part, beats) * songFade(song, beats) * focus(part.id);
 
       // Which is nothing for two thirds of the piece: leave the canvas alone
       // rather than filling it with transparent static.
@@ -201,7 +204,7 @@ export default function Static({
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [song, part, elapsed]);
+  }, [song, part, elapsed, focus]);
 
   return (
     <>

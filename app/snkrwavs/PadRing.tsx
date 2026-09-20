@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { STRIKE, strike } from "./palette";
+import { STRIKE, strike, warming } from "./palette";
+import { LANE } from "./rings";
 import {
   type Pad,
   type Song,
@@ -21,8 +22,8 @@ import {
 const TAU = Math.PI * 2;
 
 // Everything is a fraction of the shorter side of the canvas, so the pattern
-// holds its proportions from a phone to a wide display.
-const LANE = 0.0105; // one voice's band, the same across as a staff gap
+// holds its proportions from a phone to a wide display. The lane width lives
+// with the rest of the ring geometry, where the hit testing can read it too.
 const CELL_INSET = 0.16; // of a lane, left dark around each filled cell
 const STEP_INSET = 0.1; // and of a step, so the grid reads as cells
 
@@ -35,8 +36,13 @@ const CELL_ONSET = 0.1; // seconds that swell takes to settle
 const CELL_GLOW = 3.2; // lanes of glow a struck cell carries
 const CELL_BLAZE = 3; // and at the strike
 
-const GRID_COLOR = "rgba(255, 255, 255, 0.1)";
-const BAR_COLOR = "rgba(255, 255, 255, 0.4)";
+// The squared paper, which warms when this is the part being heard on its own,
+// the way a staff does. Weights rather than colours, since what changes then is
+// the hue of the grid and not how heavily it is ruled. Colour only: a blur is
+// paid per stroke, and a grid is one stroke per step of every bar in it.
+const GRID_INK = 0.1;
+const BAR_INK = 0.4;
+
 const PLAYHEAD_COLOR = "#3b82f6";
 
 // Percussion has no pitch, so the rainbow the other rings read by means
@@ -62,10 +68,14 @@ export default function PadRing({
   song,
   pad,
   elapsed,
+  focus,
+  warmth,
 }: {
   song: Song;
   pad: Pad;
   elapsed: () => number;
+  focus: (id: string) => number;
+  warmth: (id: string) => number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -79,6 +89,7 @@ export default function PadRing({
     let drawnPhase: number | null = -1;
     let drawnPresence = -1;
     let drawnFade = -1;
+    let drawnWarm = -1;
     let frame = 0;
 
     const layout = () => {
@@ -94,7 +105,12 @@ export default function PadRing({
       drawnPhase = -1;
     };
 
-    const render = (phase: number | null, presence: number, fade: number) => {
+    const render = (
+      phase: number | null,
+      presence: number,
+      fade: number,
+      warm: number,
+    ) => {
       const cx = width / 2;
       const cy = height / 2;
       const size = Math.min(width, height);
@@ -124,9 +140,14 @@ export default function PadRing({
       const roof = floor + pad.voices.length * lane;
 
       // The grid: the lanes the voices run in, and the steps they are written
-      // on. Empty, it is a sheet of squared paper with the bars marked.
+      // on. Empty, it is a sheet of squared paper with the bars marked, and warm
+      // while this is the part being heard by itself. Both inks are mixed once
+      // here, since every step of every bar is ruled in one or the other.
+      const gridInk = warming(warm, GRID_INK);
+      const barInk = warming(warm, BAR_INK);
+
       ctx.lineWidth = 1;
-      ctx.strokeStyle = GRID_COLOR;
+      ctx.strokeStyle = gridInk;
       for (let line = 0; line <= pad.voices.length; line++) {
         ctx.beginPath();
         ctx.arc(cx, cy, floor + line * lane, angleAt(0), angleAt(1));
@@ -144,7 +165,7 @@ export default function PadRing({
 
       for (let cell = 0; cell < cells; cell++) {
         const bar = cell % pad.steps === 0;
-        ctx.strokeStyle = bar ? BAR_COLOR : GRID_COLOR;
+        ctx.strokeStyle = bar ? barInk : gridInk;
         radial(angleAt(cell / cells), floor, roof);
       }
 
@@ -204,17 +225,20 @@ export default function PadRing({
       const beats = songAt(song, elapsed());
       const phase = partPhase(song, pad, beats);
       const presence = partPresence(song, pad, beats);
-      const fade = songFade(song, beats);
+      const fade = songFade(song, beats) * focus(pad.id);
+      const warm = warmth(pad.id);
 
       if (
         phase !== drawnPhase ||
         presence !== drawnPresence ||
-        fade !== drawnFade
+        fade !== drawnFade ||
+        warm !== drawnWarm
       ) {
-        render(phase, presence, fade);
+        render(phase, presence, fade, warm);
         drawnPhase = phase;
         drawnPresence = presence;
         drawnFade = fade;
+        drawnWarm = warm;
       }
       frame = requestAnimationFrame(draw);
     };
@@ -229,7 +253,7 @@ export default function PadRing({
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [song, pad, elapsed]);
+  }, [song, pad, elapsed, focus, warmth]);
 
   return (
     <canvas

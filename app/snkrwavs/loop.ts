@@ -56,6 +56,17 @@ export type Part = {
   // playhead. The notes themselves are written at the end of the turn, which
   // on a ring is the same place as before the start of it.
   lead?: number;
+  // The part on its own, if there is a recording of it: clicking its ring plays
+  // this instead of the mix. The stems are exports of the same session, so they
+  // run the length of the whole piece and line up with the master sample for
+  // sample — which is what lets the drawing carry on turning untouched while
+  // what you hear changes underneath it.
+  stem?: string;
+  // Seconds to add to the master's clock when seeking this stem. The master is
+  // AAC and reports its encoder delay in `currentTime`; an MP3 stem reports a
+  // smaller one, so the same number on both clocks is not the same moment in
+  // the music. Leave it off when the stem is the same kind of file as the mix.
+  stemOffset?: number;
   // Stretches the part is written through but not heard in. A MIDI file knows
   // what was programmed and nothing about what the mix does with it, so these
   // are read off the master itself: where a part is muted, its ring goes, and
@@ -708,6 +719,15 @@ const END_SOLO: Loop = {
   radius: 0.443,
   from: 81,
   to: 115,
+  stem: "/ASharpKnife_endsolo_stem.mp3",
+  // The stem and the master hold the same 12,835,915 samples of music, lined up
+  // to the sample: correlated against each other at three places in the solo
+  // they agree on the nose, so nothing about the playing needs shifting. What
+  // does need shifting is the clock, because the browser counts each file's
+  // encoder priming in what it reports: 2112 samples of it on the AAC master,
+  // 528 on the MP3 stem, which both files' durations confirm. The stem's clock
+  // therefore runs 1584 samples ahead of the master's on the same music.
+  stemOffset: (528 - 2112) / 44100,
   // Its bar numbers are given up: they would sit outside the staff, which out
   // here is off the edge of the canvas. No loss — thirty-four numbers that
   // never come round again were the least useful thing on the page.

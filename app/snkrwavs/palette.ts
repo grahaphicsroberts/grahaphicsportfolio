@@ -22,6 +22,27 @@ export const ROYGBIV = [
   [191, 90, 242],
 ] as const;
 
+// The colour a part's own paper takes while it is the only thing being heard.
+// Everything else on the drawing is cool — the strike blue, the playhead, the
+// white of the staffs — so warming the lines a part is written on says this is
+// the one you are listening to without touching the notes, which have the
+// rainbow to say something else with.
+export const ALONE = [255, 138, 46] as const;
+
+// How much brighter that paper gets as it warms. Colour on its own would be a
+// recolouring; a little more light in it as well is what makes it read as lit,
+// and unlike a glow it costs nothing — the lines are drawn either way.
+const LIFT = 0.7;
+
+// White paper warmed toward the orange, mixed rather than switched so a ring
+// heats up and cools off over the same moment the rest of the piece takes to
+// dim, instead of changing in a single frame.
+export const warming = (warmth: number, alpha: number) => {
+  const mix = ALONE.map((hot) => Math.round(255 + (hot - 255) * warmth));
+
+  return `rgba(${mix[0]}, ${mix[1]}, ${mix[2]}, ${Math.min(1, alpha * (1 + warmth * LIFT))})`;
+};
+
 // Steps below the staff run negative, and a remainder has to stay positive
 // for the octave to come back around to the same colour.
 export const pitchColour = (step: number, alpha = 1) => {

@@ -32,10 +32,12 @@ export default function Scatter({
   song,
   part,
   elapsed,
+  focus,
 }: {
   song: Song;
   part: Flurry;
   elapsed: () => number;
+  focus: (id: string) => number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -107,7 +109,7 @@ export default function Scatter({
       painted = sparks.length;
 
       const radius = Math.min(width, height) * DOT;
-      const fade = songFade(song, beats);
+      const fade = songFade(song, beats) * focus(part.id);
       const peak = still.matches ? PEAK * 0.6 : PEAK;
 
       ctx.fillStyle = "#ffffff";
@@ -139,7 +141,7 @@ export default function Scatter({
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [song, part, elapsed]);
+  }, [song, part, elapsed, focus]);
 
   return (
     <>
