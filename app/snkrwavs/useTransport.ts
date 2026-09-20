@@ -27,6 +27,11 @@ const TIGHT = 0.02;
 // the audio already in hand it takes a couple of seeks and a fraction of this.
 const PATIENCE = 900;
 
+// How long a part has to start playing at all before the drawing gives up on it
+// and goes back to the mix. Long, because on a phone this is a file being
+// fetched for the first time, and the mix is still playing while it comes.
+const REACH = 8000;
+
 // How long to let a seek settle before believing where it says it landed. A
 // seeked element reports the time it was asked for, and then, once it is
 // actually playing again, drops back to the frame boundary it could really
@@ -125,6 +130,9 @@ export function useTransport(
   // One correction at a time. A seek that has been asked for but has not settled
   // yet reports a time that would only provoke another one.
   const settling = useRef(false);
+  // Whether the stem element has been played once from inside a gesture, which
+  // is what a phone waits for before it will have anything to do with it.
+  const woken = useRef(false);
   // Until when to hold the stem closely rather than loosely. Set whenever the
   // two have just been thrown out of step — a solo starting, the music being
   // moved — where a correction is masked by the jump that caused it.
@@ -142,15 +150,40 @@ export function useTransport(
     clock.current = { at, since: performance.now(), running: clock.current.running };
   }, []);
 
+  // Waking the second element, which can only be done from inside a gesture: a
+  // phone will not fetch or touch a media file that nothing asked for in one,
+  // and it holds that against an element until something does. Started and
+  // stopped again here, in the tap that asks for the music, it is awake and its
+  // file is on the way down long before anyone clicks a ring.
+  const wake = useCallback(() => {
+    const stemmed = aside.current;
+    if (!stemmed || woken.current || !stemmed.src) return;
+
+    woken.current = true;
+
+    // Silent, and stopped again once it is awake — unless a part has already
+    // been asked for while the music was stopped, in which case this is the
+    // gesture that gets it going and it should be left alone.
+    stemmed.muted = soloing.current !== null ? stemmed.muted : true;
+    void stemmed
+      .play()
+      .then(() => {
+        if (soloing.current === null) stemmed.pause();
+      })
+      .catch(() => undefined);
+  }, [aside]);
+
   const toggle = useCallback(() => {
     const player = audio.current;
     if (!player) return;
 
     // Nothing here sets `running`: the element says when it is playing, and
     // both the keyboard and the button end up going through these same events.
-    if (player.paused) void player.play().catch(() => undefined);
-    else player.pause();
-  }, [audio]);
+    if (player.paused) {
+      wake();
+      void player.play().catch(() => undefined);
+    } else player.pause();
+  }, [audio, wake]);
 
   const seek = useCallback(
     (seconds: number) => {
@@ -173,11 +206,15 @@ export function useTransport(
   // Play one part on its own, or hand it back to the mix. Called with a file to
   // solo it and with nothing to stop soloing, which is the whole of the
   // arrangement: one thing or everything, never a blend of the two.
+  //
+  // Answers whether the part can actually be heard, so that a drawing which has
+  // already gone dim and warm around one ring can put itself back if the sound
+  // never arrives, rather than sitting there claiming something it is not doing.
   const solo = useCallback(
-    (stem: Stem | null) => {
+    (stem: Stem | null): Promise<boolean> => {
       const player = audio.current;
       const stemmed = aside.current;
-      if (!player || !stemmed) return;
+      if (!player || !stemmed) return Promise.resolve(false);
 
       if (stem === null) {
         soloing.current = null;
@@ -185,7 +222,7 @@ export function useTransport(
         // for this part again costs nothing and arrives on the beat.
         stemmed.muted = true;
         player.muted = false;
-        return;
+        return Promise.resolve(true);
       }
 
       const held: Held = { src: stem.src, offset: stem.offset ?? 0 };
@@ -200,77 +237,116 @@ export function useTransport(
       // so a solo cannot be heard arriving late. Corrections made now are
       // corrections nobody hears.
       stemmed.muted = true;
-
-      const handover = () => {
-        if (!mine()) return;
-
-        stemmed.muted = false;
-        player.muted = true;
-      };
-
-      // Wait for the part to be in step before handing it the mix, and hand it
-      // over anyway if it cannot get there. The putting-in-step itself belongs
-      // to the frame loop; all this does is watch, which is why it can afford
-      // to: every try happens silent, so the only cost of waiting is a few more
-      // milliseconds of the mix, and what it buys is a solo that starts on the
-      // beat rather than a third of a sixteenth behind it.
-      const watch = (by: number) => {
-        if (!mine()) return;
-        if (player.paused || performance.now() >= by) {
-          handover();
-          return;
-        }
-
-        if (!settling.current && stemmed.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
-          const off = stemmed.currentTime - linedUp(player, held.offset);
-          if (Math.abs(off) <= TIGHT) {
-            handover();
-            return;
-          }
-        }
-
-        requestAnimationFrame(() => watch(by));
-      };
-
-      const start = () => {
-        if (!mine()) return;
-
-        // Nothing to line up against while the music is stopped: the mutes are
-        // swapped now and the stem is put in step when the master starts.
-        if (player.paused) {
-          handover();
-          return;
-        }
-
-        mending.current = performance.now() + PATIENCE;
-
-        void stemmed
-          .play()
-          .then(() => watch(performance.now() + PATIENCE))
-          .catch(() => undefined);
-      };
-
       loaded.current = held;
 
       // Loading a file it is already holding would throw away the buffer and
       // start the fetch again, which is what makes switching back and forth
       // between the same two things free after the first time.
-      if (
-        holding(stemmed, held.src) &&
-        stemmed.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
-      ) {
-        start();
-        return;
-      }
-
       if (!holding(stemmed, held.src)) stemmed.src = held.src;
 
-      const onReady = () => {
-        stemmed.removeEventListener("canplay", onReady);
-        start();
-      };
+      return new Promise<boolean>((resolve) => {
+        let answered = false;
+        const answer = (heard: boolean) => {
+          if (answered) return;
 
-      stemmed.addEventListener("canplay", onReady);
+          answered = true;
+          resolve(heard);
+        };
+
+        const handover = () => {
+          if (!mine()) {
+            answer(false);
+            return;
+          }
+
+          stemmed.muted = false;
+          player.muted = true;
+          answer(true);
+        };
+
+        // How long the part has to arrive at all, and then, once it is running,
+        // how long it has to get in step before it is handed the mix anyway.
+        // Two clocks because they are two different waits: a file coming down a
+        // phone's connection can take seconds, while lining up one that is
+        // already playing takes two seeks.
+        const arriving = performance.now() + REACH;
+        let lining = 0;
+
+        // The putting-in-step itself belongs to the frame loop; all this does is
+        // watch, which is why it can afford to wait: every try happens silent, so
+        // the only cost is a few more milliseconds of the mix, and what it buys
+        // is a solo that starts on the beat rather than a third of a sixteenth
+        // behind it.
+        const watch = () => {
+          if (answered) return;
+
+          if (!mine()) {
+            answer(false);
+            return;
+          }
+
+          if (player.paused) {
+            handover();
+            return;
+          }
+
+          // Not playing yet: either the file is still coming or the phone has
+          // refused it. The mix carries on meanwhile, so this is worth waiting
+          // out — but not forever, since a part that never arrives still owes
+          // the drawing an answer.
+          const rolling =
+            !stemmed.paused &&
+            stemmed.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA;
+
+          if (!rolling) {
+            if (performance.now() >= arriving) answer(false);
+            else requestAnimationFrame(watch);
+            return;
+          }
+
+          if (lining === 0) {
+            lining = performance.now() + PATIENCE;
+            mending.current = lining;
+          }
+
+          if (performance.now() >= lining) {
+            handover();
+            return;
+          }
+
+          if (!settling.current && stemmed.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+            const off = stemmed.currentTime - linedUp(player, held.offset);
+            if (Math.abs(off) <= TIGHT) {
+              handover();
+              return;
+            }
+          }
+
+          requestAnimationFrame(watch);
+        };
+
+        // Nothing to line up against while the music is stopped, so the mutes are
+        // swapped now and the frame loop puts the stem in step when the master
+        // starts. It is stood where the master is standing first, so that when
+        // the music does start it starts from there rather than from the top.
+        if (player.paused) {
+          if (stemmed.readyState >= HTMLMediaElement.HAVE_METADATA) {
+            stemmed.currentTime = Math.max(0, linedUp(player, held.offset));
+          }
+
+          handover();
+          return;
+        }
+
+        // Asked to play now, in the same turn as the click that wanted it, and
+        // before it is known to be ready. Waiting on the file first would spend
+        // the gesture a phone has to see to allow this at all — and a phone does
+        // not fetch a media file until something asks it to play, so that wait
+        // would never end. It is silent either way, so there is nothing to hear
+        // in starting it early.
+        void stemmed.play().catch(() => answer(false));
+        watch();
+      });
     },
     [audio, aside],
   );

@@ -114,10 +114,22 @@ export default function SnkrwavsPage() {
       shift.current = { at: performance.now(), shade, warmth: warm };
       chosen.current = id;
       setSoloed(id);
-      solo(source);
+
+      void solo(source).then((heard) => {
+        // The part could not be played: the file never came, or the phone would
+        // not have it. The drawing has already dimmed and warmed around the ring
+        // by this point, so it has to put itself back rather than sit there
+        // saying it is playing something you cannot hear.
+        if (!heard && chosen.current === id) revert.current();
+      });
     },
     [focus, solo, warmth],
   );
+
+  // Kept in a ref so the undo above can reach `choose` without the two of them
+  // having to be declared in terms of each other.
+  const revert = useRef(() => {});
+  revert.current = () => choose(null, null);
 
   // Which ring, if any, is under a point on the screen. Distances are measured
   // as fractions of the shorter side of the drawing, the way the rings place
@@ -251,16 +263,28 @@ export default function SnkrwavsPage() {
       {/* The static is laid over the page's black rather than under it, since
           there is nothing under it, so everything that is read rather than
           watched is lifted clear of it. */}
-      <header className="relative z-10 flex w-full items-baseline justify-between gap-6">
-        <h1 className="font-mono text-sm uppercase tracking-[0.3em] text-neutral-300">
+      {/* One line, always, whatever it has to say. The drawing takes the height
+          this leaves it, so a header that wraps to a second line moves the rings
+          down the page and, on a short screen, shrinks them — which is what
+          soloing used to do on a phone. */}
+      <header className="relative z-10 flex h-5 w-full items-baseline justify-between gap-6">
+        {/* The title gives up its place to the part on a narrow screen, where
+            there is only room for two of these three things. It is the least
+            useful of them: the page is called this at the top of the browser
+            too. */}
+        <h1
+          className={`font-mono text-sm uppercase tracking-[0.3em] text-neutral-300 ${
+            soloed ? "hidden sm:block" : ""
+          }`}
+        >
           snkrwavs
         </h1>
 
         {/* What you are hearing, when it is not everything. */}
         {soloed && (
-          <p className="font-mono text-sm uppercase tracking-[0.3em] text-white">
-            {NAMES.get(soloed)}{" "}
-            <span className="text-neutral-500">on its own</span>
+          <p className="min-w-0 truncate font-mono text-sm uppercase tracking-[0.3em] text-white">
+            {NAMES.get(soloed)}
+            <span className="hidden text-neutral-500 sm:inline"> on its own</span>
           </p>
         )}
 
