@@ -86,6 +86,13 @@ export type Loop = Part & {
   // are just a count, and the band they reserve is better spent on a part
   // that has nowhere else to go.
   numbers?: boolean;
+  // How much to multiply the swell a note takes as it is struck. One for a
+  // ring whose notes are drawn at a readable length; more for one where they
+  // are not. A turn is a turn however much music is on it, so a part carrying
+  // thirty-odd bars in a single pass draws each note into a fraction of the
+  // arc the same note gets on an eight-bar loop, and at that size the only
+  // thing left to see it by is how far it jumps.
+  swell?: number;
   notes: Note[];
 };
 
@@ -145,6 +152,38 @@ export type Chords = Part & {
   chords: Chord[];
 };
 
+// A part with no events in it at all: no notes, no strikes, nothing to be on
+// time for. It is noise with a hand on the fader, so the only thing there is to
+// write down is where the fader was. Levels at bars, straight lines between
+// them, and nothing outside the bars given.
+export type Noise = {
+  id: string;
+  label: string;
+  envelope: { bar: number; level: number }[];
+};
+
+// A part that is neither a phrase nor a pattern: a wood block struck fast, a
+// run at a time, at a handful of moments in the piece. There is nothing here
+// to put on a staff and nothing to put in a box either, since it plays on
+// eleven bars out of a hundred and fourteen and a ring of it would be empty
+// almost all the way round. What it is, is a flourish, so it is drawn as one:
+// sparks thrown across the page, one for each strike.
+export type Flurry = {
+  id: string;
+  label: string;
+  // Strikes to the beat.
+  rate: number;
+  // Where a run sits against the bar line it lands on, in beats. Half a step,
+  // every time: the block plays off the beat rather than with it.
+  offset: number;
+  // How many strikes in a run. They fall away evenly from the first to
+  // nothing at the last, which is what the run sounds like and what makes it
+  // read as one gesture rather than a stretch of timekeeping.
+  strikes: number;
+  // The bars the runs land on.
+  bars: number[];
+};
+
 // A part with no pitch in it: a thump that lands on the same beats of every
 // bar it plays. There is nothing for it to turn, so it is drawn as a pulse in
 // the middle of the rings rather than as a ring of its own.
@@ -184,6 +223,8 @@ export type Song = {
   pads: Pad[];
   pulses: Pulse[];
   chords: Chords[];
+  flurries: Flurry[];
+  noises: Noise[];
 };
 
 export const beatSeconds = (song: Song) => 60 / song.bpm;
@@ -343,6 +384,54 @@ export const pulseAt = (song: Song, pulse: Pulse, beats: number) => {
   const left = 1 - since / THUMP_FALL;
 
   return strength * left * left;
+};
+
+// Where the fader is on a part that is only a fader, read straight off the
+// bars it was written at. Nothing before the first of them and nothing after
+// the last, which for a part that fades up out of silence and back down into
+// the mix is the same as saying it is not playing.
+export const noiseAt = (song: Song, part: Noise, beats: number) => {
+  const bar = beats / song.beatsPerBar + 1;
+  const points = part.envelope;
+  if (bar <= points[0].bar) return points[0].level;
+
+  for (let i = 1; i < points.length; i++) {
+    const last = points[i - 1];
+    const next = points[i];
+    if (bar >= next.bar) continue;
+
+    const through = (bar - last.bar) / (next.bar - last.bar);
+
+    return last.level + (next.level - last.level) * through;
+  }
+
+  return points[points.length - 1].level;
+};
+
+// Which strike of which run is sounding, and how much of the run is left in
+// it. The count runs straight through the piece rather than starting again
+// each run, so a drawing can tell a new strike from the one before it by the
+// number alone, without knowing anything about where the runs are. Null
+// whenever the block is not playing, which is nearly always.
+export const flurryAt = (song: Song, part: Flurry, beats: number) => {
+  const step = 1 / part.rate;
+
+  for (let run = 0; run < part.bars.length; run++) {
+    const start = (part.bars[run] - 1) * song.beatsPerBar + part.offset;
+    const into = beats - start;
+    if (into < 0 || into >= part.strikes * step) continue;
+
+    const strike = Math.floor(into / step);
+
+    return {
+      index: run * part.strikes + strike,
+      // Evenly down the run: the first strike has all of it, the last has a
+      // strike's worth of nothing.
+      level: 1 - strike / part.strikes,
+    };
+  }
+
+  return null;
 };
 
 // How steeply a struck chord gives up its light. This is a curve, not a
@@ -623,6 +712,10 @@ const END_SOLO: Loop = {
   // here is off the edge of the canvas. No loss — thirty-four numbers that
   // never come round again were the least useful thing on the page.
   numbers: false,
+  // Thirty-four bars on one turn leaves each note a sliver of arc, so the
+  // strike is given twice the swell it gets elsewhere. On this ring that is
+  // most of what there is to see a note by.
+  swell: 2,
   notes: END_SOLO_NOTES.map(([at, pitch, length]) => ({
     at,
     length,
@@ -788,6 +881,81 @@ const GUITAR: Chords = {
   ],
 };
 
+// The wood block, and the second part here with no file behind it: it was read
+// off the master, the same way the guitar was. Sixteenth-note triplets, six
+// strikes to the beat: the spacing measures 105 milliseconds where the grid
+// wants 106.4, a percent fast, which over a whole run comes to a frame's worth
+// of drift and nothing you could see. Eighteen strikes to a run, which is three
+// beats of it falling away evenly to nothing.
+//
+// The eleven runs are laid out with a regularity nothing else in the piece
+// has: a pair of them four bars apart, and that pair again every sixteen bars
+// from bar 38, five times over. The eleventh is on its own at 114, under the
+// fade, which is why it is the one you have to be told is there.
+//
+// Every run starts half a step after its bar line rather than on it. That is
+// the whole character of the part: struck between the beats the rest of the
+// kit is keeping, it reads as something thrown in rather than something
+// counting.
+const WOOD_BLOCK: Flurry = {
+  id: "wood-block",
+  label: "Wood block",
+  rate: 6,
+  offset: 1 / 12,
+  strikes: 18,
+  bars: [38, 42, 54, 58, 70, 74, 86, 90, 102, 106, 114],
+};
+
+// The wind, under the whole first third of the piece and the only part of it
+// that is not played on anything. Read off the master the way the guitar and
+// the block were, by watching the noise floor high up where a wind machine
+// lives and the harpsichord mostly does not, at the quietest moments of each
+// bar: silence at the top, up to full by bar 4, held there while the
+// harpsichord comes in, and then a long way down.
+//
+// Where the first stretch of it ends is a judgement rather than a measurement.
+// Past bar 28 what is left is no louder than the noise the rest of the mix
+// makes on its own, so the envelope follows what is heard — mostly gone by 36 —
+// down to nothing at 45, where the harpsichord hands over.
+//
+// Then it comes back at 61 and climbs the rest of the way to the end, which the
+// same measurement follows plainly: nothing through the fifties, lifting from
+// 61, and up without stopping from there. How far up is not something that
+// measurement can say, since the organ arrives at 81 and sits in the same part
+// of the spectrum the wind is being read in; what it can say is that the fader
+// only goes one way. So the climb is written as a little past where the first
+// stretch peaked, which is what the ear says of it, rather than the two or
+// three times over the arithmetic claims with an organ in the way.
+//
+// The last stretch of it is drawn quieter than it is written, because the mix
+// fade from bar 97 takes the wind down with everything else: what the fader
+// does and what you hear part company over those last eighteen bars.
+const WIND: Noise = {
+  id: "wind",
+  label: "Wind",
+  envelope: [
+    { bar: 1, level: 0 },
+    { bar: 2, level: 0.05 },
+    { bar: 3, level: 0.18 },
+    { bar: 4, level: 1 },
+    { bar: 11, level: 1 },
+    { bar: 12, level: 0.6 },
+    { bar: 20, level: 0.42 },
+    { bar: 28, level: 0.22 },
+    { bar: 36, level: 0.1 },
+    { bar: 45, level: 0 },
+    // Silent the whole way through the fifties, rather than creeping back up
+    // from the moment it left.
+    { bar: 60, level: 0 },
+    { bar: 61, level: 0.05 },
+    { bar: 69, level: 0.25 },
+    { bar: 77, level: 0.45 },
+    { bar: 85, level: 0.65 },
+    { bar: 97, level: 0.9 },
+    { bar: 115, level: 1.1 },
+  ],
+};
+
 export const SNKRWAVS_SONG: Song = {
   title: "A Sharp Knife Is A Safe Knife",
   audio: "/A_Sharp_Knife_Is_A_Safe_Knife__MASTER.m4a",
@@ -805,6 +973,8 @@ export const SNKRWAVS_SONG: Song = {
   pads: [HIGH_HATS, DROP_BEAT],
   pulses: [LOW_KICK],
   chords: [GUITAR],
+  flurries: [WOOD_BLOCK],
+  noises: [WIND],
 };
 
 // A loop has to come out even: if its span is not a whole number of turns it

@@ -26,6 +26,15 @@ const LANE = 0.0105; // one voice's band, the same across as a staff gap
 const CELL_INSET = 0.16; // of a lane, left dark around each filled cell
 const STEP_INSET = 0.1; // and of a step, so the grid reads as cells
 
+// What a cell does when it is struck, beyond changing colour. Waiting its turn
+// it sits inside its borders; struck, it takes them, filling its lane and its
+// step, and for the moment of the strike it swells past them both. Same idea as
+// the coin in the middle, which has always jumped on the beat.
+const CELL_FLARE = 0.4; // over a full lane, at the instant of the strike
+const CELL_ONSET = 0.1; // seconds that swell takes to settle
+const CELL_GLOW = 3.2; // lanes of glow a struck cell carries
+const CELL_BLAZE = 3; // and at the strike
+
 const GRID_COLOR = "rgba(255, 255, 255, 0.1)";
 const BAR_COLOR = "rgba(255, 255, 255, 0.4)";
 const PLAYHEAD_COLOR = "#3b82f6";
@@ -156,10 +165,13 @@ export default function PadRing({
         const since = (((phase - start) % 1) + 1) % 1 * seconds;
         const lit = Math.max(0, 1 - since / CELL_FADE);
 
+        const struck = Math.max(0, 1 - since / CELL_ONSET);
+
         const bottom = floor + hit.lane * lane;
         const middle = bottom + lane / 2;
-        const thick = lane * (1 - CELL_INSET * 2) * (1 + lit * 0.25);
-        const margin = ((end - start) * TAU * STEP_INSET) / 2;
+        const thick =
+          lane * (1 - CELL_INSET * 2 * (1 - lit)) * (1 + struck * CELL_FLARE);
+        const margin = ((end - start) * TAU * STEP_INSET * (1 - lit)) / 2;
 
         ctx.lineCap = "butt";
         ctx.lineWidth = thick;
@@ -167,7 +179,7 @@ export default function PadRing({
         // The glow is the strike, so it belongs to the blue and goes out with
         // it: a cell sitting in the pattern is flat.
         ctx.shadowColor = strike();
-        ctx.shadowBlur = lit * lane * 3.2;
+        ctx.shadowBlur = lane * (lit * CELL_GLOW + struck * CELL_BLAZE);
         ctx.globalAlpha =
           visible * hit.force * (CELL_REST + lit * (1 - CELL_REST));
 

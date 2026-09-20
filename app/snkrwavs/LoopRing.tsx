@@ -51,6 +51,16 @@ const NOTE_THICKNESS = 0.38;
 const NOTE_GROWTH = 0.35; // how much thicker a note gets while it sounds
 const NOTE_FADE = 0.4; // seconds it takes to go dark after it stops
 
+// The strike itself, which is the thing worth seeing and was the thing hardest
+// to see: a note used to light and thicken and then hold that for however long
+// it rang, so nothing marked the instant it was played. Now it swells past its
+// sounding thickness as it crosses the playhead and settles back, which is the
+// swell the kick coin has always had on the beat.
+const NOTE_FLARE = 0.75; // thicker again at the instant it is struck
+const NOTE_ONSET = 0.13; // seconds that swell takes to settle
+const NOTE_GLOW = 2.6; // gaps of glow it carries while it sounds
+const NOTE_BLAZE = 4.5; // and at the strike
+
 const STAFF_COLOR = "rgba(255, 255, 255, 0.34)";
 const BAR_COLOR = "rgba(255, 255, 255, 0.5)";
 const DOWNBEAT_COLOR = "rgba(255, 255, 255, 0.92)";
@@ -284,7 +294,21 @@ export default function LoopRing({
               ? 1
               : Math.max(0, 1 - (since - held) / NOTE_FADE);
 
-        const width = Math.max(1.5, gap * NOTE_THICKNESS * (1 + lit * NOTE_GROWTH));
+        // How much of the strike is still in it, which is a much shorter thing
+        // than how long it sounds for.
+        const struck = since < 0 ? 0 : Math.max(0, 1 - since / NOTE_ONSET);
+
+        // Everything a note does beyond sitting there is scaled by this, so a
+        // ring asking for twice the swell gets a note that grows twice as far
+        // from its resting thickness and flares twice as hard.
+        const swell = loop.swell ?? 1;
+
+        const width = Math.max(
+          1.5,
+          gap *
+            NOTE_THICKNESS *
+            (1 + swell * (lit * NOTE_GROWTH + struck * NOTE_FLARE)),
+        );
         const colour = pitchColour(note.step);
 
         // Ledger lines, drawn behind only the notes that need them: one for
@@ -310,7 +334,7 @@ export default function LoopRing({
 
         ctx.strokeStyle = lit > 0 ? colour : NOTE_COLOR;
         ctx.shadowColor = colour;
-        ctx.shadowBlur = lit * gap * 2.6;
+        ctx.shadowBlur = gap * swell * (lit * NOTE_GLOW + struck * NOTE_BLAZE);
 
         const solid = lit > 0 ? 0.45 + lit * 0.55 : 1;
 

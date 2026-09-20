@@ -5,7 +5,9 @@ import { Pause, Play, RotateCcw } from "lucide-react";
 import LoopRing from "./LoopRing";
 import PadRing from "./PadRing";
 import Readout from "./Readout";
+import Scatter from "./Scatter";
 import Scrubber from "./Scrubber";
+import Static from "./Static";
 import Thump from "./Thump";
 import Wash from "./Wash";
 import { SNKRWAVS_SONG as SONG, songSeconds } from "./loop";
@@ -43,13 +45,27 @@ export default function SnkrwavsPage() {
     <main className="flex min-h-screen flex-col items-center justify-between gap-8 bg-black px-6 py-6 text-white">
       <audio ref={player} src={SONG.audio} preload="auto" className="hidden" />
 
-      {/* A part with no ring: it lights the whole page instead, so it sits
+      {/* The part that is a background in the music as well as on the page, so
+          it goes behind the drawing rather than over it. */}
+      {SONG.noises.map((part) => (
+        <Static key={part.id} song={SONG} part={part} elapsed={elapsed} />
+      ))}
+
+      {/* The parts with no ring, which use the whole page instead of a band of
+          it: one lights it, the other throws sparks across it. Both sit
           outside the space the rings are given. */}
       {SONG.chords.map((part) => (
         <Wash key={part.id} song={SONG} part={part} elapsed={elapsed} />
       ))}
 
-      <header className="flex w-full items-baseline justify-between gap-6">
+      {SONG.flurries.map((part) => (
+        <Scatter key={part.id} song={SONG} part={part} elapsed={elapsed} />
+      ))}
+
+      {/* The static is laid over the page's black rather than under it, since
+          there is nothing under it, so everything that is read rather than
+          watched is lifted clear of it. */}
+      <header className="relative z-10 flex w-full items-baseline justify-between gap-6">
         <h1 className="font-mono text-sm uppercase tracking-[0.3em] text-neutral-300">
           snkrwavs
         </h1>
@@ -62,7 +78,7 @@ export default function SnkrwavsPage() {
           header and the controls leave it, and the drawing squares itself off
           inside that, so listing another part costs the rings a little room
           rather than pushing the page off the screen. */}
-      <div className="relative flex min-h-0 w-full flex-1 items-center justify-center">
+      <div className="relative z-10 flex min-h-0 w-full flex-1 items-center justify-center">
         {SONG.loops.map((loop) => (
           <LoopRing key={loop.id} song={SONG} loop={loop} elapsed={elapsed} />
         ))}
@@ -76,7 +92,7 @@ export default function SnkrwavsPage() {
         ))}
       </div>
 
-      <footer className="flex w-full flex-col items-center gap-5">
+      <footer className="relative z-10 flex w-full flex-col items-center gap-5">
         <div className="flex items-center gap-3">
           <button
             type="button"
