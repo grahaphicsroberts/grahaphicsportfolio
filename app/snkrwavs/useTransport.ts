@@ -6,50 +6,40 @@ type Clock = { at: number; since: number; running: boolean };
 
 export type Stem = {
   src: string;
-  // Seconds added to the master's currentTime when seeking this file. An MP3
-  // stem of an AAC mix is not zero: the two encodings report different amounts
-  // of priming, and without this they play the same music a few tens of
-  // milliseconds apart.
+  // Seconds added to the master's clock to get this file's own. Nothing, for a
+  // stem encoded the way the mix is; see the note on `stemOffset` in loop.ts for
+  // why it is worth the trouble of making sure they are.
   offset?: number;
 };
 
 type Held = { src: string; offset: number };
 
-// How far the two recordings may sit apart before the silent one is pulled back
-// into step. Not tighter than this: a compressed file can only be seeked to a
-// frame boundary, a fortieth of a second in an MP3, so asking for better is
-// asking for a correction that can never succeed and will be tried again every
-// time it is measured.
+// How close the recording coming in has to stand to the one going out before it
+// is handed the sound. Not tighter than this: a compressed file can only be
+// seeked to a frame boundary, a fortieth of a second or so, and asking for
+// better is asking for a seek that cannot land and will be tried again for as
+// long as it is measured.
 const TIGHT = 0.035;
 
-// And not more often than this, however far apart they are. A phone takes long
-// enough over a seek that a correction made every frame would spend its time
-// starting over, and the recording being corrected is the one nobody can hear,
-// so there is nothing to be gained by hurrying it.
-const COOL = 250;
-
-// How long a part may be left silent while it is put in step before it is handed
-// the mix regardless. Reached only when the file is still filling its buffer
-// after the jump, in which case it could not have played in time anyway; with
-// the audio already in hand it takes a couple of seeks and a fraction of this.
+// How long it may spend getting there, once it is playing, before it is given the
+// sound anyway. Reached only when the file is still filling its buffer after the
+// jump, where it could not have arrived in time however long it was given.
 const PATIENCE = 900;
 
-// How long a part has to start playing at all before the drawing gives up on it
-// and goes back to the mix. Long, because on a phone this is a file being
-// fetched for the first time, and the mix is still playing while it comes.
+// And how long it has to start playing at all before the drawing gives up on it.
+// Long, because on a phone this is a file being fetched for the first time, and
+// the music carries on while it comes.
 const REACH = 8000;
 
-// How long to let a seek settle before believing where it says it landed. A
-// seeked element reports the time it was asked for, and then, once it is
-// actually playing again, drops back to the frame boundary it could really
-// start from — some forty milliseconds in an MP3, a frame and a half of it.
-// Reading any sooner than that measures the request rather than the result.
+// How long to let a seek settle before believing where it says it landed. An
+// element reports the time it was asked for, and then, once it is really playing
+// again, drops back to the frame it could actually start from.
 const SETTLE = 120;
 
-// A media element reports where it is up to in steps rather than continuously,
-// so between those steps the ring is turned by the wall clock and snapped back
-// whenever the two disagree by more than this. Small enough that nobody can
-// see the correction, loose enough that it almost never has to make one.
+// A media element reports where it is up to in steps rather than continuously, so
+// between those steps the rings are turned by the wall clock and snapped back
+// whenever the two disagree by more than this. Small enough that nobody can see
+// the correction, loose enough that it almost never has to make one.
 const SLIP = 0.05;
 
 const holding = (el: HTMLAudioElement, src: string) => {
@@ -62,24 +52,14 @@ const holding = (el: HTMLAudioElement, src: string) => {
   }
 };
 
-// Where one recording has to stand to be level with another. The shift is what
-// separates the two clocks: an MP3 stem of an AAC mix reports its time a few
-// tens of milliseconds out, and which way round that goes depends on which of
-// the two is doing the following.
-const aimedAt = (leader: HTMLAudioElement, shift: number) =>
-  Math.max(0, leader.currentTime + shift);
-
-// Put the follower where the leader is. Aimed at where the leader will be by the
-// time the seek lands rather than where it is now, since otherwise every
-// correction leaves the follower exactly one seek behind — which is how a solo
-// ends up arriving a frame or two after the part it is meant to be. What a seek
-// costs is measured as it goes and kept for the next one. Answers with where it
-// aimed, which is how a housekeeping seek is told apart from someone dragging
-// the progress bar.
+// Move an element to where it ought to be. Aimed at where that will be by the
+// time the seek lands rather than where it is now, since otherwise every attempt
+// leaves it exactly one seek behind — which is how a solo ends up arriving after
+// the part it belongs to. What a seek costs is measured as it goes and kept for
+// the next one.
 const nudge = (
-  leader: HTMLAudioElement,
-  follower: HTMLAudioElement,
-  shift: number,
+  el: HTMLAudioElement,
+  target: () => number,
   lag: { current: number },
   settling: { current: boolean },
 ) => {
@@ -90,8 +70,8 @@ const nudge = (
     if (finished) return;
     finished = true;
 
-    const off = follower.currentTime - aimedAt(leader, shift);
-    if (!leader.paused && !follower.seeking) {
+    if (!el.seeking) {
+      const off = el.currentTime - target();
       lag.current = Math.min(0.25, Math.max(0, lag.current - off));
     }
 
@@ -99,75 +79,77 @@ const nudge = (
   };
 
   const landed = () => {
-    follower.removeEventListener("seeked", landed);
+    el.removeEventListener("seeked", landed);
     window.setTimeout(finish, SETTLE);
   };
 
-  follower.addEventListener("seeked", landed);
+  el.addEventListener("seeked", landed);
   // Should the seek never report back, the next one would otherwise never be
   // allowed to happen.
   window.setTimeout(finish, SETTLE * 8);
 
-  const aim = aimedAt(leader, shift) + (leader.paused ? 0 : lag.current);
-  follower.currentTime = aim;
-
-  return aim;
+  el.currentTime = Math.max(0, target() + lag.current);
 };
 
 // The clock every part of the visualisation reads, taken from the recording
-// itself. It lives in a ref and gets sampled once per frame rather than held
-// in state, so a running transport re-renders nothing: the rings, the readout
-// and the progress bar all ask it where the music is and draw themselves.
+// itself. It lives in a ref and gets sampled once per frame rather than held in
+// state, so a running transport re-renders nothing: the rings, the readout and
+// the progress bar all ask it where the music is and draw themselves.
 //
-// Two elements, not one. Soloing a part mutes the mix and brings the stem up
-// alongside it rather than swapping what is loaded, so nothing has to be fetched
-// or decoded before the next frame can be drawn and the rings carry on turning
-// through the switch. What changes is only which of the two you can hear.
+// Two elements, and one of them playing at a time. Whichever you can hear is the
+// clock, and the other is parked — muted, stopped, and left standing at the same
+// moment so that it can take over. Soloing is a handover: the part coming in is
+// started silently, put in step while nobody can hear it, given the sound only
+// once it is there, and the one it replaces is stopped.
 //
-// Whichever that is, is the clock — and is also the one that is never seeked.
-// Corrections go to the silent recording, always: it is playing the same music
-// at the same rate, so putting it in step there costs nothing, while a seek in
-// the audible one is a hole in the music. On a phone, where a seek is slow and
-// can only land on a frame boundary, a correction aimed at what you are
-// listening to does not settle — it just keeps trying, and you hear every try.
+// Two rules come out of that, and a phone is what taught both. Nothing audible is
+// ever seeked, because a seek it cannot land exactly is a hole in the music and
+// it will keep trying. And nothing is left decoding once it has been handed over,
+// because a second file playing quietly in the background is not free — it was
+// what made the whole page feel heavier for as long as a solo had been touched.
 export function useTransport(
   audio: RefObject<HTMLAudioElement | null>,
   aside: RefObject<HTMLAudioElement | null>,
 ) {
   const clock = useRef<Clock>({ at: 0, since: 0, running: false });
-  // What the second element is holding, and whether you can hear it, which are
-  // two different questions. Once a stem is loaded it keeps playing in step with
-  // the master whether or not it is the one being listened to, so coming back to
-  // a part is a matter of swapping which of the two is muted and lands exactly
-  // where the music is.
-  const loaded = useRef<Held | null>(null);
-  const soloing = useRef<Held | null>(null);
-  // And which of them you are actually hearing, which trails the one above by
-  // however long the stem takes to get in step: soloing is asked for first and
-  // granted afterwards, and everything that must not be heard happening has to
-  // know the difference.
+  // The part being heard on its own, if any. While it is set the second element
+  // is the one playing and the master is parked; while it is not, the other way
+  // about.
   const audible = useRef<Held | null>(null);
-  // Where the last correction was aimed. A seek the page made for its own
-  // housekeeping must not be mistaken for the music being moved by hand.
-  const tidy = useRef(-1);
-  // When the last one was made, so they cannot come faster than COOL.
-  const nudged = useRef(0);
-  // How long a seek on a playing element takes to land, learned from the last
-  // one. The master does not wait for it, so a seek that aims at where the
-  // master is now arrives this far behind.
+  // What that element is holding, which outlives the solo: the file stays loaded,
+  // so asking for the same part twice does not fetch it twice.
+  const loaded = useRef<Held | null>(null);
+  // Every request to change what is playing takes a number, and only the newest
+  // of them is allowed to finish: clicks come faster than files load.
+  const asked = useRef(0);
+  // How long a seek takes to land, learned from the last one.
   const lag = useRef(0.04);
-  // One correction at a time. A seek that has been asked for but has not settled
-  // yet reports a time that would only provoke another one.
+  // One seek at a time. A seek asked for but not yet settled reports a time that
+  // would only provoke another.
   const settling = useRef(false);
-  // Whether the stem element has been played once from inside a gesture, which
+  // Whether the second element has been played once from inside a gesture, which
   // is what a phone waits for before it will have anything to do with it.
   const woken = useRef(false);
-  // Until when to hold the stem closely rather than loosely. Set whenever the
-  // two have just been thrown out of step — a solo starting, the music being
-  // moved — where a correction is masked by the jump that caused it.
-  const mending = useRef(0);
   const [running, setRunning] = useState(false);
   const [duration, setDuration] = useState(0);
+
+  // The element you can hear, which is the only one that should be playing.
+  const live = useCallback(
+    () => (audible.current ? aside.current : audio.current),
+    [audio, aside],
+  );
+
+  // Where the music has got to, read off that element and given in the master's
+  // terms, since the song is counted in those. A part playing on its own that has
+  // to stop and fill its buffer takes the drawing with it, rather than leaving
+  // the rings turning somewhere the sound is not.
+  const heardAt = useCallback(() => {
+    const held = audible.current;
+    const stemmed = aside.current;
+    if (held && stemmed) return Math.max(0, stemmed.currentTime - held.offset);
+
+    return audio.current?.currentTime ?? 0;
+  }, [audio, aside]);
 
   const elapsed = useCallback(() => {
     const { at, since, running } = clock.current;
@@ -179,31 +161,9 @@ export function useTransport(
     clock.current = { at, since: performance.now(), running: clock.current.running };
   }, []);
 
-  // Where the music has got to, read from whichever recording you can hear. That
-  // one is the truth by definition: a part playing on its own that has to stop
-  // and fill its buffer should take the drawing with it, rather than leave the
-  // rings turning somewhere the sound is not. Answered in the master's terms,
-  // since that is what the song is counted in.
-  //
-  // Except in the moment after a jump, when the audible one is still on its way
-  // to where it was sent and the master is the only one that knows where that
-  // was.
-  const heardAt = useCallback(() => {
-    const player = audio.current;
-    if (!player) return 0;
-
-    const held = audible.current;
-    const stemmed = aside.current;
-    if (!held || !stemmed || performance.now() < mending.current) {
-      return player.currentTime;
-    }
-
-    return Math.max(0, stemmed.currentTime - held.offset);
-  }, [audio, aside]);
-
   // Waking the second element, which can only be done from inside a gesture: a
-  // phone will not fetch or touch a media file that nothing asked for in one,
-  // and it holds that against an element until something does. Started and
+  // phone will not fetch or touch a media file that nothing has asked for in one,
+  // and it holds that against the element until something does. Played and
   // stopped again here, in the tap that asks for the music, it is awake and its
   // file is on the way down long before anyone clicks a ring.
   const wake = useCallback(() => {
@@ -211,45 +171,51 @@ export function useTransport(
     if (!stemmed || woken.current || !stemmed.src) return;
 
     woken.current = true;
+    if (audible.current) return;
 
-    // Silent, and stopped again once it is awake — unless a part has already
-    // been asked for while the music was stopped, in which case this is the
-    // gesture that gets it going and it should be left alone.
-    stemmed.muted = soloing.current !== null ? stemmed.muted : true;
+    stemmed.muted = true;
     void stemmed
       .play()
       .then(() => {
-        if (soloing.current === null) stemmed.pause();
+        if (!audible.current) stemmed.pause();
       })
       .catch(() => undefined);
   }, [aside]);
 
   const toggle = useCallback(() => {
-    const player = audio.current;
-    if (!player) return;
+    const playing = live();
+    if (!playing) return;
 
-    // Nothing here sets `running`: the element says when it is playing, and
-    // both the keyboard and the button end up going through these same events.
-    if (player.paused) {
+    // Nothing here sets `running`: the element says when it is playing, and both
+    // the keyboard and the button end up going through these same events.
+    if (playing.paused) {
       wake();
-      void player.play().catch(() => undefined);
-    } else player.pause();
-  }, [audio, wake]);
+      void playing.play().catch(() => undefined);
+    } else playing.pause();
+  }, [live, wake]);
 
   const seek = useCallback(
     (seconds: number) => {
       const player = audio.current;
+      const stemmed = aside.current;
       if (!player) return;
 
       const length = player.duration || 0;
       const at = Math.min(Math.max(seconds, 0), length ? length - 0.01 : 0);
 
+      // Both of them: the one you can hear because that is what was asked for,
+      // and the parked one so that it is already standing where it will be
+      // wanted. Only the first of the two is heard, and a gap there is the point.
       player.currentTime = at;
-      // Moved here rather than waiting on the element to report the seek, so
-      // the rings answer the drag in the same frame as the hand moving it.
+
+      const held = audible.current ?? loaded.current;
+      if (stemmed && held) stemmed.currentTime = Math.max(0, at + held.offset);
+
+      // Moved here rather than waiting on the element to report the seek, so the
+      // rings answer the drag in the same frame as the hand moving it.
       rebase(at);
     },
-    [audio, rebase],
+    [audio, aside, rebase],
   );
 
   const rewind = useCallback(() => seek(0), [seek]);
@@ -267,37 +233,37 @@ export function useTransport(
       const stemmed = aside.current;
       if (!player || !stemmed) return Promise.resolve(false);
 
-      if (stem === null) {
-        soloing.current = null;
-        audible.current = null;
-        // The master has been kept in step all the while the stem was the one
-        // being heard, so handing it back is two mutes and nothing else: no
-        // seek, no gap, and the beat carries straight on. The stem is left
-        // playing, silently, for the same reason.
-        stemmed.muted = true;
-        player.muted = false;
-        rebase(player.currentTime);
+      const held: Held | null = stem
+        ? { src: stem.src, offset: stem.offset ?? 0 }
+        : null;
+
+      // Already the thing playing.
+      if ((held?.src ?? null) === (audible.current?.src ?? null)) {
         return Promise.resolve(true);
       }
 
-      const held: Held = { src: stem.src, offset: stem.offset ?? 0 };
-      soloing.current = held;
+      // One part straight into another would mean taking the file out from under
+      // the element that is playing it, and there is no way to do that without a
+      // hole. Going back through the mix costs a beat longer and stays seamless,
+      // since the mix has been parked in step all along waiting to be asked.
+      if (held && audible.current) {
+        return solo(null).then((back) => (back ? solo(stem) : false));
+      }
 
-      // Identity rather than the filename: two clicks on the same part are two
-      // different requests, and only the newest of them should be allowed to
-      // finish.
-      const mine = () => soloing.current === held;
+      const ticket = ++asked.current;
+      const mine = () => asked.current === ticket;
 
-      // It comes up silent and is put in step before anything is handed to it,
-      // so a solo cannot be heard arriving late. Corrections made now are
-      // corrections nobody hears.
-      stemmed.muted = true;
-      loaded.current = held;
+      const from = audible.current ? stemmed : player;
+      const to = held ? stemmed : player;
 
-      // Loading a file it is already holding would throw away the buffer and
-      // start the fetch again, which is what makes switching back and forth
-      // between the same two things free after the first time.
-      if (!holding(stemmed, held.src)) stemmed.src = held.src;
+      if (held && !holding(stemmed, held.src)) stemmed.src = held.src;
+
+      // Where the incoming recording should stand: the same moment in the music,
+      // told in its own file's terms.
+      const aim = () => Math.max(0, heardAt() + (held?.offset ?? 0));
+
+      to.muted = true;
+      if (held) loaded.current = held;
 
       return new Promise<boolean>((resolve) => {
         let answered = false;
@@ -308,33 +274,35 @@ export function useTransport(
           resolve(heard);
         };
 
-        const handover = () => {
+        const swap = () => {
           if (!mine()) {
             answer(false);
             return;
           }
 
-          stemmed.muted = false;
-          player.muted = true;
-          // From here the stem is the clock, and the master is the one that gets
-          // moved if the two ever part company.
+          to.muted = false;
           audible.current = held;
+          from.muted = true;
+          from.pause();
+          rebase(heardAt());
           answer(true);
         };
 
-        // How long the part has to arrive at all, and then, once it is running,
-        // how long it has to get in step before it is handed the mix anyway.
-        // Two clocks because they are two different waits: a file coming down a
-        // phone's connection can take seconds, while lining up one that is
-        // already playing takes two seeks.
-        const arriving = performance.now() + REACH;
+        // Stopped: there is nothing to be in step with, so the two change places
+        // at once and the new one waits where the music was left.
+        if (from.paused) {
+          to.currentTime = aim();
+          swap();
+          return;
+        }
+
+        const giveUp = performance.now() + REACH;
         let lining = 0;
 
-        // The putting-in-step itself belongs to the frame loop; all this does is
-        // watch, which is why it can afford to wait: every try happens silent, so
-        // the only cost is a few more milliseconds of the mix, and what it buys
-        // is a solo that starts on the beat rather than a third of a sixteenth
-        // behind it.
+        // Wait for it to be in step before handing it the sound. It can afford to
+        // wait: every try happens silent, so the only cost is a few more
+        // milliseconds of what was already playing, and what it buys is a switch
+        // that lands on the beat rather than a third of a sixteenth off it.
         const watch = () => {
           if (answered) return;
 
@@ -343,131 +311,101 @@ export function useTransport(
             return;
           }
 
-          if (player.paused) {
-            handover();
+          // Paused while it was getting ready.
+          if (from.paused) {
+            to.pause();
+            to.currentTime = aim();
+            swap();
             return;
           }
 
-          // Not playing yet: either the file is still coming or the phone has
-          // refused it. The mix carries on meanwhile, so this is worth waiting
-          // out — but not forever, since a part that never arrives still owes
-          // the drawing an answer.
           const rolling =
-            !stemmed.paused &&
-            stemmed.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA;
+            !to.paused && to.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA;
 
           if (!rolling) {
-            if (performance.now() >= arriving) answer(false);
-            else requestAnimationFrame(watch);
-            return;
-          }
-
-          if (lining === 0) {
-            lining = performance.now() + PATIENCE;
-            mending.current = lining;
-          }
-
-          if (performance.now() >= lining) {
-            handover();
-            return;
-          }
-
-          if (!settling.current && stemmed.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
-            const off = stemmed.currentTime - aimedAt(player, held.offset);
-            if (Math.abs(off) <= TIGHT) {
-              handover();
+            if (performance.now() < giveUp) {
+              requestAnimationFrame(watch);
               return;
             }
+
+            // It never started: the file did not come, or the phone would not
+            // have it. Stopped again rather than left half awake, decoding
+            // something nobody will hear.
+            to.pause();
+            answer(false);
+            return;
           }
+
+          if (lining === 0) lining = performance.now() + PATIENCE;
+
+          if (
+            Math.abs(to.currentTime - aim()) <= TIGHT ||
+            performance.now() >= lining
+          ) {
+            swap();
+            return;
+          }
+
+          if (!settling.current) nudge(to, aim, lag, settling);
 
           requestAnimationFrame(watch);
         };
 
-        // Nothing to line up against while the music is stopped, so the mutes are
-        // swapped now and the frame loop puts the stem in step when the master
-        // starts. It is stood where the master is standing first, so that when
-        // the music does start it starts from there rather than from the top.
-        if (player.paused) {
-          if (stemmed.readyState >= HTMLMediaElement.HAVE_METADATA) {
-            stemmed.currentTime = aimedAt(player, held.offset);
-          }
-
-          handover();
-          return;
-        }
-
-        // Asked to play now, in the same turn as the click that wanted it, and
-        // before it is known to be ready. Waiting on the file first would spend
-        // the gesture a phone has to see to allow this at all — and a phone does
-        // not fetch a media file until something asks it to play, so that wait
-        // would never end. It is silent either way, so there is nothing to hear
-        // in starting it early.
-        void stemmed.play().catch(() => answer(false));
+        // Stood roughly right and asked to play now, in the same turn as the click
+        // that wanted it and before it is known to be ready. Waiting on the file
+        // first would spend the gesture a phone has to see to allow this at all —
+        // and a phone fetches nothing until something asks it to play, so that
+        // wait would never end. It is muted, so there is nothing to hear in it
+        // starting early or in the wrong place.
+        to.currentTime = aim();
+        void to.play().catch(() => answer(false));
         watch();
       });
     },
-    [audio, aside, rebase],
+    [audio, aside, heardAt, rebase],
   );
 
   useEffect(() => {
     const player = audio.current;
+    const stemmed = aside.current;
     if (!player) return;
 
-    // Whatever the master does, the stem does with it, heard or not: it is the
-    // same recording heard from a different distance, and it is never asked to
-    // lead.
-    const follow = () => {
-      const stemmed = aside.current;
-      const held = loaded.current;
-      if (!stemmed || !held) return;
+    // Only the element you can hear has anything to say about the transport. The
+    // other one starting and stopping is housekeeping, and the page should not
+    // hear about it.
+    const its = (event: Event) => event.currentTarget === live();
 
-      if (player.paused) {
-        stemmed.pause();
-        return;
-      }
+    const onPlay = (event: Event) => {
+      if (!its(event)) return;
 
-      void stemmed.play().catch(() => undefined);
-
-      // The music has just moved, so the stem is somewhere else entirely: put it
-      // roughly right now and closely right over the next few frames, while the
-      // jump that caused it is still what you are hearing. This is the one time
-      // the audible recording is seeked, and it is the one time a gap in it is
-      // the point rather than a fault.
-      nudge(player, stemmed, held.offset, lag, settling);
-      nudged.current = performance.now();
-      mending.current = performance.now() + PATIENCE;
-    };
-
-    const onPlay = () => {
       clock.current = { at: heardAt(), since: performance.now(), running: true };
       setRunning(true);
-      follow();
     };
 
-    const onStop = () => {
+    const onStop = (event: Event) => {
+      if (!its(event)) return;
+
       clock.current = { at: heardAt(), since: performance.now(), running: false };
       setRunning(false);
-      aside.current?.pause();
     };
 
-    const onSeeked = () => {
-      // A seek the page made itself, to keep the silent recording in step. It is
-      // not the music being moved, so it must not drag the other one after it.
-      if (Math.abs(player.currentTime - tidy.current) < 0.02) {
-        tidy.current = -1;
-        return;
-      }
+    const onSeeked = (event: Event) => {
+      if (!its(event)) return;
 
-      rebase(player.currentTime);
-      follow();
+      rebase(heardAt());
     };
+
     const onMeta = () => setDuration(player.duration || 0);
 
-    player.addEventListener("play", onPlay);
-    player.addEventListener("playing", onPlay);
-    player.addEventListener("pause", onStop);
-    player.addEventListener("ended", onStop);
-    player.addEventListener("seeked", onSeeked);
+    const both = [player, stemmed].filter(Boolean) as HTMLAudioElement[];
+    for (const el of both) {
+      el.addEventListener("play", onPlay);
+      el.addEventListener("playing", onPlay);
+      el.addEventListener("pause", onStop);
+      el.addEventListener("ended", onStop);
+      el.addEventListener("seeked", onSeeked);
+    }
+
     player.addEventListener("loadedmetadata", onMeta);
     player.addEventListener("durationchange", onMeta);
 
@@ -482,44 +420,6 @@ export function useTransport(
       if (clock.current.running) {
         const played = heardAt();
         if (Math.abs(elapsed() - played) > SLIP) rebase(played);
-
-        // And the same argument a second time, between the two recordings, with
-        // one rule: the correction is always made to the one you cannot hear.
-        // A seek in the audible recording is the most obvious thing on the page —
-        // a hole in the music — and having two elements playing at once is what
-        // buys the freedom to put things right where nobody is listening.
-        const stemmed = aside.current;
-        const held = audible.current ?? loaded.current;
-        const ready =
-          stemmed &&
-          held &&
-          !stemmed.paused &&
-          !settling.current &&
-          performance.now() - nudged.current > COOL;
-
-        if (stemmed && held && ready) {
-          if (audible.current) {
-            // Soloing: the stem is the one being heard, so the master follows it.
-            // It is muted the whole time, so this costs nothing but a seek nobody
-            // can hear, and it is what makes coming back out of a solo a swap of
-            // two mutes rather than a jump in the music.
-            const off = player.currentTime - aimedAt(stemmed, -held.offset);
-
-            if (Math.abs(off) > TIGHT) {
-              nudged.current = performance.now();
-              tidy.current = nudge(stemmed, player, -held.offset, lag, settling);
-            }
-          } else {
-            // Mixing: the master is the one being heard, and the stem waits in
-            // step behind it so that asking for it is instant.
-            const off = stemmed.currentTime - aimedAt(player, held.offset);
-
-            if (Math.abs(off) > TIGHT) {
-              nudged.current = performance.now();
-              nudge(player, stemmed, held.offset, lag, settling);
-            }
-          }
-        }
       }
 
       frame = requestAnimationFrame(check);
@@ -529,15 +429,19 @@ export function useTransport(
 
     return () => {
       cancelAnimationFrame(frame);
-      player.removeEventListener("play", onPlay);
-      player.removeEventListener("playing", onPlay);
-      player.removeEventListener("pause", onStop);
-      player.removeEventListener("ended", onStop);
-      player.removeEventListener("seeked", onSeeked);
+
+      for (const el of both) {
+        el.removeEventListener("play", onPlay);
+        el.removeEventListener("playing", onPlay);
+        el.removeEventListener("pause", onStop);
+        el.removeEventListener("ended", onStop);
+        el.removeEventListener("seeked", onSeeked);
+      }
+
       player.removeEventListener("loadedmetadata", onMeta);
       player.removeEventListener("durationchange", onMeta);
     };
-  }, [audio, aside, elapsed, heardAt, rebase]);
+  }, [audio, aside, elapsed, heardAt, live, rebase]);
 
   return { running, elapsed, toggle, rewind, seek, solo, duration };
 }

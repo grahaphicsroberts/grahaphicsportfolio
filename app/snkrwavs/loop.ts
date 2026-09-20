@@ -62,10 +62,12 @@ export type Part = {
   // sample — which is what lets the drawing carry on turning untouched while
   // what you hear changes underneath it.
   stem?: string;
-  // Seconds to add to the master's clock when seeking this stem. The master is
-  // AAC and reports its encoder delay in `currentTime`; an MP3 stem reports a
-  // smaller one, so the same number on both clocks is not the same moment in
-  // the music. Leave it off when the stem is the same kind of file as the mix.
+  // Seconds to add to the master's clock when seeking this stem, for a stem that
+  // is not the same kind of file as the mix: a browser counts a file's encoder
+  // priming in the time it reports, and two encodings prime by different
+  // amounts. Encode the stems as AAC, as the master is, and this is nothing —
+  // which is the better answer, since the right number for an MP3 turns out to
+  // depend on the browser.
   stemOffset?: number;
   // Stretches the part is written through but not heard in. A MIDI file knows
   // what was programmed and nothing about what the mix does with it, so these
@@ -719,15 +721,16 @@ const END_SOLO: Loop = {
   radius: 0.443,
   from: 81,
   to: 115,
-  stem: "/ASharpKnife_endsolo_stem.mp3",
-  // The stem and the master hold the same 12,835,915 samples of music, lined up
-  // to the sample: correlated against each other at three places in the solo
-  // they agree on the nose, so nothing about the playing needs shifting. What
-  // does need shifting is the clock, because the browser counts each file's
-  // encoder priming in what it reports: 2112 samples of it on the AAC master,
-  // 528 on the MP3 stem, which both files' durations confirm. The stem's clock
-  // therefore runs 1584 samples ahead of the master's on the same music.
-  stemOffset: (528 - 2112) / 44100,
+  stem: "/ASharpKnife_endsolo_stem.m4a",
+  // No offset, and that is worth a word, because it used to need one. The stem
+  // and the master hold the same 12,835,915 samples of music, lined up to the
+  // sample — correlated at four places in the solo they agree on the nose — but
+  // the stem arrived as an MP3 against an AAC master, and a browser counts each
+  // file's encoder priming in the time it reports. Two different primings meant
+  // the same number on the two clocks was not the same moment in the music, by
+  // an amount that depended on the browser. Encoded as AAC instead, the stem
+  // comes out to the same 12,538 packets as the master, so whatever a browser
+  // makes of priming it makes of both alike and there is nothing left to correct.
   // Its bar numbers are given up: they would sit outside the staff, which out
   // here is off the edge of the canvas. No loss — thirty-four numbers that
   // never come round again were the least useful thing on the page.

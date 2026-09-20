@@ -211,9 +211,9 @@ export default function SnkrwavsPage() {
         pointing ? "cursor-pointer" : ""
       }`}
     >
-      {/* The mix, which is also the clock, and the one part playing on its own.
-          The first of them never stops: soloing mutes it and brings the other up
-          beside it, so the drawing is never waiting on a file to load. */}
+      {/* The mix, and the one part playing on its own. One of the two plays at a
+          time and the other waits in the same place, stopped: soloing hands the
+          sound from one to the other once the one coming in is in step. */}
       <audio ref={player} src={SONG.audio} preload="auto" className="hidden" />
       {/* The first stem is already sitting in this element so the first click
           does not have to wait on a fetch. Later stems swap the file; this one
