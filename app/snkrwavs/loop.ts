@@ -39,10 +39,30 @@ export const staffStep = (pitch: string) => {
   return LETTER_STEPS[letter] + Number(octave) * 7 - BOTTOM_LINE;
 };
 
+// What a part needs to be heard on its own. Not every part that can be heard
+// alone turns on a ring, so this is kept apart from the timing.
+export type Sounded = {
+  // The part on its own, if there is a recording of it: clicking its drawing
+  // plays this instead of the mix. The stems are exports of the same session, so
+  // they run the length of the whole piece and line up with the master sample
+  // for sample — which is what lets the drawing carry on turning untouched while
+  // what you hear changes underneath it. Every one is encoded to the same 12,538
+  // AAC packets the master is, so a browser's idea of where it is in a stem is
+  // its idea of where it is in the mix, and none of them needs an offset.
+  stem?: string;
+  // Seconds to add to the master's clock when seeking this stem, for a stem that
+  // is not the same kind of file as the mix: a browser counts a file's encoder
+  // priming in the time it reports, and two encodings prime by different
+  // amounts. Encode the stems as AAC, as the master is, and this is nothing —
+  // which is the better answer, since the right number for an MP3 turns out to
+  // depend on the browser.
+  stemOffset?: number;
+};
+
 // What every part that turns has in common, whatever is drawn on its ring.
 // The timing is all worked out from these four numbers, so anything that can
 // answer them can be placed in the piece and turned by the same clock.
-export type Part = {
+export type Part = Sounded & {
   // How many bars it takes to come back around: one turn of its ring.
   bars: number;
   // The song bars it comes in on and drops out on, counted from one. It plays
@@ -56,19 +76,6 @@ export type Part = {
   // playhead. The notes themselves are written at the end of the turn, which
   // on a ring is the same place as before the start of it.
   lead?: number;
-  // The part on its own, if there is a recording of it: clicking its ring plays
-  // this instead of the mix. The stems are exports of the same session, so they
-  // run the length of the whole piece and line up with the master sample for
-  // sample — which is what lets the drawing carry on turning untouched while
-  // what you hear changes underneath it.
-  stem?: string;
-  // Seconds to add to the master's clock when seeking this stem, for a stem that
-  // is not the same kind of file as the mix: a browser counts a file's encoder
-  // priming in the time it reports, and two encodings prime by different
-  // amounts. Encode the stems as AAC, as the master is, and this is nothing —
-  // which is the better answer, since the right number for an MP3 turns out to
-  // depend on the browser.
-  stemOffset?: number;
   // Stretches the part is written through but not heard in. A MIDI file knows
   // what was programmed and nothing about what the mix does with it, so these
   // are read off the master itself: where a part is muted, its ring goes, and
@@ -200,7 +207,7 @@ export type Flurry = {
 // A part with no pitch in it: a thump that lands on the same beats of every
 // bar it plays. There is nothing for it to turn, so it is drawn as a pulse in
 // the middle of the rings rather than as a ring of its own.
-export type Pulse = {
+export type Pulse = Sounded & {
   id: string;
   label: string;
   // Where it lands inside a bar, in beats from the downbeat.
@@ -357,7 +364,7 @@ const THUMP_FALL = 0.9;
 // Whether a pulse is playing at all, and how far up the fade of the entrance
 // it is on it has come. Each entrance eases in on its own terms: the kick
 // arrives over four bars at the top of the song and over five when it returns.
-const pulseStrength = (song: Song, pulse: Pulse, beats: number) => {
+export const pulseStrength = (song: Song, pulse: Pulse, beats: number) => {
   const span = pulse.spans.find(
     (candidate) =>
       beats >= (candidate.from - 1) * song.beatsPerBar &&
@@ -577,6 +584,7 @@ const HARPSICHORD: Loop = {
   radius: 0.389,
   from: 5,
   to: 45,
+  stem: "/ASharpKnife_harp_stem.m4a",
   notes: RIFF,
 };
 
@@ -630,6 +638,7 @@ const LEAD_MELODY: Loop = {
   radius: 0.277,
   from: 21,
   to: 117,
+  stem: "/ASharpKnife_melody_stem.m4a",
   // It arrives the same way, on the last three sixteenths of bar 20.
   lead: 0.75,
   notes: CALL.map(([at, pitch, length]) => ({
@@ -651,6 +660,7 @@ const LOW_KICK: Pulse = {
     { from: 1, to: 60, fadeIn: 4 },
     { from: 81, to: 116, fadeIn: 5 },
   ],
+  stem: "/ASharpKnife_boombap_stem.m4a",
 };
 
 // Soft keys under the melody, four bars that hold a low note on each downbeat
@@ -693,6 +703,7 @@ const COUNTERPOINT_MELODY: Loop = {
   radius: 0.191,
   from: 45,
   to: 117,
+  stem: "/ASharpKnife_CPmelody_stem.m4a",
   // The first thing heard of it is the run falling into bar 45, which starts
   // on the beat before last of bar 44.
   lead: 1.75,
@@ -722,15 +733,6 @@ const END_SOLO: Loop = {
   from: 81,
   to: 115,
   stem: "/ASharpKnife_endsolo_stem.m4a",
-  // No offset, and that is worth a word, because it used to need one. The stem
-  // and the master hold the same 12,835,915 samples of music, lined up to the
-  // sample — correlated at four places in the solo they agree on the nose — but
-  // the stem arrived as an MP3 against an AAC master, and a browser counts each
-  // file's encoder priming in the time it reports. Two different primings meant
-  // the same number on the two clocks was not the same moment in the music, by
-  // an amount that depended on the browser. Encoded as AAC instead, the stem
-  // comes out to the same 12,538 packets as the master, so whatever a browser
-  // makes of priming it makes of both alike and there is nothing left to correct.
   // Its bar numbers are given up: they would sit outside the staff, which out
   // here is off the edge of the canvas. No loss — thirty-four numbers that
   // never come round again were the least useful thing on the page.
@@ -766,6 +768,7 @@ const BASS: Loop = {
   radius: 0.064,
   from: 29,
   to: 100,
+  stem: "/ASharpKnife_bass_stem.m4a",
   // Enough to have the ring there before its first note reaches the far edge
   // of the window, since on a rolling ring a note is on screen for half a turn
   // before it is heard.
@@ -832,6 +835,7 @@ const HIGH_HATS: Pad = {
   voices: ["Clap", "Closed hat", "Pedal hat", "Open hat"],
   from: 29,
   to: 115,
+  stem: "/ASharpKnife_hat_stem.m4a",
   // Read off the master rather than the MIDI, which plays the pattern
   // straight through all eighty-six bars: the mix drops it for a bar, and
   // then for twenty-nine, where the harpsichord ends. What fills part of
@@ -865,6 +869,7 @@ const DROP_BEAT: Pad = {
   voices: ["Kick", "Toms", "Snare", "Pedal hat", "Crash"],
   from: 61,
   to: 115,
+  stem: "/ASharpKnife_dropbeat_stem.m4a",
   // Read off the master, which drops the kit for two bars where the MIDI keeps
   // playing it. It is out for 71 and 72 and back at the top of 73, where the
   // crash marks the turn.

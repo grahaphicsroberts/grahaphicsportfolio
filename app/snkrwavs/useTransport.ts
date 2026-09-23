@@ -22,14 +22,27 @@ type Held = { src: string; offset: number };
 const TIGHT = 0.035;
 
 // How long it may spend getting there, once it is playing, before it is given the
-// sound anyway. Reached only when the file is still filling its buffer after the
-// jump, where it could not have arrived in time however long it was given.
-const PATIENCE = 900;
+// sound anyway, landing wherever it has got to. Room for four or five goes at it:
+// a go costs a seek, the wait to see where that seek landed, and the stretch of
+// proper timekeeping below. Worth being generous with, because the whole of it is
+// spent listening to the mix — and what is bought is a switch that lands on the
+// beat instead of a bar's eighth away from it, which is heard as the music
+// stumbling.
+const PATIENCE = 1500;
 
 // And how long it has to start playing at all before the drawing gives up on it.
 // Long, because on a phone this is a file being fetched for the first time, and
 // the music carries on while it comes.
 const REACH = 8000;
+
+// How long the part coming in has to be keeping proper time before it is handed
+// the sound, and how far from the wall clock it may be over that stretch. Asked
+// to play, an element reports the time it is about to start from a good while
+// before any sound comes out of it, and it will even let that reported time
+// creep forward: the only thing that tells a recording which is playing from one
+// which is about to be playing is a clock that keeps up with the room's.
+const PROOF = 100;
+const DRIFT = 0.04;
 
 // How long to let a seek settle before believing where it says it landed. An
 // element reports the time it was asked for, and then, once it is really playing
@@ -42,15 +55,25 @@ const SETTLE = 120;
 // the correction, loose enough that it almost never has to make one.
 const SLIP = 0.05;
 
-const holding = (el: HTMLAudioElement, src: string) => {
-  if (!el.src) return false;
+const same = (url: string, src: string) => {
+  if (!url) return false;
 
   try {
-    return new URL(el.src).pathname === src;
+    return new URL(url).pathname === src;
   } catch {
-    return el.src.endsWith(src);
+    return url.endsWith(src);
   }
 };
+
+// Which file an element has been pointed at, and which one it has actually got
+// hold of. The two differ for a moment after the file is changed, and in that
+// moment everything the element says about itself — how much of it is loaded,
+// where it is up to — is still about the file it is leaving. Believing that is
+// how a part gets handed the sound before it has a sample of it: parked in step
+// on the last stem, it reads as loaded and exactly in time, because those
+// readings belong to the last one. Nine parts in, that is the ordinary case.
+const pointedAt = (el: HTMLAudioElement, src: string) => same(el.src, src);
+const holding = (el: HTMLAudioElement, src: string) => same(el.currentSrc, src);
 
 // Move an element to where it ought to be. Aimed at where that will be by the
 // time the seek lands rather than where it is now, since otherwise every attempt
@@ -256,7 +279,7 @@ export function useTransport(
       const from = audible.current ? stemmed : player;
       const to = held ? stemmed : player;
 
-      if (held && !holding(stemmed, held.src)) stemmed.src = held.src;
+      if (held && !pointedAt(stemmed, held.src)) stemmed.src = held.src;
 
       // Where the incoming recording should stand: the same moment in the music,
       // told in its own file's terms.
@@ -298,6 +321,9 @@ export function useTransport(
 
         const giveUp = performance.now() + REACH;
         let lining = 0;
+        // When the incoming recording was last seen to start keeping time, and
+        // where it was then.
+        let proof: { at: number; time: number } | null = null;
 
         // Wait for it to be in step before handing it the sound. It can afford to
         // wait: every try happens silent, so the only cost is a few more
@@ -319,11 +345,46 @@ export function useTransport(
             return;
           }
 
-          const rolling =
-            !to.paused && to.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA;
+          // Three things have to be true of the part coming in before it can be
+          // given the sound, and each of them was a hole in the music before it
+          // was asked for.
+          //
+          // That it is the file that was asked for, since for a moment after the
+          // file changes the element is still describing the last one — and the
+          // mix never changes file, so it is always holding its own. That it has
+          // enough of it in hand to carry on from where it is, rather than taking
+          // the sound and stopping to fetch. And that it has been keeping time
+          // for a tenth of a second, which is the only thing that separates a
+          // recording that is playing from one that has been told to.
+          //
+          // A seek sets all of that back: what an element reports in the middle
+          // of one is where it is going rather than where it is playing. So does
+          // falling behind the wall clock, which is what starting up looks like
+          // from the outside.
+          //
+          // Waiting on all three costs nothing, because what is waited through is
+          // the mix, still playing.
+          const now = performance.now();
+          const got = !held || holding(to, held.src);
+          const steady =
+            got &&
+            !to.paused &&
+            !to.seeking &&
+            !settling.current &&
+            to.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA;
+
+          if (!steady) proof = null;
+          else if (!proof) proof = { at: now, time: to.currentTime };
+          else if (
+            Math.abs(to.currentTime - proof.time - (now - proof.at) / 1000) > DRIFT
+          ) {
+            proof = { at: now, time: to.currentTime };
+          }
+
+          const rolling = proof !== null && now - proof.at >= PROOF;
 
           if (!rolling) {
-            if (performance.now() < giveUp) {
+            if (now < giveUp) {
               requestAnimationFrame(watch);
               return;
             }
@@ -336,12 +397,9 @@ export function useTransport(
             return;
           }
 
-          if (lining === 0) lining = performance.now() + PATIENCE;
+          if (lining === 0) lining = now + PATIENCE;
 
-          if (
-            Math.abs(to.currentTime - aim()) <= TIGHT ||
-            performance.now() >= lining
-          ) {
+          if (Math.abs(to.currentTime - aim()) <= TIGHT || now >= lining) {
             swap();
             return;
           }
@@ -415,11 +473,34 @@ export function useTransport(
     // clocks running at once will always part company eventually; this is what
     // decides that the music is the one that is right.
     let frame = 0;
+    // The last reading taken, because the same one twice is not always news. An
+    // element that is playing perfectly well can go a good while without telling
+    // anyone where it is up to — a tenth of a second, and more on the frame where
+    // a file is being fetched for another part. Taking that for a stop is how the
+    // rings freeze and then jump, when the wall clock was the better guess all
+    // along and the element, when it speaks again, has got to where the wall clock
+    // said it would.
+    //
+    // A recording that has run out of buffer stops saying anything too, and that
+    // is news: the music really has stopped and the rings have to stop with it.
+    // What tells the two apart is whether the element has anything left to play.
+    let read = -1;
 
     const check = () => {
       if (clock.current.running) {
+        const playing = live();
         const played = heardAt();
-        if (Math.abs(elapsed() - played) > SLIP) rebase(played);
+        const starved =
+          !playing || playing.readyState < HTMLMediaElement.HAVE_FUTURE_DATA;
+
+        if (
+          (played !== read || starved) &&
+          Math.abs(elapsed() - played) > SLIP
+        ) {
+          rebase(played);
+        }
+
+        read = played;
       }
 
       frame = requestAnimationFrame(check);

@@ -3,17 +3,16 @@
 import React, { useEffect, useRef } from "react";
 import { type Pulse, type Song, pulseAt, songAt, songFade } from "./loop";
 import { strike } from "./palette";
+import { COIN } from "./rings";
 
 // A part with no pitch, sitting in the middle of the rings: a coin that swells
 // on every thump and settles between them. It writes straight to the element
 // rather than through state, so the page around it never re-renders while it
 // is beating.
 
-// Of the shorter side of the space the rings turn in. Small enough that the
-// bass can have its ring around it without the two ever touching, since what
-// swells here on the beat is the thing that ring is keeping time with.
-const COIN = 0.04;
-const SWELL = 0.45; // how much bigger a coin gets on the thump
+// How much bigger a coin gets on the thump. Its size at rest is COIN, which is
+// kept with the rings since clicking the middle has to find it there.
+const SWELL = 0.45;
 
 export default function Thump({
   song,

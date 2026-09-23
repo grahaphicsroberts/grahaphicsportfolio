@@ -1,4 +1,11 @@
-import { type Loop, type Pad, type Song, partPresence } from "./loop";
+import {
+  type Loop,
+  type Pad,
+  type Pulse,
+  type Song,
+  partPresence,
+  pulseStrength,
+} from "./loop";
 
 // Where the rings sit, kept in one place because two things need to agree about
 // it: the drawing, and the hand pointing at the drawing. A ring you can click is
@@ -16,6 +23,19 @@ export const LANE = 0.0105;
 // The band a part's drawing takes, in fractions of the shorter side of the
 // canvas, measured out from the middle. A staff is two gaps either side of its
 // radius; a pattern is half a lane for each voice.
+// How wide the coin in the middle is drawn, of the shorter side, which the hand
+// pointing at it has to agree about too. Small enough that the bass can have its
+// ring around it without the two ever touching, since what swells here on the
+// beat is the thing that ring is keeping time with.
+export const COIN = 0.04;
+
+// How far out from the middle a click still means the coin: a disc twice the
+// coin's width. The coin is a fifth the size of the smallest ring and spends
+// most of each beat fading, and a thumb on a phone is wider than that, so what
+// answers has to be the room around it rather than the ink. The bass band starts
+// beyond this, so nothing is taken from it but a sliver of its slack.
+const MIDDLE = COIN;
+
 export const bandOf = (part: Loop | Pad) => {
   const half =
     "voices" in part ? (part.voices.length * LANE) / 2 : STAFF_GAP * 2;
@@ -37,7 +57,15 @@ const REACH = STAFF_GAP * 1.6;
 // Radius is a fraction of the shorter side, the same way the rings measure
 // themselves, so this works at any size of window without being told the size.
 export const ringAt = (song: Song, beats: number, radius: number) => {
-  let closest: Loop | Pad | null = null;
+  // The middle first, since it is the one part whose region is a disc and not a
+  // band, and the only one a click can land in the centre of.
+  for (const pulse of song.pulses) {
+    if (!pulse.stem) continue;
+    if (pulseStrength(song, pulse, beats) <= 0) continue;
+    if (radius <= MIDDLE) return pulse;
+  }
+
+  let closest: Loop | Pad | Pulse | null = null;
   let nearest = Infinity;
 
   for (const part of [...song.loops, ...song.pads]) {

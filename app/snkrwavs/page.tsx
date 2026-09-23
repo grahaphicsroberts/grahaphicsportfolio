@@ -215,13 +215,17 @@ export default function SnkrwavsPage() {
           time and the other waits in the same place, stopped: soloing hands the
           sound from one to the other once the one coming in is in step. */}
       <audio ref={player} src={SONG.audio} preload="auto" className="hidden" />
-      {/* The first stem is already sitting in this element so the first click
-          does not have to wait on a fetch. Later stems swap the file; this one
-          is just the one that is ready. */}
+      {/* It holds a stem from the start, though not for its sound: a phone will
+          not touch a media element nothing has played inside a gesture, and the
+          tap that starts the music is where that is got out of the way, so there
+          has to be a file in here to do it with. Nothing is fetched before that
+          tap, and which of the eight it is holding is not worth choosing over:
+          the ring clicked first is seven times out of eight a different one, and
+          a wrong guess fetched early is megabytes for nothing. */}
       <audio
         ref={stem}
         src={SONG.loops.find((part) => part.stem)?.stem}
-        preload="auto"
+        preload="none"
         className="hidden"
       />
 
