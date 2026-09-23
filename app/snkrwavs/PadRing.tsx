@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { density } from "./canvas";
+import { fitTo } from "./canvas";
 import { STRIKE, strike, warming } from "./palette";
-import { LANE } from "./rings";
+import { LANE, bandOf } from "./rings";
 import {
   type Pad,
   type Song,
@@ -55,6 +55,15 @@ const CELL_REST = 0.3; // of full white, at full force, before it is struck
 const CELL_FADE = 0.45; // seconds a struck cell takes to cool
 const CELL_COLD = [255, 255, 255];
 
+// The glow is the dearest thing on the ring — a blur is paid per stroke, and on
+// some phones rasterised on the processor — and worth least on a pattern that has
+// been dimmed for another part to be heard. Below this, cells are drawn flat.
+const GLOW_WORTH = 0.4;
+
+// How far outside its band the pattern draws, in lanes: the glow of a struck cell
+// carries further than the playhead does.
+const OUTSIDE = Math.max(CELL_GLOW + CELL_BLAZE, 0.4);
+
 // A cell on its way back to white, mixed rather than switched, so a hit cools
 // through the blue instead of dropping out of it.
 const cooling = (lit: number) => {
@@ -85,23 +94,27 @@ export default function PadRing({
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
 
+    // The canvas box, and the stage's shorter side, which is the unit the pattern
+    // measures itself in.
     let width = 0;
     let height = 0;
+    let size = 0;
     let drawnPhase: number | null = -1;
     let drawnPresence = -1;
-    let drawnFade = -1;
     let drawnWarm = -1;
+    let drawnGlow: boolean | null = null;
+    let drawnFade = -1;
     let frame = 0;
 
-    const layout = () => {
-      const rect = canvas.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
+    const reach = bandOf(pad).outer + LANE * OUTSIDE;
 
-      const dpr = density();
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const layout = () => {
+      const fitted = fitTo(canvas, reach);
+      if (!fitted) return;
+
+      width = fitted.width;
+      height = fitted.height;
+      size = fitted.stage;
 
       drawnPhase = -1;
     };
@@ -109,12 +122,13 @@ export default function PadRing({
     const render = (
       phase: number | null,
       presence: number,
-      fade: number,
       warm: number,
+      glow: boolean,
     ) => {
+      // Its square is centred on the middle the rings turn around, so the middle
+      // of the canvas is that middle whatever size the square is.
       const cx = width / 2;
       const cy = height / 2;
-      const size = Math.min(width, height);
       const lane = size * LANE;
       const radius = size * pad.radius;
 
@@ -123,9 +137,11 @@ export default function PadRing({
 
       ctx.clearRect(0, 0, width, height);
 
-      if (phase === null || presence <= 0 || fade <= 0) return;
+      if (phase === null || presence <= 0) return;
 
-      const visible = presence * fade;
+      // The pattern's own arrival, which moves it. Dimming is done to the canvas
+      // whole rather than to every stroke on it.
+      const visible = presence;
 
       ctx.save();
       ctx.translate(cx, cy);
@@ -201,7 +217,9 @@ export default function PadRing({
         // The glow is the strike, so it belongs to the blue and goes out with
         // it: a cell sitting in the pattern is flat.
         ctx.shadowColor = strike();
-        ctx.shadowBlur = lane * (lit * CELL_GLOW + struck * CELL_BLAZE);
+        ctx.shadowBlur = glow
+          ? lane * (lit * CELL_GLOW + struck * CELL_BLAZE)
+          : 0;
         ctx.globalAlpha =
           visible * hit.force * (CELL_REST + lit * (1 - CELL_REST));
 
@@ -228,26 +246,37 @@ export default function PadRing({
       const presence = partPresence(song, pad, beats);
       const fade = songFade(song, beats) * focus(pad.id);
       const warm = warmth(pad.id);
+      const glow = fade >= GLOW_WORTH;
+
+      // Handed to the compositor as one number for the canvas, rather than
+      // carried through every stroke: cheaper, and even, which a grid of
+      // overlapping strokes at a fifth of their weight is not.
+      if (fade !== drawnFade) {
+        canvas.style.opacity = fade >= 1 ? "" : String(fade);
+        drawnFade = fade;
+      }
 
       if (
-        phase !== drawnPhase ||
-        presence !== drawnPresence ||
-        fade !== drawnFade ||
-        warm !== drawnWarm
+        fade > 0.002 &&
+        (phase !== drawnPhase ||
+          presence !== drawnPresence ||
+          warm !== drawnWarm ||
+          glow !== drawnGlow)
       ) {
-        render(phase, presence, fade, warm);
+        render(phase, presence, warm, glow);
         drawnPhase = phase;
         drawnPresence = presence;
-        drawnFade = fade;
         drawnWarm = warm;
+        drawnGlow = glow;
       }
       frame = requestAnimationFrame(draw);
     };
 
     layout();
 
+    // The stage is watched rather than the canvas, which is sized from it.
     const observer = new ResizeObserver(layout);
-    observer.observe(canvas);
+    if (canvas.parentElement) observer.observe(canvas.parentElement);
     frame = requestAnimationFrame(draw);
 
     return () => {
@@ -261,7 +290,7 @@ export default function PadRing({
       ref={canvasRef}
       role="img"
       aria-label={`${pad.label}: a ${pad.bars}-bar pattern for ${pad.voices.join(", ").toLowerCase()}, drawn as a ring of ${pad.steps} steps to the bar, from bar ${pad.from} to bar ${pad.to} of the song${pad.gaps ? ", less the bars the mix mutes" : ""}`}
-      className="absolute inset-0 h-full w-full"
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
     />
   );
 }

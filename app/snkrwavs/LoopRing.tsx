@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { density } from "./canvas";
+import { fitTo } from "./canvas";
 import {
   type Loop,
   type Song,
@@ -15,7 +15,7 @@ import {
   songFade,
 } from "./loop";
 import { pitchColour, warming } from "./palette";
-import { STAFF_GAP } from "./rings";
+import { STAFF_GAP, bandOf } from "./rings";
 
 // The loop drawn as a staff bent into a circle: five lines, bar lines crossing
 // them, and one turn of the ring for one pass of the loop. Top centre is now.
@@ -77,6 +77,22 @@ const LABEL_INK = 0.4;
 const NOTE_COLOR = "rgba(255, 255, 255, 0.5)";
 const PLAYHEAD_COLOR = "#3b82f6";
 
+// Haloes are the most expensive thing on the ring by a distance — a canvas blur
+// is paid per stroke and rasterised on the processor on some phones — and the
+// least worth having on a ring that has been dimmed to a fifth for another part
+// to be heard. Below this much brightness a note is drawn flat.
+const HALO_WORTH = 0.4;
+
+// How far outside its band the ring draws, in staff gaps, which is what sets how
+// much canvas it needs. The bar numbers sit furthest out of the furniture, with
+// the playhead's arrowhead just inside them; the halo of a struck note reaches
+// past both on any ring, and twice as far again on one with swell.
+const OUTSIDE = Math.max(
+  BAR_LABEL_OFFSET + BAR_LABEL_SIZE,
+  PLAYHEAD_REACH + PLAYHEAD_TIP,
+);
+const HALO_OUT = NOTE_GLOW + NOTE_BLAZE;
+
 export default function LoopRing({
   song,
   loop,
@@ -101,24 +117,32 @@ export default function LoopRing({
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
 
+    // The canvas box, and the stage's shorter side, which is the unit every
+    // measurement on the ring is given in.
     let width = 0;
     let height = 0;
+    let size = 0;
     let mono = "monospace";
     let drawnPhase: number | null = -1;
     let drawnPresence = -1;
-    let drawnFade = -1;
     let drawnWarm = -1;
+    let drawnHaloes: boolean | null = null;
+    let drawnFade = -1;
     let frame = 0;
 
-    const layout = () => {
-      const rect = canvas.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
+    // Room enough for the furniture or for the haloes, whichever hangs further
+    // outside the staff.
+    const reach =
+      bandOf(loop).outer +
+      STAFF_GAP * Math.max(OUTSIDE, HALO_OUT * (loop.swell ?? 1));
 
-      const dpr = density();
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const layout = () => {
+      const fitted = fitTo(canvas, reach);
+      if (!fitted) return;
+
+      width = fitted.width;
+      height = fitted.height;
+      size = fitted.stage;
 
       // next/font hands out a generated family name, and canvas will not read
       // the CSS variable holding it, so it gets resolved here.
@@ -134,12 +158,13 @@ export default function LoopRing({
       phase: number | null,
       cursor: number,
       presence: number,
-      fade: number,
       warm: number,
+      haloes: boolean,
     ) => {
+      // The canvas is centred on the middle the rings turn around, whatever size
+      // of square it was given, so its own middle is that middle.
       const cx = width / 2;
       const cy = height / 2;
-      const size = Math.min(width, height);
       const gap = size * STAFF_GAP;
       const radius = size * loop.radius;
       const inner = radius - gap * 2;
@@ -149,12 +174,12 @@ export default function LoopRing({
 
       // Before the loop comes in and after it drops out there is no ring at
       // all: the bars still pass, they just pass somewhere else.
-      if (phase === null || presence <= 0 || fade <= 0) return;
+      if (phase === null || presence <= 0) return;
 
-      // The pop is the loop's own arrival; the fade is the hand on the mix
-      // taking the whole piece down. Only the first of them moves the ring,
-      // since a fade-out should dim it rather than shrink it.
-      const visible = presence * fade;
+      // The pop of the loop's own arrival, which is the one thing here that
+      // moves the ring rather than dimming it. Dimming is done to the canvas
+      // whole, a long way from here.
+      const visible = presence;
 
       ctx.save();
       ctx.translate(cx, cy);
@@ -361,7 +386,9 @@ export default function LoopRing({
 
         ctx.strokeStyle = lit > 0 ? colour : NOTE_COLOR;
         ctx.shadowColor = colour;
-        ctx.shadowBlur = gap * swell * (lit * NOTE_GLOW + struck * NOTE_BLAZE);
+        ctx.shadowBlur = haloes
+          ? gap * swell * (lit * NOTE_GLOW + struck * NOTE_BLAZE)
+          : 0;
 
         const solid = lit > 0 ? 0.45 + lit * 0.55 : 1;
 
@@ -421,28 +448,43 @@ export default function LoopRing({
       // else about it, so they arrive here as one number.
       const fade = songFade(song, beats) * focus(loop.id);
       const warm = warmth(loop.id);
+      const haloes = fade >= HALO_WORTH;
+
+      // Dimming is done to the canvas rather than to everything drawn on it: one
+      // number handed to the compositor, instead of an alpha carried through a
+      // hundred strokes and a shadow — which is both cheaper and more even, since
+      // strokes at a fifth of their weight pile up where they cross and a canvas
+      // at a fifth of its weight cannot.
+      if (fade !== drawnFade) {
+        canvas.style.opacity = fade >= 1 ? "" : String(fade);
+        drawnFade = fade;
+      }
 
       // Paused, or between frames on a fast display, there is nothing new to
-      // draw and the ring costs nothing.
+      // draw and the ring costs nothing. Nor is there anything to draw while it
+      // is dimmed to nothing, which is where the whole piece ends up.
       if (
-        phase !== drawnPhase ||
-        presence !== drawnPresence ||
-        fade !== drawnFade ||
-        warm !== drawnWarm
+        fade > 0.002 &&
+        (phase !== drawnPhase ||
+          presence !== drawnPresence ||
+          warm !== drawnWarm ||
+          haloes !== drawnHaloes)
       ) {
-        render(phase, cursor, presence, fade, warm);
+        render(phase, cursor, presence, warm, haloes);
         drawnPhase = phase;
         drawnPresence = presence;
-        drawnFade = fade;
         drawnWarm = warm;
+        drawnHaloes = haloes;
       }
       frame = requestAnimationFrame(draw);
     };
 
     layout();
 
+    // The stage is what is watched, not the canvas: the canvas is sized from the
+    // stage, so watching it would be watching for its own answer.
     const observer = new ResizeObserver(layout);
-    observer.observe(canvas);
+    if (canvas.parentElement) observer.observe(canvas.parentElement);
     frame = requestAnimationFrame(draw);
 
     return () => {
@@ -460,7 +502,7 @@ export default function LoopRing({
           ? `${loop.label}: played straight through from bar ${loop.from} to bar ${loop.to} of the song, drawn on a circular music staff carrying ${loop.bars} bars at a time`
           : `${loop.label}: a ${loop.bars}-bar loop drawn as a circular music staff, turning once for each pass, from bar ${loop.from} to bar ${loop.to} of the song`
       }
-      className="absolute inset-0 h-full w-full"
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
     />
   );
 }

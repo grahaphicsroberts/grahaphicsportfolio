@@ -20,9 +20,6 @@ export const STAFF_GAP = 0.0105;
 // programmed part and a played one read as the same size of thing.
 export const LANE = 0.0105;
 
-// The band a part's drawing takes, in fractions of the shorter side of the
-// canvas, measured out from the middle. A staff is two gaps either side of its
-// radius; a pattern is half a lane for each voice.
 // How wide the coin in the middle is drawn, of the shorter side, which the hand
 // pointing at it has to agree about too. Small enough that the bass can have its
 // ring around it without the two ever touching, since what swells here on the
@@ -36,6 +33,9 @@ export const COIN = 0.04;
 // beyond this, so nothing is taken from it but a sliver of its slack.
 const MIDDLE = COIN;
 
+// The band a part's drawing takes, in fractions of the shorter side of the stage,
+// measured out from the middle. A staff is two gaps either side of its radius; a
+// pattern is half a lane for each voice.
 export const bandOf = (part: Loop | Pad) => {
   const half =
     "voices" in part ? (part.voices.length * LANE) / 2 : STAFF_GAP * 2;

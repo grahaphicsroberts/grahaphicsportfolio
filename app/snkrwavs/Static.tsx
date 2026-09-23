@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { density } from "./canvas";
+import { noiseDensity } from "./canvas";
 import { type Noise, type Song, noiseAt, songAt, songFade } from "./loop";
 
 // The wind, drawn as the page's own grain: static, pulled sideways so it reads
@@ -33,6 +33,13 @@ const FAR = 0.5; // the far layer, dimmer and coarser and slower than the near
 const BANDS = 9; // bands across the page, which is how wide a gust is
 const BITE = 0.62; // how much of the static a thin patch gives up
 const ACROSS = 0.62; // bars a gust takes to cross, in gusts a bar
+
+// How often the static is laid down again. It is the one thing here that covers
+// the whole page — three fills of it, one of them a gradient masking the other
+// two — and the one thing that gains nothing from being redrawn sixty times a
+// second: the grain itself only boils eleven times, and what moves between those
+// is a drift of two pixels. Half rate, so the rings keep the frames.
+const REDRAW = 1000 / 30;
 
 export default function Static({
   song,
@@ -90,13 +97,14 @@ export default function Static({
     let height = 0;
     let frame = 0;
     let painted = false;
+    let laid = 0;
 
     const layout = () => {
       const rect = canvas.getBoundingClientRect();
       width = rect.width;
       height = rect.height;
 
-      const dpr = density();
+      const dpr = noiseDensity();
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -138,6 +146,13 @@ export default function Static({
         frame = requestAnimationFrame(tick);
         return;
       }
+
+      const now = performance.now();
+      if (painted && now - laid < REDRAW) {
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+      laid = now;
 
       const bars = beats / song.beatsPerBar;
       const moving = !still.matches;
