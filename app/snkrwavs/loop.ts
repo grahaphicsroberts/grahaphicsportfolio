@@ -378,6 +378,39 @@ export const pulseStrength = (song: Song, pulse: Pulse, beats: number) => {
   return fade > 0 ? Math.min(1, (beats - arrival) / fade) : 1;
 };
 
+// How long until a part can be heard again, in beats: nothing while it is
+// playing, and Infinity once it has played for the last time in this pass of the
+// song. Whatever shape of part it is, since the question is asked of whichever
+// one is being listened to on its own.
+//
+// A hole in a part is not the end of it. The mix mutes the hats for a bar around
+// 36 and drops the kit for two at 71, and those are the arrangement: they are
+// worth sitting through, and are why this answers with a length rather than a
+// yes or no.
+export const backIn = (song: Song, part: Loop | Pad | Pulse, beats: number) => {
+  if ("spans" in part) {
+    if (pulseStrength(song, part, beats) > 0) return 0;
+
+    const next = part.spans.find(
+      (span) => (span.from - 1) * song.beatsPerBar > beats,
+    );
+
+    return next ? (next.from - 1) * song.beatsPerBar - beats : Infinity;
+  }
+
+  if (beats < entrance(song, part)) return entrance(song, part) - beats;
+  if (beats >= exit(song, part)) return Infinity;
+
+  for (const gap of part.gaps ?? []) {
+    const from = (gap.from - 1) * song.beatsPerBar;
+    const to = (gap.to - 1) * song.beatsPerBar;
+
+    if (beats >= from && beats < to) return to - beats;
+  }
+
+  return 0;
+};
+
 // How long ago the last thump landed, in beats, wrapping back into the bar
 // before when the bar has only just turned over.
 const sinceHit = (song: Song, pulse: Pulse, beats: number) => {

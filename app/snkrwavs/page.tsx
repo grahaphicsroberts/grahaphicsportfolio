@@ -10,7 +10,7 @@ import Scrubber from "./Scrubber";
 import Static from "./Static";
 import Thump from "./Thump";
 import Wash from "./Wash";
-import { SNKRWAVS_SONG as SONG, songAt, songSeconds } from "./loop";
+import { SNKRWAVS_SONG as SONG, backIn, songAt, songSeconds } from "./loop";
 import { ringAt } from "./rings";
 import { type Stem, useTransport } from "./useTransport";
 
@@ -29,6 +29,22 @@ const DRAWN = [
 ];
 
 const NAMES = new Map(DRAWN.map((part) => [part.id, part.label]));
+
+// The parts that can be heard on their own, by id, so that the one being
+// listened to can be asked whether it is still playing.
+const SOLOABLE = new Map(
+  [...SONG.loops, ...SONG.pads, ...SONG.pulses].map(
+    (part) => [part.id, part] as const,
+  ),
+);
+
+// How long a hole in the part you are listening to is worth sitting through, in
+// bars. The mix mutes the hats for a bar around 36 and drops the kit for two at
+// 71: those are the arrangement, and hearing what a part does and does not do is
+// the reason for listening to it alone. Longer than this is not a hole but the
+// part gone — the hats are out for 29 bars from 44 — and sitting through that is
+// a dimmed page around a ring that is not there, with nothing coming out of it.
+const HOLD = 4; // bars
 
 // How brightly the rest of the piece is drawn while one part is soloed. Low, but
 // not dark: the reason for leaving them turning is to see where the part you are
@@ -150,10 +166,9 @@ export default function SnkrwavsPage() {
     [elapsed],
   );
 
-  // A click on a ring plays that part alone. A second click on the same ring, or
-  // a click anywhere that is not a ring, hands it back to the mix. There is no
-  // third state and no combining: two parts at once is a mix, and mixing is a
-  // job for the desk this came off, not for a page.
+  // A click on a ring plays that part alone. Then any click at all hands it back
+  // to the mix. There is no third state and no combining: two parts at once is a
+  // mix, and mixing is a job for the desk this came off, not for a page.
   const onClick = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
       // The controls are not the drawing. Reaching for play or the scrubber
@@ -161,25 +176,55 @@ export default function SnkrwavsPage() {
       const target = event.target as HTMLElement | null;
       if (target?.closest("button, a, input, [role='slider']")) return;
 
-      const hit = ringUnder(event.clientX, event.clientY);
-      const next = hit && hit.id !== chosen.current ? hit : null;
+      // One part never goes straight into another: while something is soloed the
+      // whole page is the way back, and the next part is chosen from the mix. A
+      // click that means one thing wherever it lands is easier to be sure of
+      // than one that means two, and hearing the whole again in between is what
+      // makes it clear what the next part is standing out of.
+      if (chosen.current !== null) {
+        choose(null, null);
+        return;
+      }
 
-      if (next === null && chosen.current === null) return;
+      const hit = ringUnder(event.clientX, event.clientY);
+      if (!hit) return;
 
       choose(
-        next?.id ?? null,
-        next?.stem
-          ? { src: next.stem, offset: next.stemOffset ?? 0 }
-          : null,
+        hit.id,
+        hit.stem ? { src: hit.stem, offset: hit.stemOffset ?? 0 } : null,
       );
     },
     [choose, ringUnder],
   );
 
+  // A part cannot go on being the only thing you are listening to once it has
+  // stopped playing: past its last bar, or into a hole longer than the ones the
+  // arrangement makes, the mix comes back by itself. Watched rather than worked
+  // out in advance because the song can be scrubbed, and it only runs while
+  // something is soloed.
+  useEffect(() => {
+    const part = soloed === null ? null : SOLOABLE.get(soloed);
+    if (!part) return;
+
+    let frame = 0;
+    const watch = () => {
+      if (backIn(SONG, part, songAt(SONG, elapsed())) > HOLD * SONG.beatsPerBar) {
+        choose(null, null);
+        return;
+      }
+
+      frame = requestAnimationFrame(watch);
+    };
+
+    frame = requestAnimationFrame(watch);
+
+    return () => cancelAnimationFrame(frame);
+  }, [choose, elapsed, soloed]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      // Out of a solo, for anyone who would rather not have to find a piece of
-      // empty page to click on.
+      // Out of a solo, for anyone working from the keyboard, where the whole
+      // page being the way back is no use.
       if (event.code === "Escape") {
         if (chosen.current !== null) choose(null, null);
         return;
