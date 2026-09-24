@@ -35,6 +35,13 @@ const RUMBLE_FULL = 1.5;
 const HISS = 0.075;
 const HISS_FULL = 6;
 
+// What a finished mix sits at, and what the machine is set against. A part mixed
+// to sit under six others is a long way under this — the melody is sixteen
+// decibels below the drums — and a machine at one fixed level is louder than the
+// quiet half of the record. So the noise is scaled to whatever is on the reel,
+// and stays the same distance under it whichever part that is.
+const LOUD = 0.45;
+
 // Where the hiss sits, at rest and at a spool. Bandpassed rather than shelved so
 // that it reads as a mechanism rather than as the top end of something else.
 const HISS_LOW = 420;
@@ -61,6 +68,9 @@ let noise: AudioBuffer | null = null;
 // The files the head has been handed, and the ones on their way to it.
 const sent = new Set<string>();
 const coming = new Set<string>();
+
+// And how loud each of them turned out to be, which is the machine's business.
+const levels = new Map<string, number>();
 
 // What is being turned, where the hand had it last and when that was, which is
 // all it takes to know how fast the hand is going.
@@ -96,6 +106,43 @@ const fold = (decoded: AudioBuffer) => {
   return one;
 };
 
+// How loud a part is where it plays. Averaged over the stretches with something
+// in them and not over the whole reel, so that a part waiting thirty bars for its
+// entrance is not measured against its own silence, nor a quiet one against the
+// one bar it leans on.
+const level = (samples: Float32Array) => {
+  const window = 2048;
+  let sum = 0;
+  let counted = 0;
+
+  for (let i = 0; i + window <= samples.length; i += window) {
+    let energy = 0;
+    for (let j = i; j < i + window; j++) energy += samples[j] * samples[j];
+    energy /= window;
+
+    // Eighty decibels down is the tape being blank rather than the part being
+    // quiet, and nothing is learned from averaging blank tape in.
+    if (energy > 1e-8) {
+      sum += energy;
+      counted++;
+    }
+  }
+
+  return counted ? Math.sqrt(sum / counted) : 0;
+};
+
+// How much machine the part on the reel can carry. A part no quieter than a mix
+// gets all of it; anything under that gets the same share of it, so the noise sits
+// where it did against the sound rather than over the top of it.
+//
+// Nothing known yet means nothing on the reel yet, which is the first drag of a
+// session: the machine is the whole of the sound then and runs at full.
+const carried = () => {
+  const known = holding ? levels.get(holding.src) : undefined;
+
+  return known === undefined ? 1 : Math.min(1, known / LOUD);
+};
+
 // Fetch a part and get it onto the head. The bytes come from the browser's own
 // cache, the recording having been played already, and the decoding is done into
 // a context that exists only to be asked for a sample rate: nothing is rendered
@@ -111,6 +158,7 @@ const spool = (src: string) => {
       const shop = new OfflineAudioContext(1, RATE, RATE);
       const decoded = await decode(shop, bytes);
       const samples = fold(decoded);
+      levels.set(src, level(samples));
 
       await built;
       if (!head) return;
@@ -134,6 +182,13 @@ const build = async (on: AudioContext) => {
     numberOfOutputs: 1,
     outputChannelCount: [1],
   });
+  // A head only keeps two reels. Which one it let go of is its news to give, and
+  // this is the side that has to hear it: a file believed to be on the machine
+  // and not on it is a drag with nothing but the machine in it.
+  head.port.onmessage = (event) => {
+    if (event.data?.did === "dropped") sent.delete(event.data.src);
+  };
+
   const room = on.createGain();
   room.gain.value = ROOM;
 
@@ -240,14 +295,15 @@ export const wind = (at: number) => {
   const seconds = Math.max(0.001, (now - past.when) / 1000);
   const speed = Math.abs(at - past.at) / seconds;
   const when = ctx.currentTime;
+  const room = carried();
 
   machine.rumbleGain.gain.setTargetAtTime(
-    Math.min(1, speed / RUMBLE_FULL) * RUMBLE,
+    Math.min(1, speed / RUMBLE_FULL) * RUMBLE * room,
     when,
     FOLLOW,
   );
   machine.hissGain.gain.setTargetAtTime(
-    Math.min(1, speed / HISS_FULL) * HISS,
+    Math.min(1, speed / HISS_FULL) * HISS * room,
     when,
     FOLLOW,
   );

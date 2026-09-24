@@ -71,6 +71,12 @@ class TapeHead extends AudioWorkletProcessor {
         if (src === message.src || src === this.src) continue;
 
         this.reels.delete(src);
+
+        // Said out loud, because the side that fetches and decodes is keeping
+        // track of what this head has. Left unsaid, it would go on believing
+        // this one still holds the mix and hand it nothing when a hand comes
+        // back to it, which is a drag with no music in it at all.
+        this.port.postMessage({ did: "dropped", src });
       }
 
       // Decoding can land in the middle of a drag, which is the ordinary case the
