@@ -13,6 +13,7 @@ import Wash from "./Wash";
 import {
   type Loop,
   type Pad,
+  type Pulse,
   SNKRWAVS_SONG as SONG,
   backIn,
   songAt,
@@ -68,6 +69,23 @@ const WIND = 8; // pixels
 // over before a hand could have meant a second thing.
 const WOUND = 400; // milliseconds
 
+// How long the page may sit dimmed around a part there is nothing to hear from,
+// while a hand is on it. A wind goes looking, and what it is looking for is
+// wherever it stops, so a hand crossing the forty bars the harpsichord is not
+// in is left alone as long as it keeps moving. A hand that has stopped in the
+// dark has found nothing, and the whole mix coming back is the answer to that.
+const DARK = 2000; // milliseconds
+
+// How solid the label over a ring is. Not solid: it is a note about the drawing
+// laid over the drawing, and the part it is naming goes on turning under it.
+const TIP = 0.7;
+
+// And how long it stays before it fades on its own. A mouse takes its label away
+// with it, so this is really for a finger: a tap leaves the pointer sitting where
+// it was tapped, and a label left there is a box over the part you just asked to
+// hear. Long enough to read twice, and gone by the time it is in the way.
+const SAID = 2600; // milliseconds
+
 // How brightly the rest of the piece is drawn while one part is soloed. Low, but
 // not dark: the reason for leaving them turning is to see where the part you are
 // hearing sits in the whole, and that only works while they are still legible.
@@ -115,6 +133,28 @@ export default function SnkrwavsPage() {
   const [soloed, setSoloed] = useState<string | null>(null);
   const chosen = useRef<string | null>(null);
   const [pointing, setPointing] = useState(false);
+
+  // Whether the music has ever been started. A drawing standing still does not
+  // look like something waiting to be started, so until it has been there is an
+  // invitation the size of the middle of it, and after that there is not.
+  const [begun, setBegun] = useState(false);
+
+  // And whether this is a screen being touched rather than pointed at, which is
+  // only worth knowing to call the thing a hand does by its name. Asked after the
+  // page is up, since the server has no way of knowing and guessing would only
+  // make the two of them disagree.
+  const [touch, setTouch] = useState(false);
+  useEffect(() => {
+    setTouch(window.matchMedia("(hover: none)").matches);
+  }, []);
+
+  // The three lines of the label for whichever ring is under the pointer.
+  const tip = useRef<HTMLDivElement>(null);
+  const tipName = useRef<HTMLSpanElement>(null);
+  const tipClick = useRef<HTMLSpanElement>(null);
+  const tipDrag = useRef<HTMLSpanElement>(null);
+  const fade = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(fade.current), []);
 
   // Where both ramps had got to when they last changed, so that clicking part
   // way through one carries on from where the page actually is rather than
@@ -181,6 +221,7 @@ export default function SnkrwavsPage() {
   // on, standing there silent in case it is wanted.
   const start = useCallback(() => {
     tape.wake();
+    setBegun(true);
     toggle();
   }, [toggle]);
 
@@ -229,6 +270,9 @@ export default function SnkrwavsPage() {
     turned: number;
     down: { x: number; y: number };
     wound: boolean;
+    // And when it last actually moved, which is how a hand searching is told apart
+    // from a hand that has stopped somewhere there is nothing to hear.
+    moved: number;
   } | null>(null);
 
   // When a wind last ended, because the click that comes out of the same gesture
@@ -243,6 +287,53 @@ export default function SnkrwavsPage() {
 
     return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
   }, []);
+
+  // What the ring under the pointer is, and what can be done with it, said where it
+  // is being pointed at. Written to the page rather than kept in state: a hand
+  // moves sixty times a second and none of the nine drawings needs rebuilding
+  // because it did. Only for a mouse — a finger has nowhere to hover, and what a
+  // finger needs telling is said in the middle of the page before anything starts.
+  const say = useCallback(
+    (part: Loop | Pad | Pulse | null, x: number, y: number) => {
+      const box = tip.current;
+      const name = tipName.current;
+      const click = tipClick.current;
+      const drag = tipDrag.current;
+      if (!box || !name || !click || !drag) return;
+
+      clearTimeout(fade.current);
+
+      // Nothing to say about a ring already in a hand: it is being done.
+      if (!part || turning.current?.wound) {
+        box.style.opacity = "0";
+        return;
+      }
+
+      name.textContent = part.label;
+      click.textContent =
+        chosen.current === null
+          ? "click to hear it alone"
+          : "click for the whole mix";
+
+      // The kick in the middle is a disc rather than a wheel, with no length of
+      // its own to be geared to: it is the one part that cannot be wound.
+      drag.style.display = "bars" in part ? "block" : "none";
+
+      // Beside the pointer rather than under it, and kept on the page: a label
+      // that runs off the edge is worse than no label.
+      const size = box.getBoundingClientRect();
+      const left = Math.min(x + 18, window.innerWidth - size.width - 12);
+      const top = Math.min(y + 18, window.innerHeight - size.height - 12);
+      const put = `translate(${Math.max(12, left)}px, ${Math.max(12, top)}px)`;
+
+      box.style.transform = put;
+      box.style.opacity = `${TIP}`;
+      fade.current = setTimeout(() => {
+        box.style.opacity = "0";
+      }, SAID);
+    },
+    [],
+  );
 
   const onPointerDown = useCallback(
     (event: React.PointerEvent<HTMLElement>) => {
@@ -266,6 +357,7 @@ export default function SnkrwavsPage() {
         turned: 0,
         down: { x: event.clientX, y: event.clientY },
         wound: false,
+        moved: performance.now(),
       };
 
       // So that the ring stays in the hand once it is in it, wherever the hand
@@ -297,6 +389,7 @@ export default function SnkrwavsPage() {
       // it back rewinds it, and whatever was under the finger stays under it —
       // this is the same turn the drawing is made of, read the other way.
       held.turned -= step / TAU;
+      if (step !== 0) held.moved = performance.now();
 
       // Until it has gone far enough to mean it, this is still a click. The
       // transport is not touched and the music is not stopped, since stopping it
@@ -401,25 +494,48 @@ export default function SnkrwavsPage() {
     if (!part) return;
 
     let frame = 0;
+    let dark = 0;
     const watch = () => {
-      // A hand winding the part can go through a stretch it is not in and out the
-      // other side, looking for something. What it is asking to hear is wherever
-      // it stops, so nothing is handed back until it does.
-      if (
-        !turning.current?.wound &&
-        backIn(SONG, part, songAt(SONG, elapsed())) > HOLD * SONG.beatsPerBar
-      ) {
-        choose(null, null);
+      const away =
+        backIn(SONG, part, songAt(SONG, elapsed())) > HOLD * SONG.beatsPerBar;
+      if (!away) {
+        dark = 0;
+        frame = requestAnimationFrame(watch);
         return;
       }
 
-      frame = requestAnimationFrame(watch);
+      if (!dark) dark = performance.now();
+
+      // A hand winding the part can go through a stretch it is not in and out the
+      // other side, looking for something, and what it is asking to hear is
+      // wherever it stops. So a wind is given the length of a wait in the dark —
+      // measured from the last time the hand moved as well as from the last thing
+      // there was to hear, since a hand still searching has not finished asking.
+      const held = turning.current;
+      const now = performance.now();
+      if (held?.wound && (now - dark < DARK || now - held.moved < DARK)) {
+        frame = requestAnimationFrame(watch);
+        return;
+      }
+
+      const at = elapsed();
+      choose(null, null);
+
+      // Mid-wind, the mix has to be put in the hand as well, or the hand would be
+      // left turning a reel of the part that is not there: dimming is only half of
+      // what came back. And it is put there where the hand is — handing the sound
+      // over reads the time off a recording, and the recordings have been standing
+      // still where the drag began since it began.
+      if (held?.wound) {
+        wind(at);
+        tape.grab(SONG.audio, 0, at);
+      }
     };
 
     frame = requestAnimationFrame(watch);
 
     return () => cancelAnimationFrame(frame);
-  }, [choose, elapsed, soloed]);
+  }, [choose, elapsed, soloed, wind]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -453,8 +569,13 @@ export default function SnkrwavsPage() {
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
       onMouseMove={(event) => {
-        const over = ringUnder(event.clientX, event.clientY) !== null;
-        if (over !== pointing) setPointing(over);
+        const hit = ringUnder(event.clientX, event.clientY);
+        if ((hit !== null) !== pointing) setPointing(hit !== null);
+        say(hit, event.clientX, event.clientY);
+      }}
+      onMouseLeave={() => {
+        setPointing(false);
+        say(null, 0, 0);
       }}
       className={`flex min-h-screen flex-col items-center justify-between gap-8 bg-black px-6 py-6 text-white ${
         pointing ? "cursor-grab" : ""
@@ -586,6 +707,37 @@ export default function SnkrwavsPage() {
             focus={focus}
           />
         ))}
+
+        {/* A page cannot start its own sound, so the first thing anybody has to do
+            here is the one thing a still drawing does not ask for. Dead centre and
+            the size of the middle of the rings until it has been done, and then
+            gone for good — the transport at the bottom is the one that stays.
+
+            It is also where a finger is told what the rings are for, since a finger
+            has nowhere to hover and this is the moment it is reading. */}
+        {!begun && (
+          <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-7">
+            <button
+              type="button"
+              onClick={start}
+              aria-label="Play"
+              className="pointer-events-auto flex h-28 w-28 items-center justify-center rounded-full border border-white/30 bg-black/60 transition-colors hover:border-white/70 hover:bg-black/80 sm:h-36 sm:w-36"
+            >
+              <Play
+                className="ml-1 h-10 w-10 fill-current text-white sm:h-12 sm:w-12"
+                aria-hidden="true"
+              />
+            </button>
+
+            {/* Narrower type on a narrow screen: either line wrapping turns two
+                things to read into four, and one of them into nonsense. */}
+            <p className="px-6 text-center font-mono text-[0.65rem] uppercase leading-loose tracking-[0.15em] text-neutral-400 sm:text-[0.7rem] sm:tracking-[0.2em]">
+              {touch ? "Tap" : "Click"} a ring to hear that part alone
+              <br />
+              Drag a ring to wind the tape
+            </p>
+          </div>
+        )}
       </div>
 
       <footer className="relative z-10 flex w-full flex-col items-center gap-5">
@@ -622,15 +774,30 @@ export default function SnkrwavsPage() {
 
         {/* What the piece is, and nothing about the parts: they are what the
             drawing is for, and every line written about them down here comes
-            straight out of the height it gets to turn in. Once a part can be
-            soloed by clicking its ring, whatever needs saying about it can be
-            said where it is being pointed at. */}
+            straight out of the height it gets to turn in. Whatever needs saying
+            about a part is said where it is being pointed at instead. */}
         <p className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-neutral-500">
           {SONG.bpm} bpm &middot; {SONG.beatsPerBar}/4 &middot; {SONG.bars} bars
           &middot; {clock(songSeconds(SONG))} &middot; fades from bar{" "}
           {SONG.fadeOutFrom}
         </p>
       </footer>
+
+      {/* The label for the ring under the pointer. It stays in the page whether
+          there is anything to say or not, and is moved and faded from the pointer
+          handler: it has to be measured to be kept on the screen, and something
+          being built and thrown away sixty times a second cannot be. */}
+      <div
+        ref={tip}
+        aria-hidden="true"
+        className="pointer-events-none fixed left-0 top-0 z-30 whitespace-nowrap rounded border border-white/10 bg-black/80 px-3 py-2 font-mono text-[0.6rem] uppercase leading-relaxed tracking-[0.15em] opacity-0 backdrop-blur-sm transition-opacity duration-300"
+      >
+        <span ref={tipName} className="block text-white" />
+        <span ref={tipClick} className="block text-neutral-400" />
+        <span ref={tipDrag} className="block text-neutral-400">
+          drag to wind
+        </span>
+      </div>
     </main>
   );
 }
