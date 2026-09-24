@@ -7,8 +7,13 @@
 // being listened to is handed to this as plain samples and read here instead — at
 // whatever speed and in whichever direction the hand is going. That is what a
 // tape head does, and it is why it sounds like one: the pitch, the drag at a
-// crawl, the chirp at a spool and the silence when a hand stops are all just what
-// reading samples faster or slower than they were written sounds like.
+// crawl and the silence when a hand stops are all just what reading samples faster
+// or slower than they were written sounds like.
+//
+// With one ceiling on it, at LIMIT below. A ring geared to thirty-four bars asks
+// for twenty times record speed from an ordinary flick, and nothing but a drum is
+// recognisable up there, so the pitch stops climbing where a part would stop
+// sounding like itself and the reading goes on without it.
 //
 // What it is told is a position, sixty times a second, and never a speed. Speed
 // is worked out here from how that position moves, which is the only way round
@@ -33,6 +38,33 @@ const FULL = 0.3;
 // for.
 const SPREAD = 64;
 
+// How high the pitch is allowed to climb, as a multiple of the speed the recording
+// was made at. Up to here a wind is the tape itself read faster or slower, which
+// is the sound of a hand on a reel and the whole point of doing it this way.
+//
+// Past here it would stop being the part. The rings are geared to their own
+// lengths — that is what makes a turn of one mean something — so an ordinary flick
+// is three times record speed on the four-bar drop beat and twenty-two on the
+// thirty-four-bar end solo. Twenty-two is four and a half octaves: a drum survives
+// it, because a transient has no pitch to lose, and a melody becomes birdsong.
+// Above the ceiling the head takes what it reads in overlapping pieces instead, so
+// the pitch stays where it was put and the position goes on following the hand.
+//
+// Three, because that is where the part that always worked already sits: a flick of
+// the drop beat is 3.2 times record speed, and it was the one part anybody could
+// hear. So the beats are left exactly as they were and it is the long rings that
+// are reined in.
+const LIMIT = 3;
+
+// How long one of those pieces is. They overlap by half, and their windows add
+// back to one, so below the ceiling two pieces reading the same tape at the same
+// speed are the tape: there is nothing to cross over between. Long enough to carry
+// a pitch — a twentieth of a second is several cycles of a low note — and short
+// enough that where it was taken from is still where the hand is.
+const PIECE = 0.048; // seconds
+
+const TURN = Math.PI * 2;
+
 class TapeHead extends AudioWorkletProcessor {
   constructor() {
     super();
@@ -52,6 +84,15 @@ class TapeHead extends AudioWorkletProcessor {
     this.at = 0;
     this.to = 0;
     this.held = false;
+
+    // The two pieces on their way out: where each is reading, and how far through
+    // its window it has got. Both idle until a hand moves.
+    this.pieces = [
+      { at: 0, age: Infinity },
+      { at: 0, age: Infinity },
+    ];
+    this.slot = 0;
+    this.due = 0;
 
     this.port.onmessage = (event) => this.hear(event.data);
   }
@@ -131,6 +172,8 @@ class TapeHead extends AudioWorkletProcessor {
     // machine is running.
     const ease = 1 - Math.exp(-1 / (SLACK * sampleRate));
     const last = reel.length - 1;
+    const piece = Math.max(2, Math.round(PIECE * sampleRate));
+    const half = piece >> 1;
 
     for (let i = 0; i < out.length; i++) {
       const was = this.at;
@@ -142,10 +185,50 @@ class TapeHead extends AudioWorkletProcessor {
       const weight = Math.min(1, (speed - STILL) / (FULL - STILL));
       if (weight <= 0) {
         out[i] = 0;
+
+        // Nothing is carried across a stop. Whatever the pieces were reading is
+        // somewhere the hand has finished with, and the next thing it does starts
+        // its own.
+        this.pieces[0].age = piece;
+        this.pieces[1].age = piece;
+        this.due = 0;
         continue;
       }
 
-      out[i] = weight * this.read(reel, was * this.rate, this.at * this.rate, last);
+      // How far the pieces move while the tape moves: all of it under the ceiling,
+      // and the ceiling's share of it above. This is the whole of the difference
+      // between a wind that changes pitch and one that does not.
+      const move = (this.at - was) * (Math.min(speed, LIMIT) / speed) * this.rate;
+
+      // A new piece every half of one, from wherever the tape is by then. Under the
+      // ceiling the pieces are moving exactly as the tape is, so they are both
+      // reading it and their windows add back to one: two pieces come to exactly
+      // the one reading, and there is nothing to cross over between. Above it they
+      // fall behind what the hand is doing, and starting them again is how the
+      // position keeps up while the pitch stays where it was put.
+      if (this.due <= 0) {
+        this.slot = (this.slot + 1) % 2;
+
+        const fresh = this.pieces[this.slot];
+        fresh.at = was * this.rate;
+        fresh.age = 0;
+        this.due = half;
+      }
+      this.due--;
+
+      let sum = 0;
+      for (const spot of this.pieces) {
+        if (spot.age >= piece) continue;
+
+        const window = 0.5 - 0.5 * Math.cos((TURN * spot.age) / piece);
+        const from = spot.at;
+        spot.at += move;
+        spot.age++;
+
+        sum += window * this.read(reel, from, spot.at, last);
+      }
+
+      out[i] = weight * sum;
     }
 
     return true;
