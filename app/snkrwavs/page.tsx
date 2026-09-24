@@ -561,6 +561,14 @@ export default function SnkrwavsPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [choose, start]);
 
+  // The page is as tall as the screen you can actually see, rather than as tall
+  // as the screen would be with the browser's own bars out of the way. A phone
+  // counts it the generous way, so the page was being handed room that Chrome's
+  // bottom bar was standing in, and the transport was underneath it. The plain
+  // screen height stays behind as the answer for anything that has not heard of
+  // the other one. Either way nothing scrolls: the drawing takes whatever is
+  // left between the header and the controls, and it measures itself again when
+  // a bar slides out of the way.
   return (
     <main
       onClick={onClick}
@@ -577,7 +585,7 @@ export default function SnkrwavsPage() {
         setPointing(false);
         say(null, 0, 0);
       }}
-      className={`flex min-h-screen flex-col items-center justify-between gap-8 bg-black px-6 py-6 text-white ${
+      className={`flex min-h-screen flex-col items-center justify-between gap-8 bg-black px-6 py-6 text-white supports-[height:100dvh]:min-h-[100dvh] ${
         pointing ? "cursor-grab" : ""
       }`}
     >
