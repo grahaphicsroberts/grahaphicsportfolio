@@ -10,8 +10,17 @@ import Scrubber from "./Scrubber";
 import Static from "./Static";
 import Thump from "./Thump";
 import Wash from "./Wash";
-import { SNKRWAVS_SONG as SONG, backIn, songAt, songSeconds } from "./loop";
+import {
+  type Loop,
+  type Pad,
+  SNKRWAVS_SONG as SONG,
+  backIn,
+  songAt,
+  songSeconds,
+  turnSeconds,
+} from "./loop";
 import { ringAt } from "./rings";
+import * as tape from "./tape";
 import { type Stem, useTransport } from "./useTransport";
 
 const clock = (seconds: number) =>
@@ -46,6 +55,19 @@ const SOLOABLE = new Map(
 // a dimmed page around a ring that is not there, with nothing coming out of it.
 const HOLD = 4; // bars
 
+const TAU = Math.PI * 2;
+
+// How far a pointer has to travel before it is turning a ring rather than
+// clicking one. Far enough that a click is never mistaken for a wind — which
+// would stop the music to start it again, and be heard — and near enough that
+// turning starts under the same finger that meant to.
+const WIND = 8; // pixels
+
+// And how long after a wind a click still belongs to it. Long enough to cover the
+// click that comes out of the end of the same gesture, short enough that it is
+// over before a hand could have meant a second thing.
+const WOUND = 400; // milliseconds
+
 // How brightly the rest of the piece is drawn while one part is soloed. Low, but
 // not dark: the reason for leaving them turning is to see where the part you are
 // hearing sits in the whole, and that only works while they are still legible.
@@ -69,8 +91,18 @@ export default function SnkrwavsPage() {
   // would only have to jump into line once the sound caught up with it.
   const player = useRef<HTMLAudioElement>(null);
   const stem = useRef<HTMLAudioElement>(null);
-  const { running, elapsed, toggle, rewind, seek, solo, duration } =
-    useTransport(player, stem);
+  const {
+    running,
+    elapsed,
+    toggle,
+    rewind,
+    seek,
+    solo,
+    grab,
+    wind,
+    release,
+    duration,
+  } = useTransport(player, stem);
 
   // The space the rings turn in, which is also the thing clicks are measured
   // against: where a click landed only means something as a distance from the
@@ -142,6 +174,16 @@ export default function SnkrwavsPage() {
     [focus, solo, warmth],
   );
 
+  // The tap that starts the music is where the tape machine is woken, for the
+  // same reason the second recording is woken there: a phone will not let a page
+  // make a sound nothing asked it for, and a hand arriving on a ring later is not
+  // an asking. Nothing is fetched or decoded here — only the machine is switched
+  // on, standing there silent in case it is wanted.
+  const start = useCallback(() => {
+    tape.wake();
+    toggle();
+  }, [toggle]);
+
   // Kept in a ref so the undo above can reach `choose` without the two of them
   // having to be declared in terms of each other.
   const revert = useRef(() => {});
@@ -166,11 +208,163 @@ export default function SnkrwavsPage() {
     [elapsed],
   );
 
+  // Which file is making the sound, so that a hand on a ring winds what is being
+  // heard rather than what is written: the mix, or the one part soloed out of it.
+  const sounding = useCallback((): Stem => {
+    const part = chosen.current === null ? null : SOLOABLE.get(chosen.current);
+
+    return part?.stem
+      ? { src: part.stem, offset: part.stemOffset ?? 0 }
+      : { src: SONG.audio, offset: 0 };
+  }, []);
+
+  // A ring in a hand. Where the pointer last was around the middle, how much of a
+  // turn it has been taken through since, and the moment in the song it was taken
+  // hold at: a ring is a wheel geared to its own length, so what a turn of it is
+  // worth is the part's own business.
+  const turning = useRef<{
+    part: Loop | Pad;
+    from: number;
+    angle: number;
+    turned: number;
+    down: { x: number; y: number };
+    wound: boolean;
+  } | null>(null);
+
+  // When a wind last ended, because the click that comes out of the same gesture
+  // is not a click on a ring and must not solo one. A moment rather than a flag:
+  // a gesture that ends outside the page never sends the click at all, and a flag
+  // left set would swallow the next real one.
+  const letGo = useRef(0);
+
+  const middleOf = useCallback(() => {
+    const box = stage.current?.getBoundingClientRect();
+    if (!box) return null;
+
+    return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  }, []);
+
+  const onPointerDown = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("button, a, input, [role='slider']")) return;
+
+      const hit = ringUnder(event.clientX, event.clientY);
+      // The coin in the middle is a disc rather than a wheel: there is no turning
+      // something you have hold of the centre of.
+      if (!hit || "spans" in hit) return;
+
+      const middle = middleOf();
+      if (!middle) return;
+
+      turning.current = {
+        part: hit,
+        from: elapsed(),
+        angle: Math.atan2(event.clientY - middle.y, event.clientX - middle.x),
+        turned: 0,
+        down: { x: event.clientX, y: event.clientY },
+        wound: false,
+      };
+
+      // So that the ring stays in the hand once it is in it, wherever the hand
+      // goes: a wheel is turned from the outside, and the outside of a small ring
+      // is off it almost at once.
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    [elapsed, middleOf, ringUnder],
+  );
+
+  const onPointerMove = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      const held = turning.current;
+      const middle = held && middleOf();
+      if (!held || !middle) return;
+
+      const angle = Math.atan2(event.clientY - middle.y, event.clientX - middle.x);
+
+      // The short way round, so that a hand crossing the top of a ring is a step
+      // across it rather than a turn back the other way.
+      let step = angle - held.angle;
+      while (step > Math.PI) step -= TAU;
+      while (step < -Math.PI) step += TAU;
+      held.angle = angle;
+
+      // The rings turn the way the music runs, which here is anticlockwise: the
+      // notes come up the right of the screen to meet the playhead at the top. So
+      // pulling a ring on the way it was already going runs the song on, pulling
+      // it back rewinds it, and whatever was under the finger stays under it —
+      // this is the same turn the drawing is made of, read the other way.
+      held.turned -= step / TAU;
+
+      // Until it has gone far enough to mean it, this is still a click. The
+      // transport is not touched and the music is not stopped, since stopping it
+      // to start it again is a hole in the sound and every click would have one.
+      if (!held.wound) {
+        const far = Math.hypot(
+          event.clientX - held.down.x,
+          event.clientY - held.down.y,
+        );
+        if (far < WIND) return;
+
+        const file = sounding();
+        held.wound = true;
+        grab();
+        tape.grab(file.src, file.offset ?? 0, held.from);
+        event.currentTarget.style.cursor = "grabbing";
+      }
+
+      let at = held.from + held.turned * turnSeconds(SONG, held.part);
+
+      // The ends of the reel. Held at them rather than counted past, so that
+      // coming back off an end answers the hand at once instead of spending the
+      // first half of the way back winding nothing.
+      const last = duration ? duration - 0.01 : 0;
+      if (at < 0) {
+        held.from -= at;
+        at = 0;
+      } else if (last && at > last) {
+        held.from -= at - last;
+        at = last;
+      }
+
+      wind(at);
+      tape.wind(at);
+    },
+    [duration, grab, middleOf, sounding, wind],
+  );
+
+  const onPointerUp = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      const held = turning.current;
+      if (!held) return;
+
+      turning.current = null;
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+
+      // It never became a wind: it was a click, and the click is on its way.
+      if (!held.wound) return;
+
+      event.currentTarget.style.cursor = "";
+      letGo.current = performance.now();
+      release();
+      tape.release();
+    },
+    [release],
+  );
+
   // A click on a ring plays that part alone. Then any click at all hands it back
   // to the mix. There is no third state and no combining: two parts at once is a
   // mix, and mixing is a job for the desk this came off, not for a page.
   const onClick = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
+      // The end of a wind, which arrives here as a click on whatever the hand
+      // happened to be over when it stopped. Winding is not choosing.
+      if (performance.now() - letGo.current < WOUND) return;
+
       // The controls are not the drawing. Reaching for play or the scrubber
       // should not throw away the part you set up to listen to.
       const target = event.target as HTMLElement | null;
@@ -208,7 +402,13 @@ export default function SnkrwavsPage() {
 
     let frame = 0;
     const watch = () => {
-      if (backIn(SONG, part, songAt(SONG, elapsed())) > HOLD * SONG.beatsPerBar) {
+      // A hand winding the part can go through a stretch it is not in and out the
+      // other side, looking for something. What it is asking to hear is wherever
+      // it stops, so nothing is handed back until it does.
+      if (
+        !turning.current?.wound &&
+        backIn(SONG, part, songAt(SONG, elapsed())) > HOLD * SONG.beatsPerBar
+      ) {
         choose(null, null);
         return;
       }
@@ -238,22 +438,26 @@ export default function SnkrwavsPage() {
       if (target?.closest("button, a, input, textarea")) return;
 
       event.preventDefault();
-      toggle();
+      start();
     };
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [choose, toggle]);
+  }, [choose, start]);
 
   return (
     <main
       onClick={onClick}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
       onMouseMove={(event) => {
         const over = ringUnder(event.clientX, event.clientY) !== null;
         if (over !== pointing) setPointing(over);
       }}
       className={`flex min-h-screen flex-col items-center justify-between gap-8 bg-black px-6 py-6 text-white ${
-        pointing ? "cursor-pointer" : ""
+        pointing ? "cursor-grab" : ""
       }`}
     >
       {/* The mix, and the one part playing on its own. One of the two plays at a
@@ -345,9 +549,11 @@ export default function SnkrwavsPage() {
           header and the controls leave it, and the drawing squares itself off
           inside that, so listing another part costs the rings a little room
           rather than pushing the page off the screen. */}
+      {/* Nothing here scrolls out of the way of a finger: inside the drawing a
+          drag is a ring being turned, and the page has to let go of it to be. */}
       <div
         ref={stage}
-        className="relative z-10 flex min-h-0 w-full flex-1 items-center justify-center"
+        className="relative z-10 flex min-h-0 w-full flex-1 touch-none items-center justify-center"
       >
         {SONG.loops.map((loop) => (
           <LoopRing
@@ -386,7 +592,7 @@ export default function SnkrwavsPage() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={toggle}
+            onClick={start}
             className="inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] text-black transition-colors hover:bg-neutral-300"
           >
             {running ? (

@@ -153,6 +153,13 @@ export function useTransport(
   // Whether the second element has been played once from inside a gesture, which
   // is what a phone waits for before it will have anything to do with it.
   const woken = useRef(false);
+  // Whether the tape is in somebody's hand. While it is, the recordings are
+  // stopped and have nothing to say about where the music is: what they report
+  // about themselves is where the drag began, and the clock is the hand.
+  const shuttling = useRef(false);
+  // And whether it was playing when they took hold of it, which is what letting
+  // go goes back to.
+  const was = useRef(false);
   const [running, setRunning] = useState(false);
   const [duration, setDuration] = useState(0);
 
@@ -242,6 +249,50 @@ export function useTransport(
   );
 
   const rewind = useCallback(() => seek(0), [seek]);
+
+  // Taking the tape off the transport, the way a reel is rocked by hand: the
+  // recording stops where it was, the clock is whatever the hand says, and the
+  // sound of it is somebody else's job.
+  //
+  // Nothing is seeked on the way. A seek is the one thing a recording is slow and
+  // clumsy about — it lands on a frame boundary when it lands at all — and asking
+  // for one every frame of a drag is the stutter this page spent a long time
+  // getting rid of. So there is one, at the end, where the hand left it.
+  const grab = useCallback(() => {
+    const playing = live();
+
+    shuttling.current = true;
+    was.current = !!playing && !playing.paused;
+    playing?.pause();
+
+    // The clock stops, so that a hand holding still holds the music still, while
+    // `running` is left alone: the music is coming back, and a transport that
+    // says otherwise for the length of a drag is only flickering.
+    clock.current = { at: heardAt(), since: performance.now(), running: false };
+  }, [heardAt, live]);
+
+  const wind = useCallback(
+    (seconds: number) => {
+      const length = audio.current?.duration || 0;
+
+      rebase(Math.min(Math.max(seconds, 0), length ? length - 0.01 : 0));
+    },
+    [audio, rebase],
+  );
+
+  const release = useCallback(() => {
+    if (!shuttling.current) return;
+
+    shuttling.current = false;
+
+    const at = elapsed();
+    seek(at);
+
+    if (!was.current) return;
+
+    const playing = live();
+    void playing?.play().catch(() => undefined);
+  }, [elapsed, live, seek]);
 
   // Play one part on its own, or hand it back to the mix. Called with a file to
   // solo it and with nothing to stop soloing, which is the whole of the
@@ -430,8 +481,10 @@ export function useTransport(
 
     // Only the element you can hear has anything to say about the transport. The
     // other one starting and stopping is housekeeping, and the page should not
-    // hear about it.
-    const its = (event: Event) => event.currentTarget === live();
+    // hear about it. Nor should it while the tape is being turned by hand, when
+    // the stopping is the page's own doing and the hand outranks it.
+    const its = (event: Event) =>
+      !shuttling.current && event.currentTarget === live();
 
     const onPlay = (event: Event) => {
       if (!its(event)) return;
@@ -524,5 +577,16 @@ export function useTransport(
     };
   }, [audio, aside, elapsed, heardAt, live, rebase]);
 
-  return { running, elapsed, toggle, rewind, seek, solo, duration };
+  return {
+    running,
+    elapsed,
+    toggle,
+    rewind,
+    seek,
+    solo,
+    grab,
+    wind,
+    release,
+    duration,
+  };
 }
