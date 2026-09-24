@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Pause, Play, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, ArrowUpRight, Pause, Play, RotateCcw } from "lucide-react";
 import LoopRing from "./LoopRing";
 import PadRing from "./PadRing";
 import Readout from "./Readout";
@@ -16,16 +17,13 @@ import {
   type Pulse,
   SNKRWAVS_SONG as SONG,
   backIn,
+  beatSeconds,
   songAt,
-  songSeconds,
   turnSeconds,
 } from "./loop";
 import { ringAt } from "./rings";
 import * as tape from "./tape";
 import { type Stem, useTransport } from "./useTransport";
-
-const clock = (seconds: number) =>
-  `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, "0")}`;
 
 // Everything with a drawing of its own, which is everything that dims when one
 // part is soloed, and what each of them is called.
@@ -75,6 +73,12 @@ const WOUND = 400; // milliseconds
 // in is left alone as long as it keeps moving. A hand that has stopped in the
 // dark has found nothing, and the whole mix coming back is the answer to that.
 const DARK = 2000; // milliseconds
+
+// How faint and how bright the halo behind the pre-save gets. It is a light
+// coming up under a button rather than the button changing colour, so the low
+// end is not nothing: a glow that goes out looks like something switching off.
+const DIM = 0.12;
+const LIT = 0.85;
 
 // How solid the label over a ring is. Not solid: it is a note about the drawing
 // laid over the drawing, and the part it is naming goes on turning under it.
@@ -147,6 +151,9 @@ export default function SnkrwavsPage() {
   useEffect(() => {
     setTouch(window.matchMedia("(hover: none)").matches);
   }, []);
+
+  // The light behind the pre-save.
+  const halo = useRef<HTMLSpanElement>(null);
 
   // The three lines of the label for whichever ring is under the pointer.
   const tip = useRef<HTMLDivElement>(null);
@@ -561,6 +568,48 @@ export default function SnkrwavsPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [choose, start]);
 
+  // The pre-save breathes, once a bar, brightest on the downbeat. Everything
+  // drawn on this page is moved by the record and this is asking for the record,
+  // so it is moved by it too: while the music runs the light is on the playhead,
+  // and while it is stopped it keeps the same tempo off the wall clock, so the
+  // button is already breathing before anybody has pressed anything.
+  //
+  // Only the brightness of a halo that is already drawn changes, so a frame of
+  // this is a frame of compositing and nothing is laid out or painted again.
+  useEffect(() => {
+    const glow = halo.current;
+    if (!glow) return;
+
+    // A light pulsing under a button is a small thing, but it is the only thing
+    // on the page that moves without having been asked to. Asked for less of it,
+    // it is simply lit, halfway up and steady.
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (still.matches) {
+      glow.style.opacity = `${(DIM + LIT) / 2}`;
+      return;
+    }
+
+    const bar = beatSeconds(SONG) * SONG.beatsPerBar;
+
+    let frame = 0;
+    const breathe = () => {
+      // The song's own count of beats while it is playing, rather than the clock
+      // the file is on: the master opens with a fraction of a second of priming,
+      // and every other drawing on this page allows for it.
+      const phase = running
+        ? (songAt(SONG, elapsed()) % SONG.beatsPerBar) / SONG.beatsPerBar
+        : ((performance.now() / 1000) % bar) / bar;
+      const swell = 0.5 + 0.5 * Math.cos(TAU * phase);
+
+      glow.style.opacity = `${DIM + (LIT - DIM) * swell}`;
+      frame = requestAnimationFrame(breathe);
+    };
+
+    frame = requestAnimationFrame(breathe);
+
+    return () => cancelAnimationFrame(frame);
+  }, [elapsed, running]);
+
   // The page is as tall as the screen you can actually see, rather than as tall
   // as the screen would be with the browser's own bars out of the way. A phone
   // counts it the generous way, so the page was being handed room that Chrome's
@@ -740,7 +789,7 @@ export default function SnkrwavsPage() {
             {/* Narrower type on a narrow screen: either line wrapping turns two
                 things to read into four, and one of them into nonsense. */}
             <p className="px-6 text-center font-mono text-[0.65rem] uppercase leading-loose tracking-[0.15em] text-neutral-400 sm:text-[0.7rem] sm:tracking-[0.2em]">
-              {touch ? "Tap" : "Click"} a ring to hear that part alone
+              {touch ? "Tap" : "Click"} a ring to hear it alone
               <br />
               Drag a ring to wind the tape
             </p>
@@ -748,7 +797,7 @@ export default function SnkrwavsPage() {
         )}
       </div>
 
-      <footer className="relative z-10 flex w-full flex-col items-center gap-5">
+      <footer className="relative z-10 flex w-full flex-col items-center gap-4 sm:gap-5">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -780,15 +829,49 @@ export default function SnkrwavsPage() {
           seek={seek}
         />
 
-        {/* What the piece is, and nothing about the parts: they are what the
-            drawing is for, and every line written about them down here comes
-            straight out of the height it gets to turn in. Whatever needs saying
-            about a part is said where it is being pointed at instead. */}
-        <p className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-neutral-500">
-          {SONG.bpm} bpm &middot; {SONG.beatsPerBar}/4 &middot; {SONG.bars} bars
-          &middot; {clock(songSeconds(SONG))} &middot; fades from bar{" "}
-          {SONG.fadeOutFrom}
-        </p>
+        {/* Under the title of the piece, where what the piece is used to be
+            written out. The tempo and the bar count were facts about a record
+            nobody can have yet, and this is the place to ask for it instead.
+            Outlined rather than filled, both of them: there is one white thing
+            on this page and it is the button that starts the music.
+
+            One line, always. A second row of these comes straight out of the
+            height the rings have to turn in, which is the whole page, so on a
+            phone they give up what they can instead: the arrows, the word visit,
+            and a little of their size and spacing. That fits the pair inside a
+            375-pixel screen with room to spare. */}
+        <div className="flex flex-nowrap items-center justify-center gap-2 sm:gap-3">
+          <a
+            href="https://hypeddit.com/mkb3mx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/30 px-3.5 py-2 font-mono text-[0.55rem] uppercase tracking-[0.12em] text-white transition-colors hover:border-white/70 sm:px-5 sm:py-2.5 sm:text-[0.65rem] sm:tracking-[0.2em]"
+          >
+            {/* The light, behind the pill rather than on it: a shadow thrown
+                outwards off the same shape, which is the only part of this that
+                moves. It sits under the writing because it comes first. */}
+            <span
+              ref={halo}
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_20px_5px_rgba(255,255,255,0.4)]"
+              style={{ opacity: DIM }}
+            />
+            Pre-save this song
+            <ArrowUpRight
+              className="hidden h-3.5 w-3.5 sm:block"
+              aria-hidden="true"
+            />
+          </a>
+
+          <Link
+            href="/studio"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/20 px-3.5 py-2 font-mono text-[0.55rem] uppercase tracking-[0.12em] text-neutral-300 transition-colors hover:border-white/60 hover:text-white sm:px-5 sm:py-2.5 sm:text-[0.65rem] sm:tracking-[0.2em]"
+          >
+            <span className="hidden sm:inline">Visit{" "}</span>
+            Grahaphics Studio
+            <ArrowRight className="hidden h-3.5 w-3.5 sm:block" aria-hidden="true" />
+          </Link>
+        </div>
       </footer>
 
       {/* The label for the ring under the pointer. It stays in the page whether

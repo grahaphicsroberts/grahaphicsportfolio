@@ -129,10 +129,17 @@ export default function Scrubber({
         />
       </div>
 
-      <div className="flex items-baseline justify-between font-mono text-[0.7rem] uppercase tracking-[0.2em] text-neutral-500">
-        <span ref={timeRef}>0:00</span>
-        <span className="text-neutral-700">{song.title}</span>
-        <span>{clock(duration)}</span>
+      {/* One line, whatever the screen. A title wrapping under the line it
+          belongs to reads as the page coming apart, and the second line it takes
+          comes out of the height the drawing has to turn in. The two times keep
+          their ends; the title gives up size and spacing first, and only then a
+          character or two off its end. */}
+      <div className="flex items-baseline justify-between gap-2 font-mono text-[0.6rem] uppercase tracking-[0.15em] text-neutral-500 sm:text-[0.7rem] sm:tracking-[0.2em]">
+        <span ref={timeRef} className="shrink-0">
+          0:00
+        </span>
+        <span className="min-w-0 truncate text-neutral-700">{song.title}</span>
+        <span className="shrink-0">{clock(duration)}</span>
       </div>
     </div>
   );
