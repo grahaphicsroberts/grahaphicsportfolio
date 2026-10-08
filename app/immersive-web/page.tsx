@@ -416,6 +416,73 @@ export default function ImmersiveWebPage() {
               </div>
             </div>
           </div>
+
+          {/* --- ON VIEW: MoMA, FULL DISCLOSURE --- */}
+          <div className="mt-24 border-t border-neutral-800 pt-16">
+            <div className="max-w-3xl mb-12">
+              <div className="flex items-center gap-2 font-mono text-blue-400 text-sm uppercase tracking-widest mb-4">
+                <Landmark className="w-4 h-4" aria-hidden="true" />
+                On View Now — MoMA
+              </div>
+              <h3 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                Full Disclosure: The Edge of Information Design
+              </h3>
+              <p className="text-neutral-400 text-lg leading-relaxed mb-6">
+                The reconstruction is currently exhibited at the Museum of
+                Modern Art, running on the museum's first floor through June 13,
+                2027. The show gathers digital and analog work by designers who
+                translate raw data into something a person can actually
+                understand&mdash;giving form to invisible systems, exposing
+                hidden structures of power, and preserving histories.
+              </p>
+              <p className="text-neutral-400 text-lg leading-relaxed mb-8">
+                It is organized by Paola Antonelli, Senior Curator in the
+                Department of Architecture and Design, with Jules Bernstein and
+                Forrest Pelsue.
+              </p>
+
+              {/* VISIT BUTTON */}
+              <a
+                href="https://www.moma.org/calendar/exhibitions/5926"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-full font-mono text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors"
+              >
+                <span>Visit the Exhibition</span>
+                <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+              </a>
+            </div>
+
+            {/* Installation views. The wider frame carries the piece itself, so
+                it leads; the title wall is portrait and sits beside it, and the
+                two columns are weighted so the pictures end up the same height. */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+              <div className="lg:col-span-3">
+                <div className="aspect-[4/3] bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800">
+                  <img
+                    src="/NotreDameMoMA.jpg"
+                    alt="Gallery view at MoMA, with the Notre Dame fire reconstruction playing on a screen mounted to a lavender wall."
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="mt-4 text-xs font-mono text-neutral-600 uppercase tracking-widest">
+                  The piece on view, MoMA Floor 1
+                </p>
+              </div>
+              <div className="lg:col-span-2">
+                <div className="aspect-[4/5] bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800">
+                  <img
+                    src="/FullDisclosure_MoMA.jpg"
+                    alt="The Full Disclosure: The Edge of Information Design title wall at MoMA, printed with climate warming stripes."
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="mt-4 text-xs font-mono text-neutral-600 uppercase tracking-widest">
+                  Exhibition title wall
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
