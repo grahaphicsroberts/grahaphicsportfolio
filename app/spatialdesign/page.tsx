@@ -537,9 +537,9 @@ function useDeviceTilt(px: MotionValue<number>, py: MotionValue<number>) {
 }
 
 // --- PHONE 3D MODEL: stacked depth + crossfading screen ---
-const PHONE_SCREEN_A = "/Apple_AR_productDesign.png";
-const PHONE_SCREEN_B = "/Apple_AR_productDesign_2.png";
-const PHONE_SCREEN_C = "/Apple_AR_productDesign_3.png";
+const PHONE_SCREEN_A = "/AR_productDesign.png";
+const PHONE_SCREEN_B = "/AR_productDesign_2.png";
+const PHONE_SCREEN_C = "/AR_productDesign_3.png";
 const PHONE_CROSSFADE_STEP = 2; // step 3 (0-indexed): switch to screen B
 const PHONE_CROSSFADE_STEP_2 = 7; // step 8 (0-indexed): switch to screen C
 
