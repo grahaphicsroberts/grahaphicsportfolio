@@ -14,7 +14,7 @@ const WORKS = [
   },
   // --- EVERYTHING BELOW THIS WILL BE SHUFFLED ---
   {
-    title: "Data Storytelling & Product Design",
+    title: "Brand Storytelling & Product Design",
     company: "Google / Brand Studio",
     image: "/google-hero.jpg",
     link: "/google-trends",
