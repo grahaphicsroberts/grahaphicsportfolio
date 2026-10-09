@@ -95,7 +95,7 @@ const LOCKUPS: Lockup[] = [
   {
     eyebrow: "In the studio",
     headline: "Digital storytelling sprint for Kimberly-Clark",
-    copy: "The studio recently completed a project in partnership with sprint facilitator Mesa to highlight a ground-breaking new technology.",
+    copy: "The studio recently completed a project in partnership with sprint facilitator Mesa to highlight a ground-breaking absorption technology.",
     media: {
       src: "/KC_mesa_caroussel.mp4",
       kind: "video",
