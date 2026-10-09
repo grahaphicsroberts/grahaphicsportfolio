@@ -3,6 +3,7 @@
 import React from "react";
 import Navbar from "./components/Navbar"; // <--- Import the new Navbar
 import Hero from "./components/Hero";
+import NewAndNotable from "./components/NewAndNotable";
 import SelectedWorks from "./components/SelectedWorks";
 import Awards from "./components/Awards";
 import Speaking from "./components/Speaking";
@@ -19,6 +20,7 @@ export default function Portfolio() {
 
       {/* The Page Structure */}
       <Hero />
+      <NewAndNotable />
       <SelectedWorks />
       <Awards />
       <Speaking />

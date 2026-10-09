@@ -321,7 +321,12 @@ export default function ImmersiveWebPage() {
       </section>
 
       {/* --- PROJECT 2: NOTRE DAME --- */}
-      <section className="py-32 bg-neutral-950 border-b border-neutral-800">
+      {/* id="notre-dame" and scroll-mt-24 so links can land on the project
+          itself rather than the top of the page */}
+      <section
+        id="notre-dame"
+        className="py-32 bg-neutral-950 border-b border-neutral-800 scroll-mt-24"
+      >
         <div className="px-6 md:px-24 max-w-[1400px] mx-auto">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
