@@ -1107,7 +1107,7 @@ const CATEGORIES = [
     link: "/havas",
   },
   {
-    title: "Data Storytelling & Product Design",
+    title: "Brand Storytelling & Product Design",
     company: "Google / Brand Studio",
     image: "/google-hero.jpg",
     link: "/google-trends",
