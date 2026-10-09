@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, MapPin } from "lucide-react";
 import Navbar from "../components/Navbar";
 import DotField from "../components/DotField";
+import { NotableFrame, leaned, notable } from "../components/notable";
 
 // ---------------------------------------------------------------------------
 // WHAT THE STUDIO IS HIRED FOR
@@ -105,6 +106,25 @@ const BRANDS = [
   { name: "Bayer", src: "/logos/bayer.svg", height: "h-[30px]" },
   { name: "Regeneron", src: "/logos/regeneron.svg", height: "h-[15px]" },
 ];
+
+// ---------------------------------------------------------------------------
+// WHAT IS HAPPENING NOW — the same entries the homepage banner carries, read
+// in this page's own order
+// ---------------------------------------------------------------------------
+
+const NEWS = notable("moma");
+
+// Two of these point back at the studio, which is this page. A link that
+// leads where the reader already is earns nothing, so it comes off here.
+const PROJECTS = (["snkrwavs", "deepmind", "kimberly-clark"] as const).map(
+  (id) => {
+    const project = notable(id);
+    return {
+      ...project,
+      link: project.link?.href === "/studio" ? undefined : project.link,
+    };
+  },
+);
 
 const reveal = {
   initial: { opacity: 0, y: 24 },
@@ -261,6 +281,115 @@ export default function StudioPage() {
             ))}
           </div>
         </motion.div>
+      </section>
+
+      {/* --- NEWS --- */}
+      <section className="border-b border-neutral-800 px-6 py-32 md:px-24">
+        <div className="mx-auto max-w-6xl">
+          <motion.div {...reveal} transition={{ duration: 0.6 }}>
+            <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-neutral-500">
+              News
+            </h2>
+            {/* The headline does the work of the section statement here, rather
+                than being repeated under the photograph. */}
+            <p className="mt-6 max-w-3xl text-3xl font-bold tracking-tighter text-white md:text-5xl">
+              {leaned(NEWS.headline)}.
+            </p>
+          </motion.div>
+
+          <motion.div
+            {...reveal}
+            transition={{ duration: 0.6, delay: 0.08 }}
+            className="mt-14 grid gap-10 md:grid-cols-5 md:items-center md:gap-14"
+          >
+            <div className="relative aspect-[16/10] overflow-hidden rounded-sm border border-neutral-800 bg-neutral-900 md:col-span-3">
+              <NotableFrame media={NEWS.media} stamp="feature" />
+              {/* The photograph goes where the button below it goes. It is
+                  held out of the tab order so the one destination is not
+                  announced twice. */}
+              {NEWS.link && (
+                <Link
+                  href={NEWS.link.href}
+                  aria-hidden="true"
+                  tabIndex={-1}
+                  className="absolute inset-0"
+                />
+              )}
+            </div>
+
+            <div className="md:col-span-2">
+              <p className="text-lg leading-relaxed text-neutral-300 md:text-xl">
+                {leaned(NEWS.copy)}
+              </p>
+              {NEWS.link && (
+                <Link
+                  href={NEWS.link.href}
+                  className="group mt-8 inline-flex items-center gap-3 rounded-full border border-white/20 px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] text-white transition-colors hover:border-white/60"
+                >
+                  {NEWS.link.label}
+                  <ArrowUpRight
+                    className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    aria-hidden="true"
+                  />
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* --- RECENT PROJECTS --- */}
+      <section className="border-b border-neutral-800 px-6 py-32 md:px-24">
+        <div className="mx-auto max-w-6xl">
+          <motion.div {...reveal} transition={{ duration: 0.6 }}>
+            <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-neutral-500">
+              Recent projects
+            </h2>
+            <p className="mt-6 max-w-3xl text-3xl font-bold tracking-tighter text-white md:text-5xl">
+              In the studio right now.
+            </p>
+          </motion.div>
+
+          {/* Sides alternate so three stacked rows read as a sequence rather
+              than as a list of identical cards. */}
+          <div className="mt-20 flex flex-col gap-20 md:gap-28">
+            {PROJECTS.map((project, i) => (
+              <motion.article
+                key={project.headline}
+                {...reveal}
+                transition={{ duration: 0.6 }}
+                className={`flex flex-col gap-8 md:items-center md:gap-14 ${
+                  i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                }`}
+              >
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-sm border border-neutral-800 bg-neutral-900 md:w-1/2">
+                  <NotableFrame media={project.media} stamp="feature" />
+                </div>
+
+                <div className="md:w-1/2">
+                  <h3 className="text-2xl font-bold tracking-tighter text-white md:text-4xl">
+                    {leaned(project.headline)}
+                  </h3>
+                  <p className="mt-5 leading-relaxed text-neutral-400 md:text-lg">
+                    {leaned(project.copy)}
+                  </p>
+                  {project.link && (
+                    <Link
+                      href={project.link.href}
+                      className="group mt-8 inline-flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-white transition-colors hover:text-neutral-400"
+                    >
+                      {project.link.label}
+                      <ArrowUpRight
+                        className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  )}
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* --- WHAT I'M HIRED FOR --- */}
