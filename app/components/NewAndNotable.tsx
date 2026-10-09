@@ -49,6 +49,10 @@ type Lockup = {
     alt: string;
     veil?: string;
     tone?: "light" | "dark";
+    // The panel crops a different way at every breakpoint. `anchor` pins the
+    // edge that has something on it worth keeping, for frames where the
+    // middle is not the point.
+    anchor?: "top";
   };
   link?: { href: string; label: string };
 };
@@ -97,10 +101,10 @@ const LOCKUPS: Lockup[] = [
     headline: "Digital storytelling sprint for Kimberly-Clark",
     copy: "The studio recently completed a project in partnership with sprint facilitator Mesa to highlight a ground-breaking absorption technology.",
     media: {
-      src: "/KC_mesa_caroussel.mp4",
+      src: "/KC_clip_carousel.mp4",
       kind: "video",
       alt: "",
-      veil: "Under NDA",
+      anchor: "top",
     },
     link: { href: "/studio", label: "Visit the studio" },
   },
@@ -157,12 +161,13 @@ export default function NewAndNotable() {
   }, [at, show, still, stopped]);
 
   const lockup = LOCKUPS[at];
-  const { veil, tone } = lockup.media;
+  const { veil, tone, anchor } = lockup.media;
 
   // The blur lives in the asset itself, not here: a CSS filter leaves the
   // original a URL away. What is left to do is a matter of tone — a frame that
   // was already dark collapses into nothing, so it gets lifted.
   const veiled = veil && tone === "dark" ? "brightness-[1.6] saturate-150" : "";
+  const held = anchor === "top" ? "object-top" : "";
   const scrim = tone === "dark" ? "bg-black/20" : "bg-black/40";
   const travel = still ? 0 : TRAVEL * way;
 
@@ -211,20 +216,17 @@ export default function NewAndNotable() {
               className="absolute inset-0 flex flex-col sm:flex-row"
             >
               <div className="relative h-[116px] w-full shrink-0 overflow-hidden bg-neutral-900 sm:h-full sm:w-[260px] lg:w-[420px]">
-                {/* A veiled frame is scaled up before it is blurred, so the
-                    soft edge the filter leaves behind falls outside the panel
-                    rather than feathering against its border. */}
                 {lockup.media.kind === "video" ? (
                   <AutoVideo
                     src={lockup.media.src}
-                    className={`h-full w-full object-cover ${veiled}`}
+                    className={`h-full w-full object-cover ${held} ${veiled}`}
                     aria-hidden="true"
                   />
                 ) : (
                   <img
                     src={lockup.media.src}
                     alt={veil ? "" : lockup.media.alt}
-                    className={`h-full w-full object-cover ${veiled}`}
+                    className={`h-full w-full object-cover ${held} ${veiled}`}
                   />
                 )}
 
