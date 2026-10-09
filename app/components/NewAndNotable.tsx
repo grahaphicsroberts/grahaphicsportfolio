@@ -39,10 +39,10 @@ type Lockup = {
   eyebrow: string;
   headline: string;
   copy: string;
-  // `veil` is for work that can be mentioned but not shown: the media is
-  // blurred past legibility and the string is stamped over it. `tone` says
-  // which way to push a veiled frame — bright media gets held back, media that
-  // is already dark gets lifted so the panel is not just a black rectangle.
+  // `veil` is for work that can be mentioned but not shown. The file in
+  // public/ is already blurred past legibility — the stamp labels it, it does
+  // not protect it — and `tone` says which way a veiled frame needs pushing:
+  // dark media gets lifted so the panel is not just a black rectangle.
   media: {
     src: string;
     kind: "image" | "video";
@@ -70,17 +70,6 @@ const LOCKUPS: Lockup[] = [
   },
   {
     eyebrow: "In the studio",
-    headline: "The launch of *snkrwavs*",
-    copy: "Grahaphics studio presents *snkrwavs*, an original music + visualization art project. The first interactive song is now live.",
-    media: {
-      src: "/snkrwavs_carousel.mp4",
-      kind: "video",
-      alt: "",
-    },
-    link: { href: "/snkrwavs/sharp-knife", label: "Hear the first song" },
-  },
-  {
-    eyebrow: "In the studio",
     headline: "Visualization at the AI frontier",
     copy: "Recently the studio has explored translating AI policy research with Google DeepMind.",
     media: {
@@ -91,6 +80,17 @@ const LOCKUPS: Lockup[] = [
       tone: "dark",
     },
     link: { href: "/studio", label: "Visit the studio" },
+  },
+  {
+    eyebrow: "In the studio",
+    headline: "The launch of *snkrwavs*",
+    copy: "Grahaphics studio presents *snkrwavs*, an original music + visualization art project. The first interactive song is now live.",
+    media: {
+      src: "/snkrwavs_carousel.mp4",
+      kind: "video",
+      alt: "",
+    },
+    link: { href: "/snkrwavs/sharp-knife", label: "Hear the first song" },
   },
   {
     eyebrow: "In the studio",
@@ -159,14 +159,10 @@ export default function NewAndNotable() {
   const lockup = LOCKUPS[at];
   const { veil, tone } = lockup.media;
 
-  // Blurring alone is not enough in either direction: a bright frame still
-  // reads as a lit panel on a dark page, and a frame that was already dark
-  // collapses into nothing. One lifts, the other is held back.
-  const veiled = veil
-    ? tone === "dark"
-      ? "scale-110 blur-[5px] brightness-[1.6] saturate-150 lg:blur-[7px]"
-      : "scale-110 blur-[5px] lg:blur-[7px]"
-    : "";
+  // The blur lives in the asset itself, not here: a CSS filter leaves the
+  // original a URL away. What is left to do is a matter of tone — a frame that
+  // was already dark collapses into nothing, so it gets lifted.
+  const veiled = veil && tone === "dark" ? "brightness-[1.6] saturate-150" : "";
   const scrim = tone === "dark" ? "bg-black/20" : "bg-black/40";
   const travel = still ? 0 : TRAVEL * way;
 
