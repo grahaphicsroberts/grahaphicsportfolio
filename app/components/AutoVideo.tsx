@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 type AutoVideoProps = React.VideoHTMLAttributes<HTMLVideoElement> & {
   src: string;
@@ -22,9 +22,23 @@ const PATIENCE = 10000;
  * caller whose clip is the content rather than the backdrop can pass it to get
  * the browser's own autoplay handling as well.
  */
-export default function AutoVideo({ src, ...props }: AutoVideoProps) {
+export default function AutoVideo({ src, className, ...props }: AutoVideoProps) {
   const ref = useRef<HTMLVideoElement>(null);
   const showing = useRef<string | null>(null);
+
+  // React applies `muted` as a property and never as an attribute, and iOS
+  // reads the attribute when it decides whether a clip may start unasked.
+  // Server-rendered markup happens to carry it; an element the client builds
+  // for a slide that has just come around does not, so iOS took the clip for
+  // one with sound and offered its own play button over the poster instead.
+  // Set here rather than in the effect below, because by then the browser has
+  // already chosen what to load and on what terms.
+  const hold = useCallback((el: HTMLVideoElement | null) => {
+    ref.current = el;
+    if (!el) return;
+    el.setAttribute("muted", "");
+    el.muted = true;
+  }, []);
 
   useEffect(() => {
     const v = ref.current;
@@ -36,12 +50,6 @@ export default function AutoVideo({ src, ...props }: AutoVideoProps) {
     // for another.
     if (showing.current !== null && showing.current !== src) v.load();
     showing.current = src;
-
-    // Also as a property, not only as the attribute below. Whether an
-    // unattended play() is allowed is judged from the element's state at the
-    // moment of the call, and on WebKit a clip it considers capable of sound
-    // does not get to start on its own.
-    v.muted = true;
 
     // What the clip should be doing, as distinct from what it is doing.
     let wanted = false;
@@ -126,7 +134,15 @@ export default function AutoVideo({ src, ...props }: AutoVideoProps) {
   }, [src]);
 
   return (
-    <video ref={ref} loop muted playsInline preload="metadata" {...props}>
+    <video
+      ref={hold}
+      loop
+      muted
+      playsInline
+      preload="metadata"
+      className={`bare-video${className ? ` ${className}` : ""}`}
+      {...props}
+    >
       <source src={src} type="video/mp4" />
     </video>
   );

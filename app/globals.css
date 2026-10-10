@@ -55,4 +55,14 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  /* iOS paints its own play button over a clip it has decided needs a tap,
+     even where there are no controls to show. These clips are the page's
+     imagery rather than something to operate, so a refusal should leave a
+     still frame and nothing else. */
+  .bare-video::-webkit-media-controls,
+  .bare-video::-webkit-media-controls-start-playback-button {
+    display: none !important;
+    -webkit-appearance: none;
+  }
 }
