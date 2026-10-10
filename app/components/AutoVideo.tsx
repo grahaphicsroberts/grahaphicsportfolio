@@ -6,13 +6,21 @@ type AutoVideoProps = React.VideoHTMLAttributes<HTMLVideoElement> & {
   src: string;
 };
 
+// How often to ask again, and for how long. Long enough to outlast a panel
+// fading in or a clip still arriving over a phone connection; short enough that
+// a clip which is never going to play stops costing anything.
+const BEAT = 400;
+const PATIENCE = 10000;
+
 /**
  * A muted, looping, inline background video that only plays while it's near the
  * viewport. Off-screen videos are paused so the browser isn't decoding many
  * clips at once — which is the main cause of stuttering playback on mobile.
  *
- * Note: no `autoPlay` attribute. The IntersectionObserver starts playback for
- * whatever is in view on mount and pauses everything else.
+ * Note: no `autoPlay` attribute by default. The IntersectionObserver starts
+ * playback for whatever is in view on mount and pauses everything else. A
+ * caller whose clip is the content rather than the backdrop can pass it to get
+ * the browser's own autoplay handling as well.
  */
 export default function AutoVideo({ src, ...props }: AutoVideoProps) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -29,37 +37,72 @@ export default function AutoVideo({ src, ...props }: AutoVideoProps) {
     if (showing.current !== null && showing.current !== src) v.load();
     showing.current = src;
 
-    // What the clip should be doing, as distinct from what it is doing. A
-    // play() the browser refuses — Low Power Mode, a backgrounded tab, a decode
-    // still in flight — used to be dropped on the floor, and nothing was left
-    // to try again, so the panel stayed empty.
-    let wanted = false;
+    // Also as a property, not only as the attribute below. Whether an
+    // unattended play() is allowed is judged from the element's state at the
+    // moment of the call, and on WebKit a clip it considers capable of sound
+    // does not get to start on its own.
+    v.muted = true;
 
-    const attempt = () => {
+    // What the clip should be doing, as distinct from what it is doing.
+    let wanted = false;
+    let until = 0;
+    let ticker: ReturnType<typeof setInterval> | undefined;
+
+    const stop = () => {
+      if (ticker !== undefined) {
+        clearInterval(ticker);
+        ticker = undefined;
+      }
+    };
+
+    const ask = () => {
       if (wanted && v.paused) v.play().catch(() => {});
     };
 
+    // WebKit refuses an unattended play() rather than holding onto it, and
+    // refuses it for anything it does not judge to be on screen — a panel part
+    // way through fading in counts as not on screen, and a refusal also stops
+    // the clip loading, so the events that would have been the cue to try again
+    // never arrive. Nothing announces that a refusal would now be allowed, so
+    // the only way through is to keep asking for a while.
+    const press = () => {
+      until = Date.now() + PATIENCE;
+      ask();
+      if (ticker !== undefined) return;
+      ticker = setInterval(() => {
+        if (!wanted || !v.paused || Date.now() > until) stop();
+        else ask();
+      }, BEAT);
+    };
+
+    const nudge = () => {
+      if (wanted) press();
+    };
+
     // Each of these is a moment when a refusal might not be refused again.
-    const retry = () => attempt();
-    v.addEventListener("canplay", retry);
-    v.addEventListener("loadeddata", retry);
-    document.addEventListener("visibilitychange", retry);
+    v.addEventListener("canplay", nudge);
+    v.addEventListener("loadeddata", nudge);
+    document.addEventListener("visibilitychange", nudge);
     // A gesture anywhere on the page lifts an autoplay block for everything on
     // it, which is why tapping the dots appeared to be what loaded the clip.
-    window.addEventListener("pointerdown", retry, { passive: true });
+    window.addEventListener("pointerdown", nudge, { passive: true });
+    window.addEventListener("touchend", nudge, { passive: true });
 
     let io: IntersectionObserver | undefined;
 
     if (typeof IntersectionObserver === "undefined") {
       // No observer support: fall back to just playing it.
       wanted = true;
-      attempt();
+      press();
     } else {
       io = new IntersectionObserver(
         ([entry]) => {
           wanted = entry.isIntersecting;
-          if (wanted) attempt();
-          else v.pause();
+          if (wanted) press();
+          else {
+            stop();
+            v.pause();
+          }
         },
         { rootMargin: "200px 0px", threshold: 0.1 },
       );
@@ -68,14 +111,16 @@ export default function AutoVideo({ src, ...props }: AutoVideoProps) {
 
     return () => {
       io?.disconnect();
-      v.removeEventListener("canplay", retry);
-      v.removeEventListener("loadeddata", retry);
-      document.removeEventListener("visibilitychange", retry);
-      window.removeEventListener("pointerdown", retry);
+      v.removeEventListener("canplay", nudge);
+      v.removeEventListener("loadeddata", nudge);
+      document.removeEventListener("visibilitychange", nudge);
+      window.removeEventListener("pointerdown", nudge);
+      window.removeEventListener("touchend", nudge);
       // Taking the element off the page does not stop it. An unmounted clip
       // goes on decoding and pulling bytes until it is collected, which on a
       // rotating banner means every clip it has ever shown.
       wanted = false;
+      stop();
       v.pause();
     };
   }, [src]);

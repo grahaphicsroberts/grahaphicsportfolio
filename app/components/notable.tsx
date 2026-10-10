@@ -143,6 +143,11 @@ export function NotableFrame({
           // Fetched up front rather than on demand: a panel that is the point
           // of the section cannot wait for metadata first and bytes after.
           preload="auto"
+          // Asked for in markup as well as in script. Mobile WebKit has its own
+          // handling for a clip declared this way — it holds the start until the
+          // clip is really on screen instead of refusing outright — and that is
+          // the path it supports best.
+          autoPlay
           className={`h-full w-full object-cover ${held} ${veiled}`}
           aria-hidden="true"
         />
