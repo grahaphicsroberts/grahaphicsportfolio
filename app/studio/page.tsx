@@ -70,6 +70,7 @@ const SECTORS = [
   "Technology & AI",
   "News & publishing",
   "Museums & cultural institutions",
+  "Music & audio production",
   "Education & research",
 ];
 
