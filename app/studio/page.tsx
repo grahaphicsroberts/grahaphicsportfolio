@@ -132,9 +132,16 @@ const reveal = {
   viewport: { once: true, amount: 0.3 },
 };
 
-// Seconds for a row to travel its own width. Slow enough to read a logo as it
-// passes rather than register a moving band.
-const MARQUEE_DURATION = 26;
+// Seconds for the row to travel the width of one group of logos — about 38px a
+// second. Slow enough to read a logo as it passes rather than register a moving
+// band.
+const MARQUEE_DURATION = 50;
+
+// How many copies of the row the track carries. The travel is one copy's width,
+// so the copies that are left have to cover the window on their own at the
+// moment it wraps: two is a few pixels short of that on a 1920 display and
+// leaves a gap sweeping through, three covers anything up to 3800px wide.
+const MARQUEE_COPIES = 3;
 
 const BrandLogo = ({
   brand,
@@ -153,15 +160,11 @@ const BrandLogo = ({
   />
 );
 
-// Phone layout: two short rows that drift past each other, so fourteen logos
-// cost about 90px of height instead of seven stacked rows.
-const MarqueeRow = ({
-  brands,
-  reverse = false,
-}: {
-  brands: typeof BRANDS;
-  reverse?: boolean;
-}) => {
+// One row at every width, running the full span of the page rather than
+// wrapping into a block: fourteen logos read as a client list you glance along
+// instead of a grid you audit. The row fades out at both edges so a logo
+// leaves the frame rather than being cut in half by it.
+const MarqueeRow = ({ brands }: { brands: typeof BRANDS }) => {
   const reduceMotion = useReducedMotion();
 
   // Nothing should move for someone who asked for stillness, so the row
@@ -177,28 +180,29 @@ const MarqueeRow = ({
   }
 
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden [-webkit-mask-image:linear-gradient(to_right,transparent,black_3rem,black_calc(100%-3rem),transparent)] [mask-image:linear-gradient(to_right,transparent,black_3rem,black_calc(100%-3rem),transparent)] md:[-webkit-mask-image:linear-gradient(to_right,transparent,black_8rem,black_calc(100%-8rem),transparent)] md:[mask-image:linear-gradient(to_right,transparent,black_8rem,black_calc(100%-8rem),transparent)]">
       <motion.div
         className="flex w-max"
-        animate={{ x: reverse ? ["-50%", "0%"] : ["0%", "-50%"] }}
+        animate={{ x: ["0%", `-${(100 / MARQUEE_COPIES).toFixed(4)}%`] }}
         transition={{
           duration: MARQUEE_DURATION,
           repeat: Infinity,
           ease: "linear",
         }}
       >
-        {/* Two identical groups, each carrying its own trailing gap, so the
-            halfway point of the track lines up exactly with the start. */}
-        {[false, true].map((duplicate) => (
+        {/* Identical groups, each carrying its own trailing gap, so travelling
+            exactly one group's width lands back on the start. Only the first is
+            read out; the rest are the same list again. */}
+        {Array.from({ length: MARQUEE_COPIES }, (_, copy) => (
           <div
-            key={String(duplicate)}
+            key={copy}
             className="flex shrink-0 items-center gap-x-10 pr-10"
           >
             {brands.map((brand) => (
               <BrandLogo
                 key={brand.src}
                 brand={brand}
-                decorative={duplicate}
+                decorative={copy > 0}
               />
             ))}
           </div>
@@ -263,23 +267,13 @@ export default function StudioPage() {
       </header>
 
       {/* --- BRANDS --- */}
-      <section className="border-b border-neutral-800 py-12 md:px-24">
+      <section className="border-b border-neutral-800 py-12">
         <motion.div
           {...reveal}
           viewport={{ once: true, amount: 0.4 }}
           transition={{ duration: 0.6 }}
-          className="mx-auto max-w-6xl"
         >
-          <div className="flex flex-col gap-y-6 md:hidden">
-            <MarqueeRow brands={BRANDS.slice(0, 7)} />
-            <MarqueeRow brands={BRANDS.slice(7)} reverse />
-          </div>
-
-          <div className="hidden flex-wrap items-center gap-x-12 gap-y-7 md:flex">
-            {BRANDS.map((brand) => (
-              <BrandLogo key={brand.src} brand={brand} />
-            ))}
-          </div>
+          <MarqueeRow brands={BRANDS} />
         </motion.div>
       </section>
 
