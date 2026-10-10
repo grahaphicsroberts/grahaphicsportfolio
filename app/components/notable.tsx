@@ -41,6 +41,11 @@ export type Notable = {
     src: string;
     kind: "image" | "video";
     alt: string;
+    // A still of the clip's own first frame. These panels are the content of
+    // the section rather than decoration behind it, and the banner remounts a
+    // clip from scratch every time its lockup comes back around, so something
+    // has to hold the panel while the video is still arriving.
+    poster?: string;
     veil?: string;
     tone?: "light" | "dark";
     // Panels crop a different way at every breakpoint. `anchor` pins the edge
@@ -84,6 +89,7 @@ const ITEMS = {
       src: "/snkrwavs_carousel.mp4",
       kind: "video",
       alt: "",
+      poster: "/snkrwavs_carousel_poster.jpg",
     },
     link: { href: "/snkrwavs/sharp-knife", label: "Hear the first song" },
   },
@@ -95,6 +101,7 @@ const ITEMS = {
       src: "/KC_clip_carousel.mp4",
       kind: "video",
       alt: "",
+      poster: "/KC_clip_carousel_poster.jpg",
       anchor: "top",
     },
     link: { href: "/studio", label: "Visit the studio" },
@@ -132,6 +139,10 @@ export function NotableFrame({
       {media.kind === "video" ? (
         <AutoVideo
           src={media.src}
+          poster={media.poster}
+          // Fetched up front rather than on demand: a panel that is the point
+          // of the section cannot wait for metadata first and bytes after.
+          preload="auto"
           className={`h-full w-full object-cover ${held} ${veiled}`}
           aria-hidden="true"
         />
