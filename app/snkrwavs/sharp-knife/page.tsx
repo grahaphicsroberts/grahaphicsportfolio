@@ -74,11 +74,23 @@ const WOUND = 400; // milliseconds
 // dark has found nothing, and the whole mix coming back is the answer to that.
 const DARK = 2000; // milliseconds
 
-// How faint and how bright the halo behind the pre-save gets. It is a light
+// How faint and how bright the halo behind the streaming links gets. It is a light
 // coming up under a button rather than the button changing colour, so the low
 // end is not nothing: a glow that goes out looks like something switching off.
 const DIM = 0.12;
 const LIT = 0.85;
+
+// Where the record is.
+const STREAMS = [
+  {
+    name: "Apple Music",
+    href: "https://music.apple.com/us/album/a-sharp-knife-is-a-safe-knife-single/6810330538",
+  },
+  {
+    name: "Spotify",
+    href: "https://open.spotify.com/album/5vk7Z7PU0zgwtqYRusZaSi",
+  },
+];
 
 // How solid the label over a ring is. Not solid: it is a note about the drawing
 // laid over the drawing, and the part it is naming goes on turning under it.
@@ -152,8 +164,8 @@ export default function SnkrwavsPage() {
     setTouch(window.matchMedia("(hover: none)").matches);
   }, []);
 
-  // The light behind the pre-save.
-  const halo = useRef<HTMLSpanElement>(null);
+  // The row the streaming links sit in, which holds the lights behind them.
+  const links = useRef<HTMLDivElement>(null);
 
   // The three lines of the label for whichever ring is under the pointer.
   const tip = useRef<HTMLDivElement>(null);
@@ -568,24 +580,28 @@ export default function SnkrwavsPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [choose, start]);
 
-  // The pre-save breathes, once a bar, brightest on the downbeat. Everything
-  // drawn on this page is moved by the record and this is asking for the record,
-  // so it is moved by it too: while the music runs the light is on the playhead,
-  // and while it is stopped it keeps the same tempo off the wall clock, so the
-  // button is already breathing before anybody has pressed anything.
+  // The streaming links breathe, once a bar, brightest on the downbeat.
+  // Everything drawn on this page is moved by the record and these lead to the
+  // record, so they are moved by it too: while the music runs the light is on the
+  // playhead, and while it is stopped it keeps the same tempo off the wall clock,
+  // so the buttons are already breathing before anybody has pressed anything.
   //
-  // Only the brightness of a halo that is already drawn changes, so a frame of
+  // Only the brightness of halos that are already drawn changes, so a frame of
   // this is a frame of compositing and nothing is laid out or painted again.
   useEffect(() => {
-    const glow = halo.current;
-    if (!glow) return;
+    const glows = links.current?.querySelectorAll<HTMLElement>("[data-halo]");
+    if (!glows?.length) return;
+
+    const light = (opacity: number) => {
+      for (const glow of glows) glow.style.opacity = `${opacity}`;
+    };
 
     // A light pulsing under a button is a small thing, but it is the only thing
     // on the page that moves without having been asked to. Asked for less of it,
     // it is simply lit, halfway up and steady.
     const still = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (still.matches) {
-      glow.style.opacity = `${(DIM + LIT) / 2}`;
+      light((DIM + LIT) / 2);
       return;
     }
 
@@ -601,7 +617,7 @@ export default function SnkrwavsPage() {
         : ((performance.now() / 1000) % bar) / bar;
       const swell = 0.5 + 0.5 * Math.cos(TAU * phase);
 
-      glow.style.opacity = `${DIM + (LIT - DIM) * swell}`;
+      light(DIM + (LIT - DIM) * swell);
       frame = requestAnimationFrame(breathe);
     };
 
@@ -830,42 +846,48 @@ export default function SnkrwavsPage() {
         />
 
         {/* Under the title of the piece, where what the piece is used to be
-            written out. The tempo and the bar count were facts about a record
-            nobody can have yet, and this is the place to ask for it instead.
-            Outlined rather than filled, both of them: there is one white thing
+            written out. The tempo and the bar count were facts about the
+            record, and this is the place to go and hear the record instead.
+            Outlined rather than filled, all of them: there is one white thing
             on this page and it is the button that starts the music.
 
             One line, always. A second row of these comes straight out of the
             height the rings have to turn in, which is the whole page, so on a
             phone they give up what they can instead: the arrows, the word visit,
-            and a little of their size and spacing. That fits the pair inside a
-            375-pixel screen with room to spare. */}
-        <div className="flex flex-nowrap items-center justify-center gap-2 sm:gap-3">
-          <a
-            href="https://hypeddit.com/mkb3mx"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/30 px-3.5 py-2 font-mono text-[0.55rem] uppercase tracking-[0.12em] text-white transition-colors hover:border-white/70 sm:px-5 sm:py-2.5 sm:text-[0.65rem] sm:tracking-[0.2em]"
-          >
-            {/* The light, behind the pill rather than on it: a shadow thrown
-                outwards off the same shape, which is the only part of this that
-                moves. It sits under the writing because it comes first. */}
-            <span
-              ref={halo}
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_20px_5px_rgba(255,255,255,0.4)]"
-              style={{ opacity: DIM }}
-            />
-            Pre-save this song
-            <ArrowUpRight
-              className="hidden h-3.5 w-3.5 sm:block"
-              aria-hidden="true"
-            />
-          </a>
+            and a little of their size and spacing. That fits all three inside a
+            375-pixel screen, if only just. */}
+        <div
+          ref={links}
+          className="flex flex-nowrap items-center justify-center gap-1.5 sm:gap-3"
+        >
+          {STREAMS.map((stream) => (
+            <a
+              key={stream.name}
+              href={stream.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/30 px-3 py-2 font-mono text-[0.55rem] uppercase tracking-[0.12em] text-white transition-colors hover:border-white/70 sm:px-5 sm:py-2.5 sm:text-[0.65rem] sm:tracking-[0.2em]"
+            >
+              {/* The light, behind the pill rather than on it: a shadow thrown
+                  outwards off the same shape, which is the only part of this
+                  that moves. It sits under the writing because it comes first. */}
+              <span
+                data-halo
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_20px_5px_rgba(255,255,255,0.4)]"
+                style={{ opacity: DIM }}
+              />
+              {stream.name}
+              <ArrowUpRight
+                className="hidden h-3.5 w-3.5 sm:block"
+                aria-hidden="true"
+              />
+            </a>
+          ))}
 
           <Link
             href="/studio"
-            className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/20 px-3.5 py-2 font-mono text-[0.55rem] uppercase tracking-[0.12em] text-neutral-300 transition-colors hover:border-white/60 hover:text-white sm:px-5 sm:py-2.5 sm:text-[0.65rem] sm:tracking-[0.2em]"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/20 px-3 py-2 font-mono text-[0.55rem] uppercase tracking-[0.12em] text-neutral-300 transition-colors hover:border-white/60 hover:text-white sm:px-5 sm:py-2.5 sm:text-[0.65rem] sm:tracking-[0.2em]"
           >
             <span className="hidden sm:inline">Visit{" "}</span>
             Grahaphics Studio
